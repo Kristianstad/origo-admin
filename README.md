@@ -1,7 +1,7 @@
 # Origo-admin
 https://github.com/Kristianstad/origo-admin/pkgs/container/origo-admin
 
-Docker-avbild av Origo (https://github.com/origo-map). Avbilden bygger på https://github.com/Kristianstad/nginx/pkgs/container/nginx (se repositoryt för webbserverinställningar). Lyssnar internt på port 8080. Filer och kataloger i Origos konfigurationskatalog läggs till i Origos webbkatalog vid uppstart. Det finns även ett valfritt administrationsverktyg för Origo och metadata i `-adm`-taggen. (Sökvägen till administrationsverktyget är `adm/manage.php` och standardinloggningen är origo, origo. Varje skapad karta får en egen HTML-fil. Källkoden till administrationsverktyget finns i branchen `with_php`.)
+Docker-avbild av Origo (https://github.com/origo-map). Avbilden bygger på https://github.com/Kristianstad/nginx/pkgs/container/nginx (se repositoryt för webbserverinställningar). Lyssnar internt på port 8080. Filer och kataloger i Origos konfigurationskatalog läggs till i Origos webbkatalog vid uppstart. Det finns även ett valfritt administrationsverktyg för Origo och metadata i `-adm`-taggen. (Sökvägen till administrationsverktyget är `adm/manage.php` och standardinloggningen är origo, origo. Varje skapad karta får en egen HTML-fil. Källkoden till administrationsverktyget underhålls i [Kristianstad/origo-admin](https://github.com/Kristianstad/origo-admin), branch `main`.)
 
 Testa avbilden i [Iximiuz Labs](https://labs.iximiuz.com/playgrounds):
 ```
@@ -30,7 +30,7 @@ docker run --name origo -d -p 8080:8080 ghcr.io/kristianstad/origo:2.10.0-adm
 * VAR_ADMPASSWORD="origo" (Only for management tool)
 * VAR_FINAL_COMMAND="nginx -g 'daemon off; error_log stderr \$VAR_LOG_LEVEL;'" (Command run by VAR_LINUX_USER)
 
-### Format of runtime configuration variables (mainly used by the with_php tag)
+### Format of runtime configuration variables (mainly used by the main tag)
 * VAR_wwwconf_&lt;param name&gt;: Parameter in <span>ww</span>w.conf.
 * VAR_phpini_&lt;param name&gt;: Parameter in /etc/php7/conf.d/50-setting.ini (overrides defaults set in php.ini).
 * Dot (.) is representated as double underscore (\_\_) in variable names.
@@ -434,8 +434,8 @@ Samma schemaarbete krävs oavsett om adminverktyget körs med eller utan Docker.
 
 ### Uppgradera administrationsverktyget från GitHub
 
-Källkoden för administrationsverktyget finns i branchen `with_php` på
-[GitHub](https://github.com/Kristianstad/origo/tree/with_php). Säkerhetskopiera
+Källkoden för administrationsverktyget finns i branchen `main` i
+[Kristianstad/origo-admin](https://github.com/Kristianstad/origo-admin/tree/main). Säkerhetskopiera
 databasen, `/www/maps` och `/www/adm/constants` före uppgradering. Kontrollera
 även ändringar i initierings-SQL och databasschema innan en ny version tas i
 drift.
@@ -443,7 +443,7 @@ drift.
 Med Docker rekommenderas normalt den publicerade avbilden. Hämta den nya
 avbildsversionen med `docker pull` och skapa om containern med samma bind mounts.
 Den senaste utvecklarversionen finns som
-`ghcr.io/kristianstad/origo:with_php`.
+`ghcr.io/kristianstad/origo:main`.
 
 Stoppa därefter den gamla containern och starta den nya avbilden med samma
 miljövariabler, portar och bind mounts. Ta inte bort hostkatalogerna.
@@ -451,10 +451,10 @@ miljövariabler, portar och bind mounts. Ta inte bort hostkatalogerna.
 Utan Docker uppdateras en befintlig checkout i stället för en container:
 
 ```bash
-cd /sökväg/till/origo
+cd /sökväg/till/origo-admin
 git fetch origin
-git checkout with_php
-git pull --ff-only origin with_php
+git checkout main
+git pull --ff-only origin main
 ```
 
 Stoppa webbservern eller PHP-processen under filuppdateringen, installera eller
