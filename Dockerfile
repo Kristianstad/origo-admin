@@ -126,5 +126,5 @@ ONBUILD USER root
 # Generic template (don't edit) </END>
 
 LABEL org.opencontainers.image.version="${ORIGO_VERSION}" \
-      org.opencontainers.image.title="origo with php" \
-      org.opencontainers.image.description="Origo ${ORIGO_VERSION} based on secure_and_minimal ${ALPINE_VERSION} + nginx ${NGINX_VERSION}"
+      org.opencontainers.image.title="origo-admin" \
+      org.opencontainers.image.description="Origo-admin ${ORIGO_VERSION} based on secure_and_minimal ${ALPINE_VERSION} + nginx ${NGINX_VERSION}"
