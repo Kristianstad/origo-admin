@@ -1,8 +1,7 @@
 <?php
 
-	function readDelete($username, $selectedNew, $action)
+	function readDelete($dbh, $username, $selectedNew, $action)
 	{
-		GLOBAL $dbh;
 		require("./constants/configSchema.php");
 		$actionColumn=$action.'s';
 		$field=$selectedNew[$actionColumn];

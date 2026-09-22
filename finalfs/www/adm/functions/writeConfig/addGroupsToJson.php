@@ -1,8 +1,9 @@
 <?php
 
-	function addGroupsToJson($mapGroups)
+	function addGroupsToJson($mapGroups, array &$context)
 	{
-		GLOBAL $groups, $mapLayers;
+		$groups =& $context['groups'];
+		$mapLayers =& $context['mapLayers'];
 		$groupsJson = array();
 		if (!empty($mapGroups))
 		{
@@ -25,7 +26,7 @@
 					}
 					if (!empty(trim($group['groups'], '{}')))
 					{
-						$groupJson['groups'] = addGroupsToJson($group['groups']);
+						$groupJson['groups'] = addGroupsToJson($group['groups'], $context);
 					}
 					$groupsJson[] = $groupJson;
 				}

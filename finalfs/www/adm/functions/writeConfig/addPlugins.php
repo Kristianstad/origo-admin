@@ -1,8 +1,9 @@
 <?php
 
-	function addPlugins($mapPlugins=null, &$mapCssFiles=array(), &$mapJsFiles=array(), &$mapCss='', &$mapJs='', &$mapOnload='')
+	function addPlugins($mapPlugins=null, &$mapCssFiles=array(), &$mapJsFiles=array(), &$mapCss='', &$mapJs='', &$mapOnload='', array &$context=array())
 	{
-		GLOBAL $map, $plugins;
+		$map =& $context['map'];
+		$plugins =& $context['plugins'];
 		if (!isset($mapPlugins))
 		{
 			$mapPlugins = pgArrayToPhp($map['plugins']);

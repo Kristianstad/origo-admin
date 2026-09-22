@@ -199,7 +199,7 @@
 		printHiddenInputs($inheritPosts);
 		echo '<hr class="dashedHr">';
 		echo '<div class="buttonDiv">';
-		printUpdateButton('layer');
+		printUpdateButton('layer', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('layer');
 		$layer=makeTargetBasic($layer);
 		printInfoButton($layer);

@@ -1,12 +1,10 @@
 <?php
 
 	// Takes a type (string) and prints a form submit-button with class="updateButton", name="<type>Button", value="update", and the label "Uppdatera".
-	function printUpdateButton($type)
+	function printUpdateButton($type, $formChanged=false)
 	{
-		GLOBAL $formChangedGlobal;
-		if ($formChangedGlobal)
+		if ($formChanged)
 		{
-			$formChangedGlobal=false;
 			$changeClass=' change';
 		}
 		else

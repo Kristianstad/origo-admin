@@ -125,6 +125,11 @@ som påverkar en publicerad karta ändras; `writeConfig.php`
 Detta ger sannolikt underlag för en "osparade ändringar"-indikator i
 manage-gränssnittet.
 
+WriteConfig-funktionerna använder ett explicit context-array med referenser
+till kartans konfigurationsdata. Manage- och news-helpers tar motsvarande
+state som parametrar; funktionerna använder inte PHP:s `GLOBAL`-deklaration
+för moduldata eller renderingsstate.
+
 ## SQL-importverktyget
 
 `sql_import.php` nås via **Verktyg > Importera SQL**. Verktyget laddar

@@ -11,10 +11,10 @@ news.php
  ├─ selectNew($userNews, $newId)             → plockar ut EN nyhet ur listan (om newId angivet)
  └─ switch på $action:
      ├─ 'list'      → printNewsList($userNews)
-     ├─ 'load'      → printNews($username, $selectedNew, $return)
-     ├─ 'delete'    → readDelete($username, $selectedNew, 'delete')
-     ├─ 'read'      → readDelete($username, $selectedNew, 'read')
-     ├─ 'subjects'  → printNewsSubjects($username, $userNews)  → anropar printNews() internt
+    ├─ 'load'      → printNews($dbh, $username, $selectedNew, $return)
+    ├─ 'delete'    → readDelete($dbh, $username, $selectedNew, 'delete')
+    ├─ 'read'      → readDelete($dbh, $username, $selectedNew, 'read')
+    ├─ 'subjects'  → printNewsSubjects($dbh, $username, $userNews)  → anropar printNews() internt
      └─ 'unread'    → testUnread($username, $userNews)
 */
 
@@ -79,17 +79,17 @@ if ($isLoggedIn) {
         printNewsList($userNews);
     }
     elseif ($action === 'load' && !empty($selectedNew)) {
-        printNews($username, $selectedNew, $return);
+        printNews($dbh, $username, $selectedNew, $return);
     }
     elseif (
         ($action === 'delete' || $action === 'read') &&
         !empty($selectedNew) &&
         !in_array($username, $selectedNew[$action . 's'] ?? [], true)
     ) {
-        readDelete($username, $selectedNew, $action);
+        readDelete($dbh, $username, $selectedNew, $action);
     }
     elseif ($action === 'subjects') {
-        printNewsSubjects($username, $userNews);
+        printNewsSubjects($dbh, $username, $userNews);
     }
     elseif ($action === 'unread') {
         testUnread($username, $userNews);

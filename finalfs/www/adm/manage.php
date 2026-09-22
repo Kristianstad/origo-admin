@@ -77,7 +77,7 @@ if (isset($_GET['view'])) {
     $view = $_GET['view'];
 }
 
-// Unset unused global variables
+// Unset request variables that are no longer needed
 unset($_POST, $_GET);
 
 // Create $groupIdsArray (array) from $post and update related, missing $post values
@@ -357,6 +357,8 @@ pg_close($dbh);
 // Some common information needs to be passed on every time a form is posted, this info is aggregated in $inheritPosts (array)
 // $inheritPosts is set to include $idPosts, $sizePosts, $post['groupIds'] and $categoryPosts
 $inheritPosts = array_merge($idPosts, $sizePosts);
+$inheritPosts['_viewDepth'] = 0;
+$inheritPosts['_formChanged'] = false;
 if (isset($post['groupIds'])) {
     $inheritPosts['groupIds'] = $post['groupIds'];
 }
@@ -493,21 +495,19 @@ HTML;
  *  DYNAMIC CONTENTS BASED ON SELECTED ITEM  *
  *********************************************
 */
-// A global variable that contains the number of targets (depth) shown in the dynamic view.
-$viewDepthGlobal = 0;
-
+// Track the number of targets (depth) shown in the dynamic view.
 // Expose field help ids (identifying fields with existing help text) as $helps (array)
 $helps = array_column($configTables["helps"], "help_id");
 
 // If a map is selected
 if (isset($post['mapId'])) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
 
     // Expose selected map target as $map (array).
     // If a failed update occured then show those values, else show the stored values.
     if (isset($failedUpdate) && $failedUpdate['type'] == 'map') {
         $map = makeFullTarget('map', $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     } else {
         $map = makeFullTarget('map', array_column_search($post['mapId'], 'map_id', $configTables['maps']));
     }
@@ -548,13 +548,13 @@ if (isset($post['mapId'])) {
 
 // If a database is selected
 elseif (isset($post['databaseId'])) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
 
     // Expose selected database target as $database (array).
     // If a failed update occured then show those values, else show the stored values.
     if (isset($failedUpdate) && $failedUpdate['type'] == 'database') {
         $database = makeFullTarget('database', $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     } else {
         $database = makeFullTarget('database', array_column_search($post['databaseId'], 'database_id', $configTables['databases']));
     }
@@ -580,13 +580,13 @@ elseif (isset($post['databaseId'])) {
 
 // If a schema is selected
 if (isset($post['schemaId'])) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
 
     // Expose selected schema target as $schema (array).
     // If a failed update occured then show those values, else show the stored values.
     if (isset($failedUpdate) && $failedUpdate['type'] == 'schema') {
         $schema = makeFullTarget('schema', $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     } else {
         $schema = makeFullTarget('schema', array_column_search($post['schemaId'], 'schema_id', $configTables['schemas']));
     }
@@ -619,10 +619,10 @@ if (isset($post['schemaId'])) {
 
 // If a class is selected
 if (isset($post['classeId'])) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
     if (isset($failedUpdate) && $failedUpdate['type'] == 'classe') {
         $classe = makeFullTarget('classe', $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     } else {
         $classe = makeFullTarget('classe', array_column_search($post['classeId'], 'classe_id', $configTables['classes']));
     }
@@ -648,10 +648,10 @@ if (isset($post['classeId'])) {
 // If an infogroup is selected
 $infogroupLevel = 1;
 foreach ($infogroupIdsArray as $infogroupId) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
     if (isset($failedUpdate) && $failedUpdate['type'] == 'infogroup' && $failedUpdate['id'] == $infogroupId) {
         $infogroup = makeFullTarget('infogroup', $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     } else {
         $infogroup = makeFullTarget('infogroup', array_column_search($infogroupId, 'infogroup_id', $configTables['infogroups']));
     }
@@ -691,13 +691,13 @@ $groupLevel = 1;
 
 // Loop through the tree of groups where selected group belongs
 foreach ($groupIdsArray as $groupId) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
 
     // Expose current loop group target as $group (array).
     // If a failed update occured and was current loop group then show those values, else show the stored values.
     if (isset($failedUpdate) && $failedUpdate['type'] == 'group' && $failedUpdate['id'] == $groupId) {
         $group = makeFullTarget('group', $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     } else {
         $group = makeFullTarget('group', array_column_search($groupId, 'group_id', $configTables['groups']));
     }
@@ -731,7 +731,7 @@ unset($tmpGroupIds, $parent, $groupLevel, $groupId, $thClass, $idPosts['groupId'
 
 // If any <item> is selected
 if (!empty($idPosts)) {
-    $viewDepthGlobal++;
+    $inheritPosts['_viewDepth']++;
 
     // Expose selected <item> target as $childFullTarget (array)
     $childFullTarget = makeTargetFull(makeBasicTarget(substr(key($idPosts), 0, -2), current($idPosts)), $configTables);
@@ -742,7 +742,7 @@ if (!empty($idPosts)) {
     // If a failed update occured then show those values.
     if (isset($failedUpdate) && $failedUpdate['type'] == $childType) {
         $childFullTarget = array($childType => $failedUpdate['values']);
-        $formChangedGlobal = true;
+        $inheritPosts['_formChanged'] = true;
     }
 
     // Expose the help ids available for $childType as $typeHelps (array)

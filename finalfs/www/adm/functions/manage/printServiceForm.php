@@ -35,7 +35,7 @@
 		printTextarea($service, 'info', 'textareaLarge', 'Info:', in_array('info', $helps), $sizePosts);
 		printHiddenInputs($inheritPosts);
 		echo '<div class="buttonDiv">';
-		printUpdateButton('service');
+		printUpdateButton('service', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('service');
 		$service=makeTargetBasic($service);
 		printInfoButton($service);

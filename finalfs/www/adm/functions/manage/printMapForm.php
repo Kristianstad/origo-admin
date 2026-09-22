@@ -45,7 +45,7 @@
 		printHiddenInputs($inheritPosts);
 		echo '<hr class="dashedHr">';
 		echo '<div class="buttonDiv">';
-		printUpdateButton('map');
+		printUpdateButton('map', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('map');
 		$id=targetId($map);
 		$url=targetConfigParam($map, 'url');

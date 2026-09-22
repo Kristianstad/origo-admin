@@ -76,6 +76,22 @@ $configTables = configTables($dbh);
 extract($configTables);
 
 $map = array_column_search($mapId, 'map_id', $maps);
+$writeConfigContext = array(
+	'map' => &$map,
+	'controls' => &$controls,
+	'groups' => &$groups,
+	'layers' => &$layers,
+	'mapLayers' => &$mapLayers,
+	'mapStyles' => &$mapStyles,
+	'mapSources' => &$mapSources,
+	'sources' => &$sources,
+	'services' => &$services,
+	'contacts' => &$contacts,
+	'origins' => &$origins,
+	'tables' => &$tables,
+	'plugins' => &$plugins,
+	'tilegrids' => &$tilegrids,
+);
 $configJson = array();
 
 if (isset($map['css'])) {
@@ -96,7 +112,7 @@ if (isset($map['onload'])) {
 
 if (!empty($map['controls'])) {
 	$mapControls = pgArrayToPhp($map['controls']);
-	$configJson['controls'] = addControlsToJson($mapControls, $mapCss, $mapJs, $mapOnload);
+	$configJson['controls'] = addControlsToJson($mapControls, $mapCss, $mapJs, $mapOnload, $writeConfigContext);
 }
 
 $pageSettings = array();
@@ -192,19 +208,19 @@ if (isset($_GET['getHtml']) && $_GET['getHtml'] == 'y' && (!empty($_GET['group']
 }
 
 $mapGroups = pgArrayToPhp($map['groups']);
-$mapLayerIds = groupDepth($mapGroups, $mapLayers);
+$mapLayerIds = groupDepth($mapGroups, $mapLayers, $writeConfigContext);
 $mapLayersList = getArrayValuesRecursively($mapLayerIds);
-$mapLayersList = indexweightedLayersList($mapLayersList);
-$groupsJson = addGroupsToJson($map['groups']);
+$mapLayersList = indexweightedLayersList($mapLayersList, $writeConfigContext);
+$groupsJson = addGroupsToJson($map['groups'], $writeConfigContext);
 if (!empty($groupsJson)) {
 	$configJson['groups'] = $groupsJson;
 }
 unset($groupsJson);
 $layersMeta = array();
-$layersJson = addLayersToJson($mapLayersList, $layersMeta);
+$layersJson = addLayersToJson($mapLayersList, $layersMeta, false, $writeConfigContext);
 $configJson['layers'] = $layersJson;
-$configJson['source'] = addSourcesToJson();
-$configJson['styles'] = addStylesToJson();
+$configJson['source'] = addSourcesToJson($writeConfigContext);
+$configJson['styles'] = addStylesToJson($writeConfigContext);
 $json = json_encode($configJson, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 unset($configJson);
 unset($layersJson);
@@ -265,7 +281,7 @@ HERE;
 	$mapJsFiles = pgArrayToPhp($map['js_files']);
 	if (!empty($map['plugins'])) {
 		$mapPlugins = pgArrayToPhp($map['plugins']);
-		addPlugins($mapPlugins, $mapCssFiles, $mapJsFiles, $mapCss, $mapJs, $mapOnload);
+		addPlugins($mapPlugins, $mapCssFiles, $mapJsFiles, $mapCss, $mapJs, $mapOnload, $writeConfigContext);
 	}
 
 	$html = $html . renderCssTags($mapCssFiles);

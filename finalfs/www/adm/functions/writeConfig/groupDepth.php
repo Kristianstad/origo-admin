@@ -1,8 +1,8 @@
 <?php
 
-	function groupDepth($groupIds, $layerIds=array())
+	function groupDepth($groupIds, $layerIds=array(), array &$context=array())
 	{
-		GLOBAL $groups;
+		$groups =& $context['groups'];
 		foreach ($groupIds as $groupId)
 		{
 			$group = array_column_search($groupId, 'group_id', $groups);
@@ -10,7 +10,7 @@
 			
 			if (!empty($groupGroups))
 			{
-				$groupArray=groupDepth($groupGroups);
+				$groupArray=groupDepth($groupGroups, array(), $context);
 			}
 			else
 			{

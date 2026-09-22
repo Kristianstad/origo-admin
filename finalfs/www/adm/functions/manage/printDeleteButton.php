@@ -6,8 +6,7 @@
 	// If OK is pressed in the confirmation popup then the target is posted to manage.php for deletion.
 	function printDeleteButton($target, $deleteConfirmStr, $inheritPosts)
 	{
-		GLOBAL $viewDepthGlobal;
-		if ($viewDepthGlobal == 1)
+		if (($inheritPosts['_viewDepth'] ?? 1) == 1)
 		{
 			$targetType=targetType($target);
 			$targetId=targetId($target);

@@ -1,6 +1,6 @@
 <?php
 /*
-addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false)
+addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
  ├─ för varje lager i listan:
  │    ├─ slår upp lagrets fullständiga data (array_column_search)
  │    ├─ bygger $layersMeta[] (används för SEO-strukturerad data i writeConfig.php)
@@ -20,9 +20,17 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false)
 	 lager, källor och stilar som separata JSON-block
 */
 
-	function addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false)
+	function addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, array &$context=array())
 	{
-		GLOBAL $map, $layers, $mapStyles, $mapSources, $sources, $services, $mapStyleLayers, $contacts, $origins, $tables;
+		$map =& $context['map'];
+		$layers =& $context['layers'];
+		$mapStyles =& $context['mapStyles'];
+		$mapSources =& $context['mapSources'];
+		$sources =& $context['sources'];
+		$services =& $context['services'];
+		$contacts =& $context['contacts'];
+		$origins =& $context['origins'];
+		$tables =& $context['tables'];
 		$layersJson = array();
 		if (!isset($mapSources))
 		{
@@ -332,7 +340,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false)
 			}
 			if ($layer['type'] === 'GROUP')
 			{
-				$layerJson['layers'] = addLayersToJson(pgArrayToPhp($layer['layers']), $layersMeta, true);
+				$layerJson['layers'] = addLayersToJson(pgArrayToPhp($layer['layers']), $layersMeta, true, $context);
 			}
 			if (!empty($layer['source']) && !in_array($layer['source'], $mapSources))
 			{

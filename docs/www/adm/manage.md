@@ -28,6 +28,11 @@ Skriver ändringar direkt till konfigurationsdatabasen, och markerar
 inaktuella och behöver köras genom `writeConfig.php` igen för att
 ändringen ska synas för besökare.
 
+Formulärens renderingsstate skickas explicit genom `inheritPosts`-contexten.
+Privata nycklar som `_viewDepth` och `_formChanged` används internt och
+filtreras bort av `printHiddenInputs()`, så formulärhelpers behöver inte läsa
+globala PHP-variabler för raderings- eller ändringsstatus.
+
 ## Datastrukturen "target"
 
 Ett återkommande begrepp genom hela manage-modulen. Ett **target** är en

@@ -1,8 +1,9 @@
 <?php
 
-	function addControlsToJson($mapControls=null, &$mapCss='', &$mapJs='', &$mapOnload='')
+	function addControlsToJson($mapControls=null, &$mapCss='', &$mapJs='', &$mapOnload='', array &$context=array())
 	{
-		GLOBAL $map, $controls;
+		$map =& $context['map'];
+		$controls =& $context['controls'];
 		if (!isset($mapControls))
 		{
 			$mapControls = pgArrayToPhp($map['controls']);

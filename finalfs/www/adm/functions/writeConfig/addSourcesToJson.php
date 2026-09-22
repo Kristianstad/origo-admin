@@ -2,9 +2,13 @@
 
 	// Uses writeConfig functions: pgBoolToText, pgArrayToText, pgBoxToText
 
-	function addSourcesToJson()
+	function addSourcesToJson(array &$context)
 	{
-		GLOBAL $mapSources, $map, $sources, $services, $tilegrids;
+		$mapSources =& $context['mapSources'];
+		$map =& $context['map'];
+		$sources =& $context['sources'];
+		$services =& $context['services'];
+		$tilegrids =& $context['tilegrids'];
 		require("./constants/sourcesQueryColumns.php");
 		$sourcesJson = array();
 		if (!is_array($mapSources))

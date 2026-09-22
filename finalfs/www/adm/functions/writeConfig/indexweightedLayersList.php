@@ -2,9 +2,9 @@
 
 	// Uses writeConfig functions: array_move
 
-	function indexweightedLayersList($layersList)
+	function indexweightedLayersList($layersList, array &$context)
 	{
-		GLOBAL $layers;
+		$layers =& $context['layers'];
 		$layerweights=array();
 		$whileDo=true;
 		while ($whileDo)

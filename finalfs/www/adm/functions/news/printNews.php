@@ -1,13 +1,12 @@
 <?php
 
-	function printNews($username, $selectedNew, $return)
+	function printNews($dbh, $username, $selectedNew, $return)
 	{
-		GLOBAL $dbh;
 		if (count($return) == 1 && !empty($return[0]) && $return[0]!='all')
 		{
 			if ($return[0] == 'text' && !in_array($username, $selectedNew['reads']))
 			{
-				readDelete($username, $selectedNew, 'read');
+				readDelete($dbh, $username, $selectedNew, 'read');
 			}
 
 			if ($return[0] == 'text')

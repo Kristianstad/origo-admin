@@ -7,7 +7,7 @@
 		$hiddenInputs="";
 		foreach ($inheritPosts as $idKey => $idValue)
 		{
-			if ($idKey != 'layerCategory')
+			if ($idKey != 'layerCategory' && !str_starts_with($idKey, '_'))
 			{
 				$hiddenInputs=$hiddenInputs.'<input type="hidden" name="'.$idKey.'" value="'.$idValue.'">';
 			}

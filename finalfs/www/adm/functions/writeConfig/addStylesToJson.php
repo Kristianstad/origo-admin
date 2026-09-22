@@ -1,8 +1,8 @@
 <?php
 
-	function addStylesToJson()
+	function addStylesToJson(array &$context)
 	{
-		GLOBAL $mapStyles, $styles, $mapSources;
+		$mapStyles =& $context['mapStyles'];
 		$stylesJson = array();
 		foreach ($mapStyles as $style)
 		{
