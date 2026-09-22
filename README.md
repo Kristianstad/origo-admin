@@ -1,5 +1,5 @@
-# origo
-https://github.com/Kristianstad/origo/pkgs/container/origo
+# Origo-admin
+https://github.com/Kristianstad/origo-admin/pkgs/container/origo-admin
 
 Docker-avbild av Origo (https://github.com/origo-map). Avbilden bygger på https://github.com/Kristianstad/nginx/pkgs/container/nginx (se repositoryt för webbserverinställningar). Lyssnar internt på port 8080. Filer och kataloger i Origos konfigurationskatalog läggs till i Origos webbkatalog vid uppstart. Det finns även ett valfritt administrationsverktyg för Origo och metadata i `-adm`-taggen. (Sökvägen till administrationsverktyget är `adm/manage.php` och standardinloggningen är origo, origo. Varje skapad karta får en egen HTML-fil. Källkoden till administrationsverktyget finns i branchen `with_php`.)
 
@@ -7,12 +7,12 @@ Testa avbilden i [Iximiuz Labs](https://labs.iximiuz.com/playgrounds):
 ```
 1. Start a Docker playground.
 2. Run the following command at the command prompt:
-   docker run -p 8080:8080 ghcr.io/kristianstad/origo:2.10.0-adm
+   docker run -p 8080:8080 ghcr.io/kristianstad/origo-admin:2.10.0
 3. Klick Expose ports in the menu and make port 8080 exposed publicly, then click on the url.
 4. To access the admin tool add "/adm/" to the url and login with origo, origo.
 ```
 
-A swedish tutorial of the management tool is available [Here](https://raw.githubusercontent.com/Kristianstad/origo/refs/heads/with_php/finalfs/www/Origo_admin_tutorial_swedish.pdf).
+A swedish tutorial of the management tool is available [Here](https://raw.githubusercontent.com/Kristianstad/origo-admin/refs/heads/main/finalfs/www/Origo_admin_tutorial_swedish.pdf).
 
 ## Docker run examples
 ### If you just need Origo
