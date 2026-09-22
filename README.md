@@ -18,7 +18,7 @@ A swedish tutorial of the management tool is available [Here](https://raw.github
 ### If you just need Origo
 docker run --name origo -d -p 8080:8080 ghcr.io/kristianstad/origo:2.10.0
 ### If you also want Kristianstad's management tool for Origo and metadata
-docker run --name origo -d -p 8080:8080 ghcr.io/kristianstad/origo:2.10.0-adm
+docker run --name origo -d -p 8080:8080 ghcr.io/kristianstad/origo-admin:2.10.0
 
 ## Environment variables
 ### Runtime variables with default value
