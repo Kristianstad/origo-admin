@@ -11,9 +11,9 @@ on:
         description: 'Application version / Origo version (e.g. 2.10.0)'
         required: false
       image_name:
-        description: 'Image name (e.g. origo)'
+        description: 'Image name (e.g. origo-admin)'
         required: true
-        default: 'origo'
+        default: 'origo-admin'
 
 env:
   REGISTRY: ghcr.io
