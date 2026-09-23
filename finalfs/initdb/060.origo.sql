@@ -3,6 +3,55 @@ BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS map_configs;
 
+CREATE TABLE IF NOT EXISTS map_configs.object_identity
+(
+    target_key character varying COLLATE pg_catalog."default" NOT NULL,
+    target_table character varying COLLATE pg_catalog."default" NOT NULL,
+    target_id character varying COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT object_identity_pkey PRIMARY KEY (target_key),
+    CONSTRAINT object_identity_unique UNIQUE (target_table, target_id)
+);
+
+CREATE TABLE IF NOT EXISTS map_configs.edits
+(
+    edit_id bigserial NOT NULL,
+    target_key character varying COLLATE pg_catalog."default" NOT NULL,
+    target_table character varying COLLATE pg_catalog."default" NOT NULL,
+    target_id character varying COLLATE pg_catalog."default" NOT NULL,
+    date timestamp without time zone NOT NULL DEFAULT now(),
+    action character varying COLLATE pg_catalog."default" NOT NULL,
+    abstract character varying COLLATE pg_catalog."default",
+    info character varying COLLATE pg_catalog."default",
+    changed_by character varying COLLATE pg_catalog."default",
+    before_data jsonb,
+    after_data jsonb,
+    CONSTRAINT edits_pkey PRIMARY KEY (edit_id),
+    CONSTRAINT edits_target_key_fk FOREIGN KEY (target_key)
+        REFERENCES map_configs.object_identity (target_key) MATCH SIMPLE
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS edits_target_key_date_idx
+    ON map_configs.edits USING btree (target_key, date, edit_id);
+
+CREATE TABLE IF NOT EXISTS map_configs.edit_cursor
+(
+    target_key character varying COLLATE pg_catalog."default" NOT NULL,
+    current_edit_id bigint,
+    can_undo boolean NOT NULL DEFAULT false,
+    can_redo boolean NOT NULL DEFAULT false,
+    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT edit_cursor_pkey PRIMARY KEY (target_key),
+    CONSTRAINT edit_cursor_target_key_fk FOREIGN KEY (target_key)
+        REFERENCES map_configs.object_identity (target_key) MATCH SIMPLE
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT edit_cursor_edit_fk FOREIGN KEY (current_edit_id)
+        REFERENCES map_configs.edits (edit_id) MATCH SIMPLE
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS map_configs.controls
 (
     control_id character varying COLLATE pg_catalog."default" NOT NULL,

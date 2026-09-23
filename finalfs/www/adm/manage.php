@@ -24,6 +24,9 @@ manage.php
  │    │    ├─ 'create'    → skapa ny rad med angivet id
  │    │    ├─ 'delete'    → radera rad, MEN BARA om inget annat refererar till den
  │    │    │                (findAllParents-koll, samma skyddsmönster som i info.php)
+ │    │    ├─ 'undo'/'redo' → applyHistoryNavigation() flyttar edit_cursor och skriver
+ │    │    │                  tillbaka before/after-snapshotet (target_key/target_table/
+ │    │    │                  target_id postas dolt av printUndoButton()/printRedoButton())
  │    │    ├─ 'update'/'copy' → validateUpdate() → bygg UPDATE-sats via sqlForUpdate()
  │    │    │    └─ SPECIALFALL: layer/source med QGIS-tjänst → läser .qgs-fil från disk
  │    │    │       för att auto-fylla 'updated', 'softversion', 'tables' (samma mönster
@@ -35,6 +38,9 @@ manage.php
  │    │    ├─ usedInMaps() FÖRE och EFTER ändringen → markMapsChanged() för påverkade
  │    │    │   kartor (sätter troligen maps.changed='t', vilket writeConfig.php senare
  │    │    │   läser för att veta vilka kartor som behöver publiceras om)
+ │    │    ├─ vid 'update': recordHistoryEdit() sparar before/after-snapshot i historiken
+ │    │    │   (endast 'update' loggas – 'copy'/'create'/'delete' ingår medvetet inte än,
+ │    │    │   se manage.md "Historik: Ångra/Gör om")
  │    │    └─ vid fel: bygger ett JS alert() med Postgres felmeddelande
  │
  ├─ FAS 3: RENDERA SIDAN (rubrik, JS, CSS, toppknappar, vyväxlare)
@@ -192,6 +198,30 @@ if (isset($postButton)) {
         }
     }
 
+    elseif (($command == 'undo' || $command == 'redo') && !empty($post['target_key'])) {
+        $historyTarget = makeBasicTarget($type, $post['target_id'] ?? $post['target_key']);
+        $usedInMapsOld = usedInMaps($dbh, $historyTarget);
+        $historyResult = applyHistoryNavigation($dbh, $post['target_key'], $command);
+        if (!$historyResult['ok']) {
+            $errorAlert = 'window.onload=function(){alert("' . str_replace('"', '\"', $historyResult['error']) . '");}';
+        } else {
+            $configTables = configTables($dbh);
+            $usedInMapsNew = usedInMaps($dbh, $historyTarget);
+            $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
+            if (!empty($usedInMaps)) {
+                markMapsChanged($dbh, $usedInMaps);
+                $configTables = configTables($dbh);
+            }
+            $post[$type . 'Id'] = $historyResult['target_id'];
+            $idPosts[$type . 'Id'] = $historyResult['target_id'];
+            if (in_array($typeTableName, $keywordCategorized)) {
+                $categoriesByTable[$typeTableName] = categories($configTables[$typeTableName], $typeTablePkColumn);
+            }
+            unset($usedInMaps);
+        }
+        unset($usedInMapsOld, $usedInMapsNew, $historyTarget, $historyResult);
+    }
+
     elseif (isset($post[$type . 'Id'])) {
 
         // The selected item is exposed as a basic target.
@@ -213,6 +243,9 @@ if (isset($postButton)) {
             if ($updateValid) {
                 $fullTarget = makeTargetFull($target, $configTables);
                 $config = targetConfig($fullTarget);
+                if ($command == 'update') {
+                    $historyBeforeConfig = $config;
+                }
 
                 // If $type is 'layer' or 'source' and is originating from Qgis Server, then $post is updated with information gathered from corresponding Qgis project file
                 if ($type == 'layer' || $type == 'source') {
@@ -347,10 +380,15 @@ if (isset($postButton)) {
                 }
                 unset($usedInMapsNew, $usedInMaps);
             }
+            if ($command == 'update' && isset($historyBeforeConfig)) {
+                $historyAfterConfig = targetConfig(makeTargetFull($changedTarget, $configTables));
+                recordHistoryEdit($dbh, $changedTarget, 'update', $historyBeforeConfig, $historyAfterConfig);
+                unset($historyAfterConfig);
+            }
         }
         unset($usedInMapsOld, $changedTarget, $result);
     }
-    unset($updatePosts, $copyId, $id, $target, $type, $typeTableName, $typeTablePkColumn, $typeTable, $command, $sqlStatements);
+    unset($updatePosts, $copyId, $id, $target, $type, $typeTableName, $typeTablePkColumn, $typeTable, $command, $sqlStatements, $historyBeforeConfig);
 }
 pg_close($dbh);
 
