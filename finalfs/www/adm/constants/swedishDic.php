@@ -45,5 +45,7 @@
 		'new'		=>'nyhet',
 		'news'		=>'nyheter',
 		'aduser'	=>'AD-användare',
-		'adusers'	=>'AD-användare'
+		'adusers'	=>'AD-användare',
+		'edit'		=>'ändring',
+		'edits'		=>'ändringar'
 	);
