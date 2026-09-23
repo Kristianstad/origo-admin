@@ -9,6 +9,7 @@
 		.headButton		{ width:4em }
 		.topButton		{ margin-left:0.1em; margin-right:0.2em; margin-bottom:0.3em; margin-top:0.5em; float:left }
 		.updateButton	{ margin-right:0.2em }
+		.historyButton	{ width:2.1em; min-width:2.1em; margin-right:0.2em; padding:0.1em 0.3em; font-size:1.1em; line-height:1.2 }
 		.deleteButton	{ margin-right:0.2em; color:var(--skin-danger, #ffcdd2); font-weight:bold }
 		.smallMultiselectButton { margin-left:-0.3em; margin-right:0.1em; height:unset; border-style:none; padding:0.1em 0.2em; vertical-align:middle }
 		.smallHelpButton { margin-left:-0.3em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }

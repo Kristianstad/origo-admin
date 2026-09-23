@@ -25,6 +25,8 @@
 		printTextarea($table, 'info', 'textareaLarge', 'Info:', in_array('info', $helps), $sizePosts);
 		printHiddenInputs($inheritPosts);
 		echo '<div class="buttonDiv">';
+		$tableForHistory=makeTargetBasic($table);
+		printHistoryButtons($tableForHistory);
 		printUpdateButton('table', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('table');
 		$table=makeTargetBasic($table);

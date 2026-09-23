@@ -27,9 +27,10 @@ function printSimpleEntityForm($target, $type, $fields, $inheritPosts, $helps=ar
 		echo '<hr class="dashedHr">';
 	}
 	echo '<div class="buttonDiv">';
+	$basicTarget=makeTargetBasic($target);
+	printHistoryButtons($basicTarget);
 	printUpdateButton($type, $inheritPosts['_formChanged'] ?? false);
 	printCopyButton($type);
-	$basicTarget=makeTargetBasic($target);
 	printInfoButton($basicTarget);
 	if (isset($extras['inlineButtons']))
 	{

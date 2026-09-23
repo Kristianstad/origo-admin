@@ -45,6 +45,8 @@
 		printHiddenInputs($inheritPosts);
 		echo '<hr class="dashedHr">';
 		echo '<div class="buttonDiv">';
+		$mapForHistory=makeTargetBasic($map);
+		printHistoryButtons($mapForHistory);
 		printUpdateButton('map', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('map');
 		$id=targetId($map);
