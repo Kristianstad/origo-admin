@@ -10,7 +10,7 @@ funktioner/konstanter.
 
 | Modul | Entry point(s) | Beskrivning |
 |---|---|---|
-| manage | `manage.php` | Den centrala CRUD-motorn för all konfiguration: kartor, lager, grupper, källor, tjänster, m.fl. (78 funktionsfiler, se manage.md) |
+| manage | `manage.php` | Den centrala CRUD-motorn för all konfiguration: kartor, lager, grupper, källor, tjänster, m.fl., inklusive ångra/gör om för fältuppdateringar (se manage.md) |
 | writeConfig | `writeConfig.php` | Genererar Origo-JSON + publicerad HTML-sida från databasen. "Kompileringssteget" |
 | read_json | `read_json.php` (**aktiv, ej avstängd**) | Motsatsen till writeConfig: importerar Origo-JSON till databasen. Körs i produktion — känd teknisk skuld (strängbyggd SQL, skör regex-parsning) är alltså en reell risk, inte bara vilande kod |
 | sql_import | `sql_import.php` | Kör inklistrad SQL eller uppladdad `.sql`-fil mot admin-databasen via Verktyg-vyn |

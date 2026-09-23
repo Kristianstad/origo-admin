@@ -86,6 +86,52 @@ nyckel och värde direkt.
 arbetsstruktur för JSON-genereringen. Den är medvetet inte omskriven till
 targets, eftersom target-abstraktionen där inte skulle minska komplexiteten.
 
+## Historik: Ångra/Gör om (undo/redo)
+
+Ett fristående historiklager, separat från själva konfigurationstabellerna,
+låter administratören ångra och göra om fältuppdateringar (command update)
+per objekt. Modellen bygger på tre tabeller i map_configs (definierade i
+initdb/060.origo.sql):
+
+- object_identity - en stabil identitet per objekt: target_key
+  (<typ>:<id>, se objectHistoryKey()) som primärnyckel, plus target_table
+  och target_id.
+- edits - en logg av before/after-snapshots (before_data/after_data, json)
+  för varje ändring, en rad per ändring, kopplad till target_key.
+- edit_cursor - en rad per target_key som pekar ut vilken edits-rad som
+  är det aktuella tillståndet (current_edit_id), plus cachade
+  can_undo/can_redo-flaggor (visningsflaggorna räknas dock om från grunden
+  av historyStateForTarget() snarare än att läsas direkt).
+
+Skrivsidan: i manage.php:s update-gren sparas konfigurationen som den såg
+ut före ändringen ($historyBeforeConfig). Om transaktionen lyckas anropas
+recordHistoryEdit() med före/efter-snapshotet, vilket lägger till en ny
+edits-rad, flyttar edit_cursor dit, och kastar bort en ev. kvarvarande
+"gör om"-gren (rader med edit_id större än den gamla cursorn) - precis som
+i en vanlig linjär undo/redo-stack.
+
+Läsidan: knapparna (printUndoButton()/printRedoButton(), samlade via
+printHistoryButtons()) postar ett eget litet formulär med
+target_key/target_table/target_id som dolda fält och command undo/redo.
+manage.php har en egen dispatch-gren för dessa två kommandon (parallell
+med copy/create/delete/update/operation) som anropar
+applyHistoryNavigation(): den flyttar edit_cursor ett steg i given
+riktning och skriver tillbaka before_data (undo) eller after_data (redo)
+till objektets tabell.
+
+Medvetet avgränsat: endast update-kommandot loggas och kan
+ångras/göras om. copy, create och delete ingår inte i historikmodellen
+än - de skapar eller tar bort hela rader, vilket kräver att undo/redo även
+kan återskapa/ta bort raden (INSERT/DELETE) snarare än bara skriva om
+befintliga kolumnvärden (UPDATE), samt hantera eventuella referenser till
+raden. Detta är ett medvetet avgränsat första steg, inte en bugg.
+
+UI: printHistoryButtons() döljer bägge knapparna helt om varken ångra
+eller gör om är möjligt för objektet (t.ex. inga sparade ändringar än).
+Knapparna är just nu inkopplade i printSimpleEntityForm() (alla
+"enkla"-formulär) samt i printMapForm.php, printLayerForm.php,
+printSourceForm.php, printServiceForm.php och printTableForm.php.
+
 ## Mönster: enkla entitetsformulär (printKeywordForm, printAduserForm, m.fl.)
 
 Flera `print<Typ>Form`-funktioner använder nu den gemensamma
@@ -149,12 +195,14 @@ betydande typspecifik villkorslogik:
 | Fil | Funktion | Beskrivning |
 |---|---|---|
 | `printTilegridForm.php` | (enkelt mönster) | tilesize, standardfält i övrigt |
+| `printUndoButton.php` | `printUndoButton($target, $visible=true)` | "Backa"-knappen: postar `target_key`/`target_table`/`target_id` och `command=undo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
 | `printUpdateButton.php` | `printUpdateButton($type)` | "Uppdatera"-knappen. Läser den globala `$formChangedGlobal`-flaggan (satt i `manage.php` vid failed update, se tidigare) för att visa den redan i "ändrad"-läge om ett sparförsök just misslyckades |
 | `printUpdateForm.php` | (enkelt mönster) | Namnet är missvisande – detta gäller entiteten "update" (en uppdateringsrutin/schema för när data anses föråldrad, kopplat till `updated`-modulen), inte formulärets egen uppdateringsknapp. Fält: `interval` (tidsintervall som text, t.ex. "+1 month" – ser ut som PHP:s `strtotime()`-kompatibla format), `method` (manuellt/automatiskt) |
 | `printUpdateSelect.php` | `printUpdateSelect($fullTarget, $configParamValues, $class, $label, $help=false, $options=null, $onchange='')` | Motsvarigheten till `printTextarea()` men för `<select>`-fält istället för fritext. Om `$options` inte anges härleds de automatiskt från `$configParamValues` |
 | `printUrlButton.php` | `printUrlButton($url, $type)` | Generisk knapp som öppnar en URL i ny flik och använder typen för knapptexten, exempelvis karta eller externt verktyg |
 | `printViewSwitcher.php` | `printViewSwitcher($view)` | Radioknappar för att växla mellan vyer (`constants/views.php`), autopostar vid ändring |
 | `printWriteConfigButton.php` | `printWriteConfigButton($mapId, $changed='f')` | Knappen som triggar `writeConfig.php` (publicering). Visar "ändrad"-styling om `maps.changed = 't'` (kopplingen till `markMapsChanged()` vi identifierade tidigare, nu bekräftad från UI-sidan) |
+| `recordHistoryEdit.php` | `recordHistoryEdit($dbh, $target, $action, $beforeConfig, $afterConfig): bool` | Sparar ett before/after-snapshot som en ny `edits`-rad efter en lyckad `update`, flyttar `edit_cursor` dit, och kastar en ev. kvarvarande "gör om"-gren. Se "Historik: Ångra/Gör om" ovan |
 
 ## Anropas med
 `manage.php?view=<vy>` (GET för vy) + POST med formulärdata
@@ -168,8 +216,9 @@ betydande typspecifik villkorslogik:
 | `<typ>IdNew` | Nytt id vid skapande av ett objekt |
 | `<typ>IdDel` | Id att radera |
 | `update<Fält>` | Ett formulärfälts nya värde vid uppdatering (t.ex. `updateTitle`, `updateAbstract`) |
-| `<knapp med kommando>` | Formulärknappens `name`/`value` avslöjar `$type` och `$command` (`copy`/`create`/`delete`/`update`/`operation`), tolkas av `postButton()` |
+| `<knapp med kommando>` | Formulärknappens `name`/`value` avslöjar `$type` och `$command` (`copy`/`create`/`delete`/`update`/`operation`/`undo`/`redo`), tolkas av `postButton()` |
 | `to<Typ>Id` / `from<Typ>Id` | Vid `operation`-kommandot: lägg till/ta bort ett barn-objekt från en förälder (map/group/classe/infogroup) |
+| `target_key` / `target_table` / `target_id` | Vid `undo`/`redo`-kommandot: identifierar vilket objekt historiken gäller (se "Historik: Ångra/Gör om" ovan), postas som dolda fält av `printUndoButton()`/`printRedoButton()` |
 
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
@@ -185,15 +234,18 @@ betydande typspecifik villkorslogik:
 | Fil | Funktion | Beskrivning |
 |---|---|---|
 | `appendUpdatedColumnsToSql.php` | `appendUpdatedColumnsToSql($dbColumns, $sql, $params=[]): array` | Bygger vidare på en SQL-sträng med parameteriserade `kolumn = $N`-par för en `UPDATE`-sats. Tomma värden (inkl. `'{}'`/`'{{}}'`, tomma Postgres-arrayer) blir `NULL`; returnerar SQL och parametrar |
+| `applyHistoryNavigation.php` | `applyHistoryNavigation($dbh, $targetKey, $direction): array` | Flyttar `edit_cursor` ett steg `undo`/`redo` för given `$targetKey` och skriver tillbaka rätt snapshot (`before_data`/`after_data`) till objektets tabell. Returnerar `['ok', 'target_table', 'target_id', 'error']`. Se "Historik: Ångra/Gör om" ovan |
 | `categories.php` | `categories($config, $catParam): array` | Bygger en nyckelordskategorisering: går igenom en hel tabellkonfiguration och grupperar rad-id:n (`$catParam`, primärnyckelkolumnen) efter deras `keywords`-fält. Lägger alltid till en `"Alla"`-kategori med samtliga id:n överst |
 | `categoryPosts.php` | `categoryPosts($post): array` | Filtrerar `$post` till fält vars namn slutar på `Category` |
 | `deleteIdSql.php` | `deleteIdSql($id, $tableName): array` | Bygger parameteriserad `DELETE`-sats för given tabell och id; returnerar SQL och parametrar |
 | `focusTable.php` | `focusTable($idPosts): string\|null` | Avgör vilken tabell som är "i fokus" utifrån vilka `*Id`-fält som postats – prioriterar map/database/schema/group före övriga typer, annars härleds tabellen från det första postade id-fältets namn |
 | `hasStringKeys.php` | `hasStringKeys(array $array): bool` | Kontrollerar om en array har minst en textnyckel (dvs. är associativ snarare än numeriskt indexerad). **Ingen användning observerad** – se flaggning |
+| `historyStateForTarget.php` | `historyStateForTarget($dbh, $target): array` | Läser `edit_cursor`/`edits` för given target och räknar från grunden ut `['undo', 'redo', 'current_edit_id', 'edits', 'index']`. Används av `printHistoryButtons()` för att avgöra vilka knappar som ska visas |
 | `idPosts.php` | `idPosts($post): array` | Filtrerar `$post` till fält vars namn slutar på `Id`, med undantag för operationernas `from/to`-fält för map, group, classe och infogroup |
 | `isArrayColumn.php` | `isArrayColumn($column): bool` | Kontrollerar om en given kolumn är en Postgres-array-kolumn, genom att slå upp den mot listan i `constants/arrayColumns.php`. Avslutar programmet (`die()`) om `$column` inte är en icke-tom sträng |
 | `makeTargetFull.php` | `makeTargetFull($target, $configTablesOrDbh): array` | Tar en basic (eller full) target och returnerar en full target, genom att slå upp konfigurationen via `targetConfig()` om den saknas. Avslutar programmet om indata inte är en giltig target |
 | `markMapsChanged.php` | `markMapsChanged(&$dbh, $mapIds): void` | Sätter `maps.changed = 't'` för samtliga angivna kartor i en enda batch-SQL (flera `UPDATE`-satser konkatenerade med `; `). **Bekräftar tidigare hypotes:** detta är motparten till `markMapUnchanged()` i writeConfig-modulen – manage-modulen flaggar en karta som "ändrad, behöver publiceras om" varje gång något som påverkar den redigeras, och writeConfig-modulen nollställer flaggan efter lyckad publicering |
+| `objectHistoryKey.php` | `objectHistoryKey($target): string` | Bygger den stabila historiknyckeln `<typ>:<id>` (`target_key`) för ett objekt, utifrån `targetType()`/`targetId()`. Se "Historik: Ångra/Gör om" ovan |
 | `postButton.php` | `postButton($post): string\|null` | Hittar namnet på den POST-parameter vars namn slutar på `Button` – det är detta namn (`<typ>Button`) som `manage.php` sedan bryter isär för att få fram `$type` |
 | `printAddOperation.php` | `printAddOperation($target, $addToTable, $buttontext, $inheritPosts)` | Skriver ut ett litet formulär: en dropdown med tillgängliga föräldrar (t.ex. kartor eller grupper) + en knapp som postar `operation`-kommandot för att lägga till `$target` i den valda föräldern |
 | `printChildSelect.php` | `printChildSelect($target, $column, &$thClass, $heading, $inheritPosts, $groupLevel=1, $selectedValue=null)` | Den mest komplexa av dessa byggstenar: skriver ut en kolumn i "barn-urvalsraden" (t.ex. vilka lager/grupper/kontroller finns i vald karta). Hanterar specialfall för `schemas`/`tables` och nästlade `groups`/`infogroups`, där respektive id-kedja byggs baserat på djup |
@@ -206,17 +258,19 @@ betydande typspecifik villkorslogik:
 | `printHeadForms.php` | `printHeadForms($view, $configTables, $focusTable, $inheritPosts)` | Skriver ut hela toppraden av urvalsformulär, en `printHeadForm()`-kolumn per tabell som ingår i vald `$view` (styrt av `constants/views.php`). Placerar `$focusTable` först och ger den fokus-styling |
 | `printHelpButton.php` | `printHelpButton($type, $configParam=null, $buttonText='?', $buttonClass='smallHelpButton')` | Liten "?"-knapp bredvid ett fält, öppnar/togglar hjälptext för just det fältet (`help.php?id=<type>[:<configParam>]`) i topFrame |
 | `printHiddenInputs.php` | `printHiddenInputs($inheritPosts)` | Skriver ut ett dolt `<input>` per nyckel/värde i `$inheritPosts`, för att bevara navigeringskontext genom formulärinskick |
+| `printHistoryButtons.php` | `printHistoryButtons($target, $dbh=null, $inheritPosts=array())` | Skriver ut "Backa"/"Gör om"-knapparna för given target, efter att ha frågat `historyStateForTarget()` om vilka som är tillgängliga. Öppnar/stänger en egen databaskoppling om ingen skickas in. Se "Historik: Ångra/Gör om" ovan |
 | `printInfoButton.php` | `printInfoButton($basicTarget)` | "Info"-knapp som öppnar `info.php` i topFrame för given target |
 | `printMultiselectButton.php` | `printMultiselectButton($configParam, $value=null, $textareaId, $buttonText='+', $buttonClass='smallMultiselectButton')` | Knapp som öppnar multiselect-verktyget i topFrame för ett givet fält, via samma `<textareaId>::<tabell>:<värden>`-kodning vi dokumenterat i `multiselect.md` |
 | `printReadDbSchemasButton.php` | `printReadDbSchemasButton($databaseId)` | Knapp som anropar `read_db_schemas.php` i en dold iframe, med JS-bekräftelsedialog och automatisk formulärresubmit efter 1 sekund för att visa nya scheman |
 | `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php` |
 | `printRemoveOperation.php` | (samma mönster som `printAddOperation.php`, se ovan) | Motsatsen till `printAddOperation()` – kräver dessutom `findParents()` [common] för att bara visa de föräldrar objektet faktiskt tillhör (kan inte tas bort från en förälder det inte är kopplat till) |
+| `printRedoButton.php` | `printRedoButton($target, $visible=true)` | "Gör om"-knappen: postar `target_key`/`target_table`/`target_id` och `command=redo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
 | `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn). **Ovanligt val-etikettmönster**, se flaggning |
 | `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Den mest centrala byggstenen i hela manage-modulen – skriver ut ett enskilt redigerbart fält som ett `<textarea>`. Städar Postgres-arraysyntax för visning, bevarar användarens tidigare valda storlek/scrollposition (via `$sizePosts`, kopplat till `sizePosts.js`-liknande dolda fält), visar en hjälpknapp om hjälptext finns, och visar en multiselect-knapp om fältet är konfigurerat som "multiselectable" |
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |
 | `sqlForOperation.php` | `sqlForOperation($operation, $child, $parent): array` | Bygger en parameteriserad UPDATE-sats som lägger till/tar bort ett barn-id ur förälderns array-kolumn; returnerar SQL och parametrar |
 | `sqlForUpdate.php` | `sqlForUpdate($fullTarget, $updatePosts): array` | Bygger en parameteriserad fullständig UPDATE-sats för en target baserat på postat formulärdata; returnerar SQL och parametrar |
-| `tableConfigs.php` | `tableConfigs($table, $configTablesOrDbh)` | Hämtar konfigurationen för en tabell antingen från en databaskoppling (färsk fråga) eller från en redan inläst `configTables`-array (cachat) – avgörs via `is_resource()` |
+| `tableConfigs.php` | `tableConfigs($table, $configTablesOrDbh)` | Hämtar konfigurationen för en tabell antingen från en databaskoppling (färsk fråga) eller från en redan inläst `configTables`-array (cachat) – avgörs via `is_resource()`/`instanceof PgSql\Connection` |
 | `targetConfig.php` | `targetConfig($target, $configTablesOrDbh=null)` | Slår upp/returnerar hela konfigurationen för en target, oavsett om den redan är "full" eller bara "basic" |
 | `typeHelps.php` | `typeHelps($type, $helps): array` | Filtrerar den globala listan av hjälptext-id:n (`help_id`, format `<typ>:<fält>`) till de som gäller en specifik typ, och returnerar bara fältdelen. Detta är mekaniken bakom `in_array($fältnamn, $helps)`-kontrollerna vi sett i varje `print*Form`-funktion – `$helps` som skickas till de funktionerna är redan filtrerat via denna funktion i `manage.php`s entry point |
 | `updatedFullTarget.php` | `updatedFullTarget($fullTarget, $updatePosts): array` | Bygger en ny full target där varje kolumns värde ersätts med motsvarande `update<Kolumn>`-fält från `$updatePosts` (eller tom sträng om inget postades för den kolumnen). Array-kolumner (enligt `isArrayColumn()`/`constants/arrayColumns.php`) omsluts automatiskt med Postgres-array-syntax `{...}`. Detta är steget som förvandlar "vad användaren skrev i formuläret" till "vad som ska stå i databasen", och används av `sqlForUpdate()` innan `appendUpdatedColumnsToSql()` bygger själva SQL-strängen |
