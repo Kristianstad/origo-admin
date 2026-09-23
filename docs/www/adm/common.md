@@ -30,6 +30,7 @@
 | `makeBasicTarget($type, $id)` | `makeBasicTarget.php` | Skapar en basic target `[$type => $id]` | info, manage, target-infrastruktur |
 | `makeFullTarget($type, $config)` | `makeFullTarget.php` | Skapar en full target `[$type => $config]` från en konfigurationsrad | info, manage, target-infrastruktur |
 | `makeTargetBasic($target)` | `makeTargetBasic.php` | Konverterar en full target till en basic target | manage (används flitigt i samtliga print*Form) |
+| `mbUcfirst($str)` | `mbUcfirst.php` | Multibyte-säker `ucfirst()` (via `mb_strtoupper()`/`mb_substr()`, kräver `mbstring`-tillägget) – PHP:s vanliga `ucfirst()` är byte-baserad och versaliserar bara ASCII a-z, vilket missar svenska ord som börjar på å/ä/ö | printHeadForms, multiselect (används runt `toSwedish()`-resultat, där ett svenskt ord kan börja på å/ä/ö) |
 | `pgArrayToPhp($pgArray)` | `pgArrayToPhp.php` | Konverterar Postgres arraysyntax (`{a,b,c}`) till PHP-array | news, export, writeConfig |
 | `pkColumnOfTable($table)` | `pkColumnOfTable.php` | Returnerar primärnyckelns kolumnnamn för en tabell | info, writeTablesForAllLayers, target-infrastruktur (targetId, targetIdColumn via targetTable), validateUpdate |
 | `readAndCloseSession()` | `readAndCloseSession.php` | Läser in `$_SESSION` och stänger sessionen | news, export |

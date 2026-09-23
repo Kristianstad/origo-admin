@@ -111,13 +111,15 @@ edits-rad, flyttar edit_cursor dit, och kastar bort en ev. kvarvarande
 i en vanlig linjär undo/redo-stack.
 
 Läsidan: knapparna (printUndoButton()/printRedoButton(), samlade via
-printHistoryButtons()) postar ett eget litet formulär med
-target_key/target_table/target_id som dolda fält och command undo/redo.
-manage.php har en egen dispatch-gren för dessa två kommandon (parallell
-med copy/create/delete/update/operation) som anropar
-applyHistoryNavigation(): den flyttar edit_cursor ett steg i given
-riktning och skriver tillbaka before_data (undo) eller after_data (redo)
-till objektets tabell.
+printHistoryButtons()) postar target_key/target_table/target_id som dolda
+fält i objektets egna redigeringsformulär och bekräftar åtgärden via knappens
+egen onclick (inte formulärets onsubmit – ett omslutande `<form>` hade
+tyst kastats bort av webbläsaren eftersom formulär inte får nästlas, vilket
+ursprungligen gjorde att bekräftelsedialogen aldrig visades). manage.php har en
+egen dispatch-gren för dessa två kommandon (parallell med
+copy/create/delete/update/operation) som anropar applyHistoryNavigation():
+den flyttar edit_cursor ett steg i given riktning och skriver tillbaka
+before_data (undo) eller after_data (redo) till objektets tabell.
 
 Medvetet avgränsat: endast update-kommandot loggas och kan
 ångras/göras om. copy, create och delete ingår inte i historikmodellen
@@ -131,6 +133,18 @@ eller gör om är möjligt för objektet (t.ex. inga sparade ändringar än).
 Knapparna är just nu inkopplade i printSimpleEntityForm() (alla
 "enkla"-formulär) samt i printMapForm.php, printLayerForm.php,
 printSourceForm.php, printServiceForm.php och printTableForm.php.
+
+Bläddringsbar logg: `edits`-tabellen är tillagd som en vanlig, bläddringsbar
+entitetstyp ("Ändringar") under vyn "Verktyg" (`constants/views.php`), via
+`printEditForm.php` (följer det "enkla"-mönstret). Nästan alla fält är
+readonly (systemgenererad revisionsdata) – endast `abstract`/`info` är
+redigerbara, så en administratör kan skriva en läsbar förklaring till en
+lagrad ändring i efterhand. `object_identity`/`edit_cursor` är medvetet
+**inte** exponerade i någon vy – de är intern bokföring, inte något en
+administratör behöver bläddra i direkt. Typen `edit`/`edits` har fältnamn
+och hjälptexter precis som övriga typer: översättning i
+`constants/swedishDic.php` och `help_id`-poster (`edit:<fält>`) i
+`initdb/060.origo.sql`.
 
 ## Mönster: enkla entitetsformulär (printKeywordForm, printAduserForm, m.fl.)
 
@@ -160,6 +174,7 @@ Funktionsnamnen och deras publika argument är oförändrade eftersom
 | `printContactForm.php` | contact | name, web, email | – |
 | `printControlForm.php` | control | options, css, js, onload | `printAddOperation`/`printRemoveOperation` mot maps |
 | `printDatabaseForm.php` | database | connectionstring | `printReadDbSchemasButton` |
+| `printEditForm.php` | edit | target_key, target_table, target_id, date, action, changed_by, before_data, after_data (samtliga readonly) | – (bläddringsbar historiklogg, se "Historik: Ångra/Gör om") |
 | `printFooterForm.php` | footer | img, url, text | – |
 | `printFormatForm.php` | format | (endast format_id, ingen extra) | – |
 | `printGroupForm.php` | group | layers, groups, title, expanded (select), show_meta (select), keywords | `printConfigPreviewButton`, `printAddOperation`/`printRemoveOperation` mot maps OCH groups (två par) |
@@ -254,7 +269,7 @@ betydande typspecifik villkorslogik:
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
 | `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med JS-bekräftelsedialog. **Visas bara om `$viewDepthGlobal == 1`** (se flaggning – innebär att radering bara är möjlig för toppnivåobjekt, inte nästlade) |
 | `printExportJsonButton.php` | `printExportJsonButton($mapId)` | Knapp som laddar ner kartans JSON-konfiguration via `writeConfig.php?getJson=y&download=y`, öppnas i den dolda iframen (`hiddenFrame`) så sidan inte navigerar bort |
-| `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + ett textfält och knapp för att skapa nytt |
+| `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + ett textfält och knapp för att skapa nytt. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `all_from_table()` redan läser raderna sorterade på `edit_id` |
 | `printHeadForms.php` | `printHeadForms($view, $configTables, $focusTable, $inheritPosts)` | Skriver ut hela toppraden av urvalsformulär, en `printHeadForm()`-kolumn per tabell som ingår i vald `$view` (styrt av `constants/views.php`). Placerar `$focusTable` först och ger den fokus-styling |
 | `printHelpButton.php` | `printHelpButton($type, $configParam=null, $buttonText='?', $buttonClass='smallHelpButton')` | Liten "?"-knapp bredvid ett fält, öppnar/togglar hjälptext för just det fältet (`help.php?id=<type>[:<configParam>]`) i topFrame |
 | `printHiddenInputs.php` | `printHiddenInputs($inheritPosts)` | Skriver ut ett dolt `<input>` per nyckel/värde i `$inheritPosts`, för att bevara navigeringskontext genom formulärinskick |
@@ -265,7 +280,7 @@ betydande typspecifik villkorslogik:
 | `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php` |
 | `printRemoveOperation.php` | (samma mönster som `printAddOperation.php`, se ovan) | Motsatsen till `printAddOperation()` – kräver dessutom `findParents()` [common] för att bara visa de föräldrar objektet faktiskt tillhör (kan inte tas bort från en förälder det inte är kopplat till) |
 | `printRedoButton.php` | `printRedoButton($target, $visible=true)` | "Gör om"-knappen: postar `target_key`/`target_table`/`target_id` och `command=redo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
-| `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn). **Ovanligt val-etikettmönster**, se flaggning |
+| `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn), om inte `$preserveOrder` är satt (används av `edit`-dropdownen för att bevara kronologisk ordning trots att etiketten är `target_key`, inte datumet). **Ovanligt val-etikettmönster**, se flaggning |
 | `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Den mest centrala byggstenen i hela manage-modulen – skriver ut ett enskilt redigerbart fält som ett `<textarea>`. Städar Postgres-arraysyntax för visning, bevarar användarens tidigare valda storlek/scrollposition (via `$sizePosts`, kopplat till `sizePosts.js`-liknande dolda fält), visar en hjälpknapp om hjälptext finns, och visar en multiselect-knapp om fältet är konfigurerat som "multiselectable" |
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |
 | `sqlForOperation.php` | `sqlForOperation($operation, $child, $parent): array` | Bygger en parameteriserad UPDATE-sats som lägger till/tar bort ett barn-id ur förälderns array-kolumn; returnerar SQL och parametrar |
