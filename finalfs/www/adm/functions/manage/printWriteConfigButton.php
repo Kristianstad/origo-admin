@@ -12,11 +12,11 @@
 			$changeClass='';
 		}
 		$confirmStr="Är du säker att du vill skriva över den befintliga konfigurationen för $mapId?";
+		$confirmJs=json_encode($confirmStr, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+		$mapIdJs=json_encode($mapId, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 		echo <<<HERE
-			<form onsubmit='confirmStr="{$confirmStr}"; if (confirm(confirmStr)) {this.children[0].classList.remove("change"); return true;} else {return false;}' action="writeConfig.php" method="get" target="hiddenFrame">
-				<button title="Skriv konfiguration till disk (json)" class="updateButton{$changeClass}" type="submit" name="map" value="{$mapId}">
-					Skriv kartkonfiguration
-				</button>
-			</form>
+			<button title="Skriv konfiguration till disk (json)" class="updateButton{$changeClass}" type="button" onclick='if (!confirm({$confirmJs})) return false; this.classList.remove("change"); document.getElementById("hiddenFrame").src="writeConfig.php?map="+encodeURIComponent({$mapIdJs});'>
+				Skriv kartkonfiguration
+			</button>
 		HERE;
 	}

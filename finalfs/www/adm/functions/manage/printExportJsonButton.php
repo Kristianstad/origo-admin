@@ -2,13 +2,10 @@
 
 	function printExportJsonButton($mapId)
 	{
+		$mapIdJs=json_encode($mapId, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 		echo <<<HERE
-			<form action="writeConfig.php" method="get" target="hiddenFrame">
-				<input type="hidden" name="getJson" value="y">
-				<input type="hidden" name="download" value="y">
-				<button title="Ladda ner konfiguration" class="updateButton" type="submit" name="map" value="{$mapId}">
-					Exportera JSON
-				</button>
-			</form>
+			<button title="Ladda ner konfiguration" class="updateButton" type="button" onclick='document.getElementById("hiddenFrame").src="writeConfig.php?getJson=y&amp;download=y&amp;map="+encodeURIComponent({$mapIdJs});'>
+				Exportera JSON
+			</button>
 		HERE;
 	}

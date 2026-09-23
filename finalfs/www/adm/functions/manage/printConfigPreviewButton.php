@@ -11,27 +11,25 @@
 		$groupInput='';
 		$layerInput='';
 		$titleTarget='karta (utan att skriva till disk)';
+		$params=array('getHtml'=>'y', 'map'=>$mapId);
 		if (isset($group))
 		{
-			$groupInput="<input type='hidden' name='group' value='$group'>";
+			$params['group']=$group;
 			$titleTarget='grupp';
 		}
 		if (isset($layer))
 		{
-			$layerInput="<input type='hidden' name='layer' value='$layer'>";
+			$params['layer']=$layer;
 			if (!isset($group))
 			{
 				$titleTarget='lager';
 			}
 		}
+		$url='writeConfig.php?'.http_build_query($params);
+		$urlJs=json_encode($url, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 		echo <<<HERE
-			<form action="writeConfig.php" method="get" target="_blank">
-				<input type="hidden" name="getHtml" value="y">
-				{$groupInput}
-				{$layerInput}
-				<button title="Förhandsgranska {$titleTarget}" class="updateButton" type="submit" name="map" value="{$mapId}">
-					Förhandsgranska
-				</button>
-			</form>
+			<button title="Förhandsgranska {$titleTarget}" class="updateButton" type="button" onclick='window.open({$urlJs}, "_blank");'>
+				Förhandsgranska
+			</button>
 		HERE;
 	}

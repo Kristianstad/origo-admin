@@ -134,6 +134,17 @@ Knapparna är just nu inkopplade i printSimpleEntityForm() (alla
 "enkla"-formulär) samt i printMapForm.php, printLayerForm.php,
 printSourceForm.php, printServiceForm.php och printTableForm.php.
 
+Formulär och åtgärdsknappar: knapphelpers som renderas inuti ett
+entitetsformulär får inte skapa egna nästlade `<form>`-element. Sådana
+element ignoreras eller omtolkas av webbläsarens HTML-parser och kan göra
+att knappar skickar fel formulär eller tappar sin bekräftelse. Submit-
+åtgärder som Uppdatera/Kopiera/Radera/Backa/Gör om använder entitetens
+befintliga POST-formulär och bekräftar via knappens `onclick`. Fristående
+GET-åtgärder (Info, läs in schema/tabeller, publicera, exportera och
+förhandsgranska) använder typknappar utan eget formulär och riktar
+begäran till `topFrame`, `hiddenFrame` eller ett nytt fönster. Avbryt i
+bekräftelserna för Radera, publicera och inläsning stoppar åtgärden.
+
 Bläddringsbar logg: `edits`-tabellen är tillagd som en vanlig, bläddringsbar
 entitetstyp ("Ändringar") under vyn "Verktyg" (`constants/views.php`), via
 `printEditForm.php` (följer det "enkla"-mönstret). Nästan alla fält är
@@ -214,9 +225,9 @@ betydande typspecifik villkorslogik:
 | `printUpdateButton.php` | `printUpdateButton($type)` | "Uppdatera"-knappen. Läser den globala `$formChangedGlobal`-flaggan (satt i `manage.php` vid failed update, se tidigare) för att visa den redan i "ändrad"-läge om ett sparförsök just misslyckades |
 | `printUpdateForm.php` | (enkelt mönster) | Namnet är missvisande – detta gäller entiteten "update" (en uppdateringsrutin/schema för när data anses föråldrad, kopplat till `updated`-modulen), inte formulärets egen uppdateringsknapp. Fält: `interval` (tidsintervall som text, t.ex. "+1 month" – ser ut som PHP:s `strtotime()`-kompatibla format), `method` (manuellt/automatiskt) |
 | `printUpdateSelect.php` | `printUpdateSelect($fullTarget, $configParamValues, $class, $label, $help=false, $options=null, $onchange='')` | Motsvarigheten till `printTextarea()` men för `<select>`-fält istället för fritext. Om `$options` inte anges härleds de automatiskt från `$configParamValues` |
-| `printUrlButton.php` | `printUrlButton($url, $type)` | Generisk knapp som öppnar en URL i ny flik och använder typen för knapptexten, exempelvis karta eller externt verktyg |
+| `printUrlButton.php` | `printUrlButton($url, $type)` | Typknapp som öppnar en URL i ny flik utan att skapa ett nästlat formulär; använder typen för knapptexten, exempelvis karta eller externt verktyg |
 | `printViewSwitcher.php` | `printViewSwitcher($view)` | Radioknappar för att växla mellan vyer (`constants/views.php`), autopostar vid ändring |
-| `printWriteConfigButton.php` | `printWriteConfigButton($mapId, $changed='f')` | Knappen som triggar `writeConfig.php` (publicering). Visar "ändrad"-styling om `maps.changed = 't'` (kopplingen till `markMapsChanged()` vi identifierade tidigare, nu bekräftad från UI-sidan) |
+| `printWriteConfigButton.php` | `printWriteConfigButton($mapId, $changed='f')` | Typknapp som efter bekräftelse anropar `writeConfig.php` i `hiddenFrame` (utan nästlat formulär). Visar "ändrad"-styling om `maps.changed = 't'` (kopplingen till `markMapsChanged()` vi identifierade tidigare, nu bekräftad från UI-sidan) |
 | `recordHistoryEdit.php` | `recordHistoryEdit($dbh, $target, $action, $beforeConfig, $afterConfig): bool` | Sparar ett before/after-snapshot som en ny `edits`-rad efter en lyckad `update`, flyttar `edit_cursor` dit, och kastar en ev. kvarvarande "gör om"-gren. Se "Historik: Ångra/Gör om" ovan |
 
 ## Anropas med
@@ -265,19 +276,19 @@ betydande typspecifik villkorslogik:
 | `printAddOperation.php` | `printAddOperation($target, $addToTable, $buttontext, $inheritPosts)` | Skriver ut ett litet formulär: en dropdown med tillgängliga föräldrar (t.ex. kartor eller grupper) + en knapp som postar `operation`-kommandot för att lägga till `$target` i den valda föräldern |
 | `printChildSelect.php` | `printChildSelect($target, $column, &$thClass, $heading, $inheritPosts, $groupLevel=1, $selectedValue=null)` | Den mest komplexa av dessa byggstenar: skriver ut en kolumn i "barn-urvalsraden" (t.ex. vilka lager/grupper/kontroller finns i vald karta). Hanterar specialfall för `schemas`/`tables` och nästlade `groups`/`infogroups`, där respektive id-kedja byggs baserat på djup |
 | `printAddRemoveOperations.php` | `printAddRemoveOperations($target, $operationTables, $inheritPosts, $labels=array())` | Gemensam renderer för add/remove-operationer. `exclusiveOperationGroups.php` kan ange singleton-poster eller grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs när målet redan finns i någon förälder i gruppen |
-| `printConfigPreviewButton.php` | `printConfigPreviewButton($mapId, $group=null, $layer=null)` | Knapp som öppnar en förhandsgranskning via `writeConfig.php?getHtml=y` i en ny flik, utan att skriva till disk. Kan begränsas till en specifik grupp eller ett specifikt lager |
+| `printConfigPreviewButton.php` | `printConfigPreviewButton($mapId, $group=null, $layer=null)` | Typknapp som öppnar en förhandsgranskning via `writeConfig.php?getHtml=y` i en ny flik, utan att skriva till disk eller skapa ett nästlat formulär. Kan begränsas till en specifik grupp eller ett specifikt lager |
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
-| `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med JS-bekräftelsedialog. **Visas bara om `$viewDepthGlobal == 1`** (se flaggning – innebär att radering bara är möjlig för toppnivåobjekt, inte nästlade) |
-| `printExportJsonButton.php` | `printExportJsonButton($mapId)` | Knapp som laddar ner kartans JSON-konfiguration via `writeConfig.php?getJson=y&download=y`, öppnas i den dolda iframen (`hiddenFrame`) så sidan inte navigerar bort |
+| `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med `onclick`-bekräftelse; skickar delete-kommandot via det omgivande entitetsformuläret, utan att skapa ett eget formulär. **Visas bara om `$viewDepthGlobal == 1`** (se flaggning – innebär att radering bara är möjlig för toppnivåobjekt, inte nästlade) |
+| `printExportJsonButton.php` | `printExportJsonButton($mapId)` | Typknapp som laddar ner kartans JSON-konfiguration via `writeConfig.php?getJson=y&download=y` i den dolda iframen (`hiddenFrame`) så sidan inte navigerar bort; inget nästlat formulär |
 | `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + ett textfält och knapp för att skapa nytt. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `all_from_table()` redan läser raderna sorterade på `edit_id` |
 | `printHeadForms.php` | `printHeadForms($view, $configTables, $focusTable, $inheritPosts)` | Skriver ut hela toppraden av urvalsformulär, en `printHeadForm()`-kolumn per tabell som ingår i vald `$view` (styrt av `constants/views.php`). Placerar `$focusTable` först och ger den fokus-styling |
 | `printHelpButton.php` | `printHelpButton($type, $configParam=null, $buttonText='?', $buttonClass='smallHelpButton')` | Liten "?"-knapp bredvid ett fält, öppnar/togglar hjälptext för just det fältet (`help.php?id=<type>[:<configParam>]`) i topFrame |
 | `printHiddenInputs.php` | `printHiddenInputs($inheritPosts)` | Skriver ut ett dolt `<input>` per nyckel/värde i `$inheritPosts`, för att bevara navigeringskontext genom formulärinskick |
 | `printHistoryButtons.php` | `printHistoryButtons($target, $dbh=null, $inheritPosts=array())` | Skriver ut "Backa"/"Gör om"-knapparna för given target, efter att ha frågat `historyStateForTarget()` om vilka som är tillgängliga. Öppnar/stänger en egen databaskoppling om ingen skickas in. Se "Historik: Ångra/Gör om" ovan |
-| `printInfoButton.php` | `printInfoButton($basicTarget)` | "Info"-knapp som öppnar `info.php` i topFrame för given target |
+| `printInfoButton.php` | `printInfoButton($basicTarget)` | Typknapp som öppnar `info.php` i `topFrame` för given target, utan eget formulär |
 | `printMultiselectButton.php` | `printMultiselectButton($configParam, $value=null, $textareaId, $buttonText='+', $buttonClass='smallMultiselectButton')` | Knapp som öppnar multiselect-verktyget i topFrame för ett givet fält, via samma `<textareaId>::<tabell>:<värden>`-kodning vi dokumenterat i `multiselect.md` |
-| `printReadDbSchemasButton.php` | `printReadDbSchemasButton($databaseId)` | Knapp som anropar `read_db_schemas.php` i en dold iframe, med JS-bekräftelsedialog och automatisk formulärresubmit efter 1 sekund för att visa nya scheman |
-| `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php` |
+| `printReadDbSchemasButton.php` | `printReadDbSchemasButton($databaseId)` | Typknapp som efter bekräftelse anropar `read_db_schemas.php` i `hiddenFrame` och skickar om databasurvalet efter 1 sekund. Avbryt stoppar båda åtgärderna; inget nästlat formulär |
+| `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php`; Avbryt stoppar anrop och formulärresubmit |
 | `printRemoveOperation.php` | (samma mönster som `printAddOperation.php`, se ovan) | Motsatsen till `printAddOperation()` – kräver dessutom `findParents()` [common] för att bara visa de föräldrar objektet faktiskt tillhör (kan inte tas bort från en förälder det inte är kopplat till) |
 | `printRedoButton.php` | `printRedoButton($target, $visible=true)` | "Gör om"-knappen: postar `target_key`/`target_table`/`target_id` och `command=redo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
 | `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn), om inte `$preserveOrder` är satt (används av `edit`-dropdownen för att bevara kronologisk ordning trots att etiketten är `target_key`, inte datumet). **Ovanligt val-etikettmönster**, se flaggning |
@@ -585,20 +596,16 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   "Kommun, Förvaltning, Namn" och bara "Namn" ska visas)? Detta är en
   icke uppenbar detalj värd att fråga om, eftersom den påverkar hur
   **alla** dropdown-menyer i hela manage-modulen visar sina etiketter.
-- **`printReadDbSchemasButton.php`/`printReadSchemaTablesButton.php`
-  ignorerar resultatet av `confirm()`:**
-```js
-  confirmStr="..."; confirm(confirmStr); setTimeout(...)
-```
-  `confirm()`s returvärde (true/false) sparas aldrig och används inte
-  för att avgöra om åtgärden ska fortsätta – `setTimeout(...)` körs
-  **oavsett om användaren klickar OK eller Avbryt** i bekräftelsedialogen.
-  Detta skiljer sig från `printDeleteButton()`s korrekta mönster
-  (`return confirm(confirmStr)` som formulärets `onsubmit`-värde, vilket
-  faktiskt stoppar inskickningen vid Avbryt). Sannolikt en bugg –
-  bekräftelsedialogen här är just nu bara kosmetisk och stoppar
-  ingenting om användaren ångrar sig. **Bör rättas** till samma mönster
-  som `printDeleteButton.php` använder.
+- **Nästlade formulär i knapphelpers:** tidigare skrev flera helpers ut
+  egna formulär inuti entitetsformuläret. Webbläsaren ignorerade då vissa
+  `<form>`-taggar och bekräftelser/submit kunde bli beroende av renderings-
+  ordningen (bl.a. en tom `<form>` i `printInfoButton()`). **Åtgärdat:**
+  `printDeleteButton()` skickar via det befintliga entitetsformuläret;
+  `printInfoButton()`, `printWriteConfigButton()`,
+  `printReadDbSchemasButton()`, `printReadSchemaTablesButton()`,
+  `printConfigPreviewButton()`, `printExportJsonButton()` och
+  `printUrlButton()` skriver inga formulär. Bekräftelserna använder
+  knappens `onclick` och Avbryt stoppar åtgärden.
 - **`printTableForm.php` anropar `updated_from_table()`** (utan `2`-
   suffix, till skillnad från `updated_from_table2()` vi dokumenterade i
   `updated.md`) – detta bekräftar att båda varianterna faktiskt används,
@@ -624,14 +631,6 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   välstrukturerade delen av hela manage-modulen och en bra förebild för
   hur övriga delar (t.ex. `printLayerForm.php`s djupa villkorslogik)
   skulle kunna struktureras om vid framtida förenkling.
-- **`printWriteConfigButton.php`s bekräftelsedialog hanterar avbrutet
-  klick korrekt** (`if (confirm(...)) {...return true;} else {return
-  false;}`), till skillnad från `printReadDbSchemasButton.php`/
-  `printReadSchemaTablesButton.php` som vi flaggade tidigare som troligen
-  buggiga i just detta avseende. Bra jämförelsepunkt: samma utvecklare
-  har skrivit korrekt hanterad bekräftelselogik på minst ett ställe, vilket
-  gör det tydligare att de andra två är förbiseenden snarare än ett
-  medvetet designval.
 - **`tableConfigs()` avslutar processen helt (`exit(1)`)** om varken en
   databaskoppling eller en configTables-array med den efterfrågade
   tabellen ges. Samma "fail fast för programmeringsfel"-mönster som

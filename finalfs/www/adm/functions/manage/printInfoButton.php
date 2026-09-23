@@ -7,13 +7,11 @@
 	{
 		$type=targetType($basicTarget);
 		$id=targetId($basicTarget);
+		$typeJs=json_encode($type, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+		$idJs=json_encode($id, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 		echo <<<HERE
-			<form></form>
-			<form action="info.php" method="get" target="topFrame">
-				<input type="hidden" name="type" value="{$type}">
-				<button title="Visa/dölj ytterligare information" class="updateButton" onclick="toggleTopFrame('info');" type="submit" name="id" value="{$id}">
-					Info
-				</button>
-			</form>
+			<button title="Visa/dölj ytterligare information" class="updateButton" type="button" onclick='toggleTopFrame("info"); document.getElementById("topFrame").src="info.php?type="+encodeURIComponent({$typeJs})+"&id="+encodeURIComponent({$idJs});'>
+				Info
+			</button>
 		HERE;
 	}

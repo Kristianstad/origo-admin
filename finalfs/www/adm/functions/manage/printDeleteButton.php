@@ -41,12 +41,12 @@
 			}
 			*/
 			$targetTypeSwe=toSwedish($targetType);
+			$targetIdEsc=htmlspecialchars($targetId, ENT_QUOTES, 'UTF-8');
+			$deleteConfirmJs=json_encode($deleteConfirmStr, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 			echo <<<HERE
-					<form method='post' onsubmit='confirmStr="{$deleteConfirmStr}"; return confirm(confirmStr);'>
-						<input type="hidden" name="{$targetType}IdDel" value="{$targetId}">
-						<button title='Radera {$targetTypeSwe}' class='deleteButton' type='submit' name='{$targetType}Button' value='delete'>Radera</button>
+					<input type="hidden" name="{$targetType}IdDel" value="{$targetIdEsc}">
+					<button title='Radera {$targetTypeSwe}' class='deleteButton' type='submit' name='{$targetType}Button' value='delete' onclick='return confirm({$deleteConfirmJs});'>Radera</button>
 			HERE;
 			printHiddenInputs($inheritPosts);
-			echo '</form>';
 		}
 	}
