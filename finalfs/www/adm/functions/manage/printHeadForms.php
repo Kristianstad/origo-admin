@@ -64,7 +64,7 @@
 				$focusClass='h3NoFocus';
 				unset($tmpInheritPosts[$tableType.'Id']);
 			}
-			echo "<h3 class='$focusClass'>".ucfirst(toSwedish($tableType))."</h3>";
+			echo "<h3 class='$focusClass'>".mbUcfirst(toSwedish($tableType))."</h3>";
 			printHeadForm(array($tableName=>$table), $tmpInheritPosts);
 			echo "</div></th>";
 		}

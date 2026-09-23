@@ -43,7 +43,7 @@ if ($table == 'proj4defs') {
     $idColumn = rtrim($table, 's') . '_id';
 }
 
-$header = ucfirst(toSwedish($table));
+$header = mbUcfirst(toSwedish($table));
 
 // Escape for safe HTML output
 $textareaIdEsc       = htmlspecialchars($textareaId, ENT_QUOTES, 'UTF-8');

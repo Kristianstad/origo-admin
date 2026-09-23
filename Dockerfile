@@ -37,6 +37,7 @@ ARG RUNDEPS="\
         php$PHP_VERSION-openssl \
         php$PHP_VERSION-ldap \
         php$PHP_VERSION-pecl-brotli \
+        php${PHP_VERSION}-mbstring \
         php$PHP_VERSION-pgsql"
 ARG MAKEDIRS="/etc/php$PHP_VERSION/conf.d /etc/php$PHP_VERSION/php-fpm.d /var/log/php$PHP_VERSION"
 ARG FINALCMDS=\
