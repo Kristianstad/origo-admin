@@ -1,9 +1,9 @@
 <?php
 
-	function printSelectOptions($optionValues, $selectedValue=null)
+	function printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)
 	{
 		$isAssociativeArray=hasStringKeys($optionValues);
-		if ($isAssociativeArray)
+		if ($isAssociativeArray && !$preserveOrder)
 		{
 			asort($optionValues);
 		}
