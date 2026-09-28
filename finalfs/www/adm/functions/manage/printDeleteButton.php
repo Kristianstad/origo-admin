@@ -1,7 +1,7 @@
 <?php
 
 	// Takes a basic target array, a confirmation string, and inheritPosts (array).
-	// Prints a form with a button labeled "Radera" as only visible element. 
+	// Prints an icon-only delete button in the surrounding entity form.
 	// The button lauches a confirmation popup with the given confirmation string. 
 	// If OK is pressed in the confirmation popup then the target is posted to manage.php for deletion.
 	function printDeleteButton($target, $deleteConfirmStr, $inheritPosts)
@@ -45,7 +45,7 @@
 			$deleteConfirmJs=json_encode($deleteConfirmStr, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 			echo <<<HERE
 					<input type="hidden" name="{$targetType}IdDel" value="{$targetIdEsc}">
-					<button title='Radera {$targetTypeSwe}' class='deleteButton' type='submit' name='{$targetType}Button' value='delete' onclick='return confirm({$deleteConfirmJs});'>Radera</button>
+					<button title='Radera {$targetTypeSwe}' aria-label='Radera {$targetTypeSwe}' class='deleteButton historyButton' type='submit' name='{$targetType}Button' value='delete' onclick='return confirm({$deleteConfirmJs});'><span aria-hidden='true'>&#x1F5D1;&#xFE0E;</span></button>
 			HERE;
 			printHiddenInputs($inheritPosts);
 		}

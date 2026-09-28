@@ -65,7 +65,7 @@
 		$typeSwe=toSwedish($type);
 		echo <<<HERE
 						</select>
-						<button title="Hämta {$typeSwe}" type="submit" class="headButton" name="{$type}Button" value="get">Hämta</button>
+						<button title="Hämta {$typeSwe}" aria-label="Hämta {$typeSwe}" type="submit" class="headButton headIconButton" name="{$type}Button" value="get"><span aria-hidden="true">&#x21AA;</span></button>
 					</div>
 				</form><br>
 		HERE;
@@ -78,7 +78,7 @@
 		HERE;
 			printHiddenInputs($inheritPosts);
 			echo <<<HERE
-						<button title="Skapa ny {$typeSwe}" type="submit" class="headButton" name="{$type}Button" value="create">Skapa</button>
+						<button title="Skapa ny {$typeSwe}" aria-label="Skapa ny {$typeSwe}" type="submit" class="headButton headIconButton" name="{$type}Button" value="create"><span class="newDocumentIcon" aria-hidden="true">&#x1F5CE;&#xFE0E;<span class="newDocumentAsterisk">*</span></span></button>
 					</div>
 				</form>
 			HERE;

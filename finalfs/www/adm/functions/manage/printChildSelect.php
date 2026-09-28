@@ -105,7 +105,7 @@
 			printHiddenInputs($hiddenInputs);
 			$columnTypeSwe=toSwedish($columnType);
 			echo <<<HERE
-								<button title="Hämta {$columnTypeSwe}" type="submit" class="headButton" name="{$columnType}Button" value="get">Hämta</button>
+								<button title="Hämta {$columnTypeSwe}" aria-label="Hämta {$columnTypeSwe}" type="submit" class="headButton headIconButton" name="{$columnType}Button" value="get"><span aria-hidden="true">&#x21AA;</span></button>
 							</div>
 						</form>
 					</div>

@@ -54,8 +54,6 @@
 		$changed=targetConfigParam($map, 'changed');
 		$map=makeTargetBasic($map);
 		printInfoButton($map);
-		$deleteConfirmStr="Är du säker på att du vill radera kartan $id? Ingående kontroller, grupper och lager påverkas ej.";
-		printDeleteButton($map, $deleteConfirmStr, $inheritPosts);
 		printConfigPreviewButton($id);
 		printWriteConfigButton($id, $changed);
 		printExportJsonButton($id);
@@ -64,5 +62,7 @@
 			$url="../".str_replace('#', '%23', $id).".html";
 		}
 		printUrlButton($url, 'map');
+		$deleteConfirmStr="Är du säker på att du vill radera kartan $id? Ingående kontroller, grupper och lager påverkas ej.";
+		printDeleteButton($map, $deleteConfirmStr, $inheritPosts);
 		echo '</div></form></div></div>';
 	}

@@ -15,7 +15,10 @@
 			$targetToRemoveType=targetType($targetToRemove);
 			$targetToRemoveTypeSwe=toSwedish($targetToRemoveType);
 			$tableToRemoveFromTypeSwe=toSwedish($tableToRemoveFromType);
-			echo '<button title="Ta bort '.$targetToRemoveTypeSwe.' från '.$tableToRemoveFromTypeSwe.'" type="submit" name="'.$targetToRemoveType.'Button" value="operation">'.$buttontext.'</button>';
+			$buttonTitle=htmlspecialchars('Ta bort '.$targetToRemoveTypeSwe.' från '.$tableToRemoveFromTypeSwe, ENT_QUOTES, 'UTF-8');
+			$buttonLabel=htmlspecialchars($buttontext, ENT_QUOTES, 'UTF-8');
+			$buttonCaption=htmlspecialchars(preg_replace('/^Ta bort\s*/u', '', $buttontext), ENT_QUOTES, 'UTF-8');
+			echo '<button title="'.$buttonTitle.'" aria-label="'.$buttonLabel.'" class="operationButton" type="submit" name="'.$targetToRemoveType.'Button" value="operation"><span class="operationSymbol" aria-hidden="true">−</span><span class="operationCaption">'.$buttonCaption.'</span></button>';
 			echo '</form>';
 		}
 	}

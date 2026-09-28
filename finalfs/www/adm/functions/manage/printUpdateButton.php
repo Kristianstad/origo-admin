@@ -1,6 +1,6 @@
 <?php
 
-	// Takes a type (string) and prints a form submit-button with class="updateButton", name="<type>Button", value="update", and the label "Uppdatera".
+	// Takes a type (string) and prints an icon-only form submit-button for updating.
 	function printUpdateButton($type, $formChanged=false)
 	{
 		if ($formChanged)
@@ -11,5 +11,5 @@
 		{
 			$changeClass='';
 		}
-		echo '<button title="Skriv ändringar till databas" class="updateButton'.$changeClass.'" type="submit" name="'.$type.'Button" value="update">Uppdatera</button>';
+		echo '<button title="Skriv ändringar till databas" aria-label="Uppdatera" class="updateButton'.$changeClass.' historyButton" type="submit" name="'.$type.'Button" value="update"><span aria-hidden="true">&#x1F4BE;&#xFE0E;</span></button>';
 	}

@@ -18,6 +18,6 @@ function printRedoButton($target, $visible=true)
 		<input type='hidden' name='target_key' value='{$targetKeyEsc}'>
 		<input type='hidden' name='target_table' value='{$targetTableEsc}'>
 		<input type='hidden' name='target_id' value='{$idEsc}'>
-		<button title='Gör om' class='historyButton' type='submit' name='{$type}Button' value='redo' onclick='return confirm("Gör om senaste ändringen för "+{$idJs}+"?");'>↷</button>
+		<button title='Gör om' class='historyButton' type='submit' name='{$type}Button' value='redo' onclick='return confirm("Gör om senaste ändringen för "+{$idJs}+"?");'><span aria-hidden='true'>↷</span></button>
 	HERE;
 }
