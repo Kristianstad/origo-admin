@@ -179,7 +179,8 @@ Ett separat historiklager (tabellerna `object_identity`, `edits` och
 `edit_cursor` i `map_configs`, se `initdb/060.origo.sql`) låter
 administratören ångra/göra om fältuppdateringar (`command == 'update'`)
 per objekt, utan att blanda in historikfält i konfigurationstabellerna
-själva. `copy`/`create`/`delete` ingår medvetet inte ännu, eftersom de
-skapar/tar bort hela rader snarare än att bara ändra kolumnvärden.
+själva. `create`/`copy` sparar en historikbaslinje så efterföljande
+uppdateringar kan ångras. `delete` sparar objektets snapshot, som kan
+återställas från ändringsposten; radering är inte ett Gör om-steg.
 Fullständig beskrivning (datamodell, skriv-/läsflöde, UI) finns i
 `manage.md` under "Historik: Ångra/Gör om (undo/redo)".

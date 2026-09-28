@@ -482,8 +482,8 @@ HERE;
 			}
 		}
 		array_walk($restrictedLayers, function (&$restrictedLayer) {
-			$restrictedLayer['authorized_users'] = pgArrayToPhp(str_replace('"', '', (strtolower($restrictedLayer['authorized_users']))));
-			$restrictedLayer['authorized_groups'] = pgArrayToPhp(str_replace('"', '', (strtolower($restrictedLayer['authorized_groups']))));
+			$restrictedLayer['authorized_users'] = array_map(function ($user) { return mb_strtolower($user, 'UTF-8'); }, pgArrayToPhp(str_replace('"', '', $restrictedLayer['authorized_users'])));
+			$restrictedLayer['authorized_groups'] = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, pgArrayToPhp(str_replace('"', '', $restrictedLayer['authorized_groups'])));
 		});
 		defineFileConstant('RESTRICTEDLAYERS', $restrictedLayers);
 	}

@@ -39,8 +39,8 @@ manage.php
  │    │    │   kartor (sätter troligen maps.changed='t', vilket writeConfig.php senare
  │    │    │   läser för att veta vilka kartor som behöver publiceras om)
  │    │    ├─ vid 'update': recordHistoryEdit() sparar before/after-snapshot i historiken
- │    │    │   (endast 'update' loggas – 'copy'/'create'/'delete' ingår medvetet inte än,
- │    │    │   se manage.md "Historik: Ångra/Gör om")
+ │    │    ├─ vid 'create'/'copy': sparas en baslinje för det nya objektet
+ │    │    └─ vid 'delete': sparas snapshotet som kan återställas från edit-vyn
  │    │    └─ vid fel: bygger ett JS alert() med Postgres felmeddelande
  │
  ├─ FAS 3: RENDERA SIDAN (rubrik, JS, CSS, toppknappar, vyväxlare)
@@ -189,6 +189,7 @@ if (isset($postButton)) {
             $child = makeBasicTarget($type, $id);
             $allParents = findAllParents($dbh, $child);
             if (empty(assoc_array_values($allParents))) {
+                $historyBeforeConfig = targetConfig(makeTargetFull($child, $configTables));
                 $sqlStatements[] = deleteIdSql($id, $typeTableName);
                 unset($post[$type . 'Id'], $idPosts[$type . 'Id']);
             } else {
@@ -196,6 +197,17 @@ if (isset($postButton)) {
             }
             unset($child, $allParents);
         }
+    }
+
+    elseif ($command == 'restore' && $type == 'edit' && !empty($post['restoreEditId'])) {
+        $restoreResult = restoreDeletedEdit($dbh, $post['restoreEditId']);
+        if (!$restoreResult['ok']) {
+            $errorAlert = 'window.onload=function(){alert(' . json_encode($restoreResult['error'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) . ');}';
+        } else {
+            $configTables = configTables($dbh);
+            $errorAlert = 'window.onload=function(){alert("Objektet har återställts.");}';
+        }
+        unset($restoreResult);
     }
 
     elseif (($command == 'undo' || $command == 'redo') && !empty($post['target_key'])) {
@@ -338,6 +350,7 @@ if (isset($postButton)) {
         $usedInMapsOld = usedInMaps($dbh, $changedTarget);
         $allOk = pg_query($dbh, "BEGIN") !== false;
         $result = false;
+        $historyConfigTables = null;
         if ($allOk) {
             foreach ($sqlStatements as $statement) {
                 $result = pg_query_params($dbh, $statement['sql'], $statement['params']);
@@ -346,6 +359,17 @@ if (isset($postButton)) {
                     break;
                 }
             }
+        }
+        if ($allOk && ($command == 'create' || $command == 'copy')) {
+            $historyConfigTables = configTables($dbh);
+            $newObjectId = ($command == 'copy') ? $copyId : $post[$type . 'IdNew'];
+            $newObjectTarget = makeBasicTarget($type, $newObjectId);
+            $newObjectConfig = targetConfig(makeTargetFull($newObjectTarget, $historyConfigTables));
+            $allOk = recordHistoryEdit($dbh, $newObjectTarget, $command, $newObjectConfig, $newObjectConfig);
+            unset($newObjectId, $newObjectTarget, $newObjectConfig);
+        }
+        if ($allOk && $command == 'delete' && isset($historyBeforeConfig)) {
+            $allOk = recordHistoryEdit($dbh, $changedTarget, 'delete', $historyBeforeConfig, null);
         }
         if ($allOk) {
             $result = pg_query($dbh, "COMMIT");
@@ -357,7 +381,7 @@ if (isset($postButton)) {
             $failedUpdate['type'] = $type;
             $failedUpdate['id'] = $id;
             $failedUpdate['values'] = array();
-            foreach ($updatePosts as $key => $value) {
+            foreach (($updatePosts ?? array()) as $key => $value) {
                 $failedUpdate['values'][lcfirst(substr($key, 6))] = $value;
             }
         } else {
@@ -367,7 +391,7 @@ if (isset($postButton)) {
                 $idPosts[$type . 'Id']=$copyId;
                 $id=$copyId;
             }
-            $configTables = configTables($dbh);
+            $configTables = ($historyConfigTables !== null) ? $historyConfigTables : configTables($dbh);
             if ($command != 'operation' && in_array($typeTableName, $keywordCategorized)) {
                 $categoriesByTable[$typeTableName] = categories($configTables[$typeTableName], $typeTablePkColumn);
             }

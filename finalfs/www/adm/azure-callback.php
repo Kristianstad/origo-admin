@@ -70,9 +70,9 @@ try {
     $azureUser = $provider->getResourceOwner($token);
     //$graphToken = getGraphToken($token);
     //$groups = getAzureGroups($graphToken);
-    //$adUser = strtolower(getOnPremisesSamAccountName($graphToken) ?? $azureUser->getId());
+    //$adUser = mb_strtolower(getOnPremisesSamAccountName($graphToken) ?? $azureUser->getId(), 'UTF-8');
 	$groups = getAzureGroups($token);
-	$adUser = strtolower(getOnPremisesSamAccountName($token) ?? $azureUser->getId());
+    $adUser = mb_strtolower(getOnPremisesSamAccountName($token) ?? $azureUser->getId(), 'UTF-8');
 	//error_log("AD-user: ".$adUser." Grupper: ".json_encode($groups));
 
 	require('./constants/forwardauthSessionConfig.php');

@@ -14,7 +14,7 @@ function historyStateForTarget($dbh, $target)
 	{
 		$currentEditId = pg_fetch_result($loaded, 0, 0);
 	}
-	$result = pg_query_params($dbh, "SELECT edit_id, date, action, before_data, after_data FROM map_configs.edits WHERE target_key = $1 ORDER BY date ASC, edit_id ASC", array($targetKey));
+	$result = pg_query_params($dbh, "SELECT edit_id, date, action, before_data, after_data FROM map_configs.edits WHERE target_key = $1 AND action NOT IN ('delete', 'restored') AND edit_id >= COALESCE((SELECT MAX(edit_id) FROM map_configs.edits WHERE target_key = $1 AND action IN ('baseline', 'create', 'copy', 'restore')), 0) ORDER BY edit_id ASC", array($targetKey));
 	$edits = array();
 	if ($result !== false)
 	{
@@ -43,11 +43,15 @@ function historyStateForTarget($dbh, $target)
 			}
 		}
 	}
-	if ($index === null && !empty($edits))
+	if ($currentEditId === null && !empty($edits))
+	{
+		$index = -1;
+	}
+	elseif ($index === null && !empty($edits))
 	{
 		$index = count($edits) - 1;
 	}
-	$undo = ($index !== null && $index > 0);
+	$undo = ($index !== null && $index > 0) || ($index === 0 && ($edits[0]['action'] ?? null) === 'update');
 	$redo = ($index !== null && $index < count($edits) - 1);
 	return array(
 		'undo' => $undo,

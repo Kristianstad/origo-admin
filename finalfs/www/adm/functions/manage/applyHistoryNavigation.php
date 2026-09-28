@@ -10,7 +10,7 @@
 		{
 			return array('ok' => false, 'target_table' => null, 'target_id' => null, 'error' => "Okänd riktning: $direction");
 		}
-		$editsResult=pg_query_params($dbh, "SELECT edit_id, target_table, target_id, before_data, after_data FROM $configSchema.edits WHERE target_key = $1 ORDER BY edit_id ASC", array($targetKey));
+		$editsResult=pg_query_params($dbh, "SELECT edit_id, target_table, target_id, before_data, after_data FROM $configSchema.edits WHERE target_key = $1 AND action NOT IN ('delete', 'restored') AND edit_id >= COALESCE((SELECT MAX(edit_id) FROM $configSchema.edits WHERE target_key = $1 AND action IN ('baseline', 'create', 'copy', 'restore')), 0) ORDER BY edit_id ASC", array($targetKey));
 		if ($editsResult === false)
 		{
 			return array('ok' => false, 'target_table' => null, 'target_id' => null, 'error' => pg_last_error($dbh));
@@ -30,7 +30,7 @@
 		{
 			$currentEditId=pg_fetch_result($cursorResult, 0, 0);
 		}
-		$index=null;
+		$index=($currentEditId === null) ? -1 : null;
 		foreach ($edits as $i => $edit)
 		{
 			if ($currentEditId !== null && $edit['edit_id'] == $currentEditId)
@@ -41,7 +41,7 @@
 		}
 		if ($direction == 'undo')
 		{
-			if ($index === null)
+			if ($index === null || $index < 0 || ($index === 0 && $edits[$index]['action'] !== 'update'))
 			{
 				return array('ok' => false, 'target_table' => null, 'target_id' => null, 'error' => 'Det finns inget att ångra.');
 			}

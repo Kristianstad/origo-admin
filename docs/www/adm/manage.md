@@ -89,8 +89,9 @@ targets, eftersom target-abstraktionen där inte skulle minska komplexiteten.
 ## Historik: Ångra/Gör om (undo/redo)
 
 Ett fristående historiklager, separat från själva konfigurationstabellerna,
-låter administratören ångra och göra om fältuppdateringar (command update)
-per objekt. Modellen bygger på tre tabeller i map_configs (definierade i
+lagrar konfigurationsuppdateringar per objekt och snapshots för objektens
+livscykel. Uppdateringar kan ångras/göras om; en radering kan återställas från
+sin snapshot. Modellen bygger på tre tabeller i map_configs (definierade i
 initdb/060.origo.sql):
 
 - object_identity - en stabil identitet per objekt: target_key
@@ -104,11 +105,25 @@ initdb/060.origo.sql):
   av historyStateForTarget() snarare än att läsas direkt).
 
 Skrivsidan: i manage.php:s update-gren sparas konfigurationen som den såg
-ut före ändringen ($historyBeforeConfig). Om transaktionen lyckas anropas
-recordHistoryEdit() med före/efter-snapshotet, vilket lägger till en ny
-edits-rad, flyttar edit_cursor dit, och kastar bort en ev. kvarvarande
-"gör om"-gren (rader med edit_id större än den gamla cursorn) - precis som
-i en vanlig linjär undo/redo-stack.
+ut före ändringen ($historyBeforeConfig). recordHistoryEdit() lägger till
+före/efter-snapshotet, flyttar edit_cursor dit och kastar bort en ev.
+kvarvarande "gör om"-gren. Om historik saknas skapas först en baslinje, så
+även objekt som fanns före historikfunktionen får en ångringsbar första
+uppdatering. Äldre historik utan baslinje kan också ångra sin första
+update-post. Skapa- och kopiera-kommandon sparar en baslinje med
+objektets initiala snapshot; baslinjen i sig är inte ångringsbar, men gör
+senare uppdateringar ångringsbara, precis som i en vanlig linjär
+undo/redo-stack.
+
+Vid radering sparas objektets snapshot i en edit med action `delete`. När en
+sådan edit visas finns knappen Återställ. Den återinfogar objektet från det
+lagrade snapshotet, markerar raderingshändelsen som `restored` och flyttar
+historikmarkören tillbaka till föregående giltiga edit. Raderingen blir inte
+ett Gör om-steg; om objektet raderas på nytt skapas en ny raderings-edit.
+Delete- och restored-posterna finns kvar i ändringslistan men ingår inte i
+undo/redo-kedjan. Återställning är begränsad till den senaste raderingen och
+misslyckas om samma id redan används. Knappen ligger först i ändringsformulärets
+knapprad, före Backa/Gör om, och använder samma symbol som Backa.
 
 Läsidan: knapparna (printUndoButton()/printRedoButton(), samlade via
 printHistoryButtons()) postar target_key/target_table/target_id som dolda
@@ -120,13 +135,13 @@ egen dispatch-gren för dessa två kommandon (parallell med
 copy/create/delete/update/operation) som anropar applyHistoryNavigation():
 den flyttar edit_cursor ett steg i given riktning och skriver tillbaka
 before_data (undo) eller after_data (redo) till objektets tabell.
+Restore har en separat dispatch-gren som anropar `restoreDeletedEdit()` med
+`restoreEditId` och validerar snapshotet innan raden återinfogas.
 
-Medvetet avgränsat: endast update-kommandot loggas och kan
-ångras/göras om. copy, create och delete ingår inte i historikmodellen
-än - de skapar eller tar bort hela rader, vilket kräver att undo/redo även
-kan återskapa/ta bort raden (INSERT/DELETE) snarare än bara skriva om
-befintliga kolumnvärden (UPDATE), samt hantera eventuella referenser till
-raden. Detta är ett medvetet avgränsat första steg, inte en bugg.
+Medvetet avgränsat: create/copy ger en baslinje men går inte själva att
+ångra. Radering kan återställas från edit-vyn, men ingår inte som ett steg
+i Gör om. Återställning misslyckas om samma id redan finns eller snapshotet
+inte längre är giltigt.
 
 UI: printHistoryButtons() döljer bägge knapparna helt om varken ångra
 eller gör om är möjligt för objektet (t.ex. inga sparade ändringar än).
@@ -150,7 +165,9 @@ entitetstyp ("Ändringar") under vyn "Verktyg" (`constants/views.php`), via
 `printEditForm.php` (följer det "enkla"-mönstret). Nästan alla fält är
 readonly (systemgenererad revisionsdata) – endast `abstract`/`info` är
 redigerbara, så en administratör kan skriva en läsbar förklaring till en
-lagrad ändring i efterhand. `object_identity`/`edit_cursor` är medvetet
+lagrad ändring i efterhand. En `delete`-post har dessutom knappen Återställ.
+Radera och Skapa kopia är dolda för edits, liksom skapa-fältet i toppraden.
+`object_identity`/`edit_cursor` är medvetet
 **inte** exponerade i någon vy – de är intern bokföring, inte något en
 administratör behöver bläddra i direkt. Typen `edit`/`edits` har fältnamn
 och hjälptexter precis som övriga typer: översättning i
@@ -171,9 +188,10 @@ function print<Typ>Form($target, $inheritPosts, $helps=array())
 
 Varje wrapper deklarerar en ordnad `$fields`-array. Fältdefinitionerna
 stöder textarea med valfri `readonly`-flagga och select-fält med sina
-optioner. `$extras` stöder inline-knappar (t.ex. databasens
-`printReadDbSchemasButton` och gruppens preview) samt sektioner efter
-formuläret (kontrollens och gruppens add/remove-operationer).
+optioner. `$extras` stöder ledande knappar före historikknapparna,
+inline-knappar (t.ex. databasens `printReadDbSchemasButton` och gruppens
+preview), valfri visning av Kopiera/Radera samt sektioner efter formuläret
+(kontrollens och gruppens add/remove-operationer).
 Funktionsnamnen och deras publika argument är oförändrade eftersom
 `manage.php` fortfarande använder dynamisk dispatch.
 
@@ -185,7 +203,7 @@ Funktionsnamnen och deras publika argument är oförändrade eftersom
 | `printContactForm.php` | contact | name, web, email | – |
 | `printControlForm.php` | control | options, css, js, onload | `printAddOperation`/`printRemoveOperation` mot maps |
 | `printDatabaseForm.php` | database | connectionstring | `printReadDbSchemasButton` |
-| `printEditForm.php` | edit | target_key, target_table, target_id, date, action, changed_by, before_data, after_data (samtliga readonly) | – (bläddringsbar historiklogg, se "Historik: Ångra/Gör om") |
+| `printEditForm.php` | edit | target_key, target_table, target_id, date, action, changed_by, before_data, after_data (samtliga readonly) | Återställ för delete-poster; Skapa kopia/Radera döljs |
 | `printFooterForm.php` | footer | img, url, text | – |
 | `printFormatForm.php` | format | (endast format_id, ingen extra) | – |
 | `printGroupForm.php` | group | layers, groups, title, expanded (select), show_meta (select), keywords | `printConfigPreviewButton`, `printAddOperation`/`printRemoveOperation` mot maps OCH groups (två par) |
@@ -228,7 +246,8 @@ betydande typspecifik villkorslogik:
 | `printUrlButton.php` | `printUrlButton($url, $type)` | Typknapp som öppnar en URL i ny flik utan att skapa ett nästlat formulär; använder typen för knapptexten, exempelvis karta eller externt verktyg |
 | `printViewSwitcher.php` | `printViewSwitcher($view)` | Radioknappar för att växla mellan vyer (`constants/views.php`), autopostar vid ändring |
 | `printWriteConfigButton.php` | `printWriteConfigButton($mapId, $changed='f')` | Typknapp som efter bekräftelse anropar `writeConfig.php` i `hiddenFrame` (utan nästlat formulär). Visar "ändrad"-styling om `maps.changed = 't'` (kopplingen till `markMapsChanged()` vi identifierade tidigare, nu bekräftad från UI-sidan) |
-| `recordHistoryEdit.php` | `recordHistoryEdit($dbh, $target, $action, $beforeConfig, $afterConfig): bool` | Sparar ett before/after-snapshot som en ny `edits`-rad efter en lyckad `update`, flyttar `edit_cursor` dit, och kastar en ev. kvarvarande "gör om"-gren. Se "Historik: Ångra/Gör om" ovan |
+| `recordHistoryEdit.php` | `recordHistoryEdit($dbh, $target, $action, $beforeConfig, $afterConfig): bool` | Sparar update/create/copy/delete-snapshots, skapar baslinje vid behov (även vid restore utan föregående giltig edit) och flyttar `edit_cursor`; update kastar en kvarvarande gör-om-gren. Se "Historik: Ångra/Gör om" ovan |
+| `restoreDeletedEdit.php` | `restoreDeletedEdit($dbh, $editId): array` | Validerar och återställer objektet från senaste delete-editens snapshot i en transaktion; markerar posten som restored och flyttar historikmarkören tillbaka utan redo-radering |
 
 ## Anropas med
 `manage.php?view=<vy>` (GET för vy) + POST med formulärdata
@@ -242,9 +261,10 @@ betydande typspecifik villkorslogik:
 | `<typ>IdNew` | Nytt id vid skapande av ett objekt |
 | `<typ>IdDel` | Id att radera |
 | `update<Fält>` | Ett formulärfälts nya värde vid uppdatering (t.ex. `updateTitle`, `updateAbstract`) |
-| `<knapp med kommando>` | Formulärknappens `name`/`value` avslöjar `$type` och `$command` (`copy`/`create`/`delete`/`update`/`operation`/`undo`/`redo`), tolkas av `postButton()` |
+| `<knapp med kommando>` | Formulärknappens `name`/`value` avslöjar `$type` och `$command` (`copy`/`create`/`delete`/`update`/`operation`/`undo`/`redo`/`restore`), tolkas av `postButton()` |
 | `to<Typ>Id` / `from<Typ>Id` | Vid `operation`-kommandot: lägg till/ta bort ett barn-objekt från en förälder (map/group/classe/infogroup) |
 | `target_key` / `target_table` / `target_id` | Vid `undo`/`redo`-kommandot: identifierar vilket objekt historiken gäller (se "Historik: Ångra/Gör om" ovan), postas som dolda fält av `printUndoButton()`/`printRedoButton()` |
+| `restoreEditId` | Vid `restore`-kommandot: id för delete-edit-posten vars snapshot ska återställas; posten och snapshotet hämtas och valideras på serversidan |
 
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
@@ -280,7 +300,7 @@ betydande typspecifik villkorslogik:
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
 | `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med `onclick`-bekräftelse; skickar delete-kommandot via det omgivande entitetsformuläret, utan att skapa ett eget formulär. **Visas bara om `$viewDepthGlobal == 1`** (se flaggning – innebär att radering bara är möjlig för toppnivåobjekt, inte nästlade) |
 | `printExportJsonButton.php` | `printExportJsonButton($mapId)` | Typknapp som laddar ner kartans JSON-konfiguration via `writeConfig.php?getJson=y&download=y` i den dolda iframen (`hiddenFrame`) så sidan inte navigerar bort; inget nästlat formulär |
-| `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + ett textfält och knapp för att skapa nytt. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `all_from_table()` redan läser raderna sorterade på `edit_id` |
+| `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + normalt ett textfält och en knapp för att skapa nytt. Skapadelen döljs för `edits`. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `all_from_table()` redan läser raderna sorterade på `edit_id` |
 | `printHeadForms.php` | `printHeadForms($view, $configTables, $focusTable, $inheritPosts)` | Skriver ut hela toppraden av urvalsformulär, en `printHeadForm()`-kolumn per tabell som ingår i vald `$view` (styrt av `constants/views.php`). Placerar `$focusTable` först och ger den fokus-styling |
 | `printHelpButton.php` | `printHelpButton($type, $configParam=null, $buttonText='?', $buttonClass='smallHelpButton')` | Liten "?"-knapp bredvid ett fält, öppnar/togglar hjälptext för just det fältet (`help.php?id=<type>[:<configParam>]`) i topFrame |
 | `printHiddenInputs.php` | `printHiddenInputs($inheritPosts)` | Skriver ut ett dolt `<input>` per nyckel/värde i `$inheritPosts`, för att bevara navigeringskontext genom formulärinskick |
@@ -291,6 +311,7 @@ betydande typspecifik villkorslogik:
 | `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php`; Avbryt stoppar anrop och formulärresubmit |
 | `printRemoveOperation.php` | (samma mönster som `printAddOperation.php`, se ovan) | Motsatsen till `printAddOperation()` – kräver dessutom `findParents()` [common] för att bara visa de föräldrar objektet faktiskt tillhör (kan inte tas bort från en förälder det inte är kopplat till) |
 | `printRedoButton.php` | `printRedoButton($target, $visible=true)` | "Gör om"-knappen: postar `target_key`/`target_table`/`target_id` och `command=redo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
+| `printRestoreEditButton.php` | `printRestoreEditButton($editId, $targetId)` | Skriver ut Återställ-knappen för en delete-edit; postar edit-id:t och ber om bekräftelse |
 | `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn), om inte `$preserveOrder` är satt (används av `edit`-dropdownen för att bevara kronologisk ordning trots att etiketten är `target_key`, inte datumet). **Ovanligt val-etikettmönster**, se flaggning |
 | `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Den mest centrala byggstenen i hela manage-modulen – skriver ut ett enskilt redigerbart fält som ett `<textarea>`. Städar Postgres-arraysyntax för visning, bevarar användarens tidigare valda storlek/scrollposition (via `$sizePosts`, kopplat till `sizePosts.js`-liknande dolda fält), visar en hjälpknapp om hjälptext finns, och visar en multiselect-knapp om fältet är konfigurerat som "multiselectable" |
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |

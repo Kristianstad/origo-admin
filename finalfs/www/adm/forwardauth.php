@@ -46,8 +46,8 @@ if (!empty($_SESSION['user']['id']) && isset($_SESSION['user']['expires_at'])) {
 	
 		// Gruppkontroll (OR-logik)
 		if (!empty($required_groups)) {
-			$required = array_map('strtolower', array_filter(array_map('trim', explode(',', $required_groups))));
-			$user_groups = array_map('strtolower', $_SESSION['user']['groups'] ?? []);
+			$required = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, array_filter(array_map('trim', explode(',', $required_groups))));
+			$user_groups = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, $_SESSION['user']['groups'] ?? []);
 
 			if (!array_intersect($required, $user_groups)) {
 				session_write_close();

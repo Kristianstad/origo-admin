@@ -23,12 +23,27 @@
 		{
 			pg_query_params($dbh, "DELETE FROM $configSchema.edits WHERE target_key = $1", array($targetKey));
 		}
+		if ($action === 'update' && $currentEditId === null)
+		{
+			$baselineResult=pg_query_params($dbh, "INSERT INTO $configSchema.edits (target_key, target_table, target_id, action, before_data, after_data) VALUES ($1, $2, $3, 'baseline', $4, $4) RETURNING edit_id", array($targetKey, $targetTable, $targetId, json_encode($beforeConfig)));
+			if ($baselineResult === false)
+			{
+				return false;
+			}
+			$currentEditId=pg_fetch_result($baselineResult, 0, 0);
+			$baselineCursorResult=pg_query_params($dbh, "INSERT INTO $configSchema.edit_cursor (target_key, current_edit_id, can_undo, can_redo, updated_at) VALUES ($1, $2, false, false, now()) ON CONFLICT (target_key) DO UPDATE SET current_edit_id = $2, can_undo = false, can_redo = false, updated_at = now()", array($targetKey, $currentEditId));
+			if ($baselineCursorResult === false)
+			{
+				return false;
+			}
+		}
 		$insertResult=pg_query_params($dbh, "INSERT INTO $configSchema.edits (target_key, target_table, target_id, action, before_data, after_data) VALUES ($1, $2, $3, $4, $5, $6) RETURNING edit_id", array($targetKey, $targetTable, $targetId, $action, json_encode($beforeConfig), json_encode($afterConfig)));
 		if ($insertResult === false)
 		{
 			return false;
 		}
 		$newEditId=pg_fetch_result($insertResult, 0, 0);
-		pg_query_params($dbh, "INSERT INTO $configSchema.edit_cursor (target_key, current_edit_id, can_undo, can_redo, updated_at) VALUES ($1, $2, true, false, now()) ON CONFLICT (target_key) DO UPDATE SET current_edit_id = $2, can_undo = true, can_redo = false, updated_at = now()", array($targetKey, $newEditId));
+		$canUndo=($currentEditId !== null && $action !== 'create' && $action !== 'copy' && $action !== 'restore');
+		pg_query_params($dbh, "INSERT INTO $configSchema.edit_cursor (target_key, current_edit_id, can_undo, can_redo, updated_at) VALUES ($1, $2, $3, false, now()) ON CONFLICT (target_key) DO UPDATE SET current_edit_id = $2, can_undo = $3, can_redo = false, updated_at = now()", array($targetKey, $newEditId, $canUndo ? 't' : 'f'));
 		return true;
 	}

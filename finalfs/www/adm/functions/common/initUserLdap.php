@@ -84,10 +84,9 @@ function initUserLdap(&$dbh = false)
         $email      = $userInfo->getEmail() ?? '';
         $company    = $userInfo->getCompany() ?? '';
         $department = $userInfo->getDepartment() ?? '';
-        $adgroups   = array_diff(
-            array_map('strtolower', array_values($userInfo->getGroupNames(true))),
-            $adGroupFilter
-        );
+        $adgroups = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, array_values($userInfo->getGroupNames(true)));
+        $adGroupFilter = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, $adGroupFilter);
+        $adgroups = array_diff($adgroups, $adGroupFilter);
     } catch (Exception $e) {
         error_log('LDAP error in initUserLdap: ' . $e->getMessage());
         clearAuthSession();

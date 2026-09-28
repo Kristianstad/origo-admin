@@ -28,6 +28,10 @@ function printSimpleEntityForm($target, $type, $fields, $inheritPosts, $helps=ar
 	}
 	echo '<div class="buttonDiv">';
 	$basicTarget=makeTargetBasic($target);
+	if (isset($extras['leadingButtons']))
+	{
+		$extras['leadingButtons']($basicTarget);
+	}
 	printHistoryButtons($basicTarget);
 	printUpdateButton($type, $inheritPosts['_formChanged'] ?? false);
 	if (!isset($extras['showCopy']) || $extras['showCopy'])
