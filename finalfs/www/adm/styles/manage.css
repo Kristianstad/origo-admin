@@ -18,10 +18,8 @@
 		.headIconButton > span,
 		.newDocumentIcon { transform:translateY(1px) }
 		.historyButton[value="update"] > span,
-		.historyButton[value="copy"] > span { transform:translateY(2px) }
-		.historyButton[aria-label="Visa/dölj ytterligare information"] > span { transform:translateY(0) }
-		.historyButton[aria-label^="Förhandsgranska"] > span,
-		.historyButton[value="delete"] > span { transform:translateY(1px) }
+		.historyButton[value="copy"] > span { transform:translateY(1px) }
+		.historyButton[aria-label="Visa/dölj ytterligare information"] > span { transform:translateY(-1px) }
 		.historyButton[value="undo"] > span,
 		.historyButton[value="redo"] > span,
 		.historyButton[value="restore"] > span { transform:translateY(1px) }
