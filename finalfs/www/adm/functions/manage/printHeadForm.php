@@ -68,15 +68,20 @@
 						<button title="Hämta {$typeSwe}" type="submit" class="headButton" name="{$type}Button" value="get">Hämta</button>
 					</div>
 				</form><br>
+		HERE;
+		if ($tableName != 'edits')
+		{
+			echo <<<HERE
 				<form class="headForm" method="post">
 					<div class="headFormDiv3">
 						<input class="headInput" type="text" name="{$type}IdNew">
 		HERE;
-		printHiddenInputs($inheritPosts);
-		echo <<<HERE
+			printHiddenInputs($inheritPosts);
+			echo <<<HERE
 						<button title="Skapa ny {$typeSwe}" type="submit" class="headButton" name="{$type}Button" value="create">Skapa</button>
 					</div>
 				</form>
-			</div>
-		HERE;
+			HERE;
+		}
+		echo '</div>';
 	}

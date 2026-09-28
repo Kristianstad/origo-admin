@@ -17,7 +17,5 @@
 			array('name'=>'before_data', 'class'=>'textareaLarge', 'label'=>'Tillstånd före:', 'readonly'=>true),
 			array('name'=>'after_data', 'class'=>'textareaLarge', 'label'=>'Tillstånd efter:', 'readonly'=>true),
 			array('name'=>'info', 'class'=>'textareaLarge', 'label'=>'Info:')
-		), $inheritPosts, $helps, array(
-			'deleteConfirm'=>function ($target) { return "Är du säker att du vill radera ändringen ".targetId($target)."? Detta kan påverka möjligheten att ångra/göra om för det berörda objektet."; }
-		));
+		), $inheritPosts, $helps, array('showDelete'=>false, 'showCopy'=>false));
 	}

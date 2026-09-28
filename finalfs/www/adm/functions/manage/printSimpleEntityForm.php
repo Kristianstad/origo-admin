@@ -30,14 +30,20 @@ function printSimpleEntityForm($target, $type, $fields, $inheritPosts, $helps=ar
 	$basicTarget=makeTargetBasic($target);
 	printHistoryButtons($basicTarget);
 	printUpdateButton($type, $inheritPosts['_formChanged'] ?? false);
-	printCopyButton($type);
+	if (!isset($extras['showCopy']) || $extras['showCopy'])
+	{
+		printCopyButton($type);
+	}
 	printInfoButton($basicTarget);
 	if (isset($extras['inlineButtons']))
 	{
 		$extras['inlineButtons']($basicTarget);
 	}
-	$deleteConfirmStr=$extras['deleteConfirm']($basicTarget);
-	printDeleteButton($basicTarget, $deleteConfirmStr, $inheritPosts);
+	if (!isset($extras['showDelete']) || $extras['showDelete'])
+	{
+		$deleteConfirmStr=$extras['deleteConfirm']($basicTarget);
+		printDeleteButton($basicTarget, $deleteConfirmStr, $inheritPosts);
+	}
 	echo '</div></form></div></div>';
 	if (isset($extras['afterFormSections']))
 	{
