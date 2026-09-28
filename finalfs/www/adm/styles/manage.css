@@ -46,7 +46,7 @@
 		select			{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
 		.headSelect		{ width:100%; max-width:calc(100% - 2.6em) }
 		.addSelect		{ width:12em }
-		.operationButton { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:0.3em; width:auto; min-width:0; height:2em; padding:0 0.45em; line-height:1; vertical-align:middle }
+		.operationButton { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:0.3em; width:auto; min-width:0; height:1.7em; padding:0 0.45em; line-height:1; vertical-align:middle }
 		.operationSymbol { display:block; font-size:1.5em; font-weight:900; line-height:0.8; transform:translateY(-1px) }
 		.operationCaption { font-size:inherit; font-weight:inherit; line-height:1 }
 		.bodySelect		{ position:relative; max-width:200px }
