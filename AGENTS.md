@@ -6,6 +6,7 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 
 - Repot bygger administrationsverktyget för Origo och en Docker-avbild. Runtime-struktur och moduler beskrivs i `docs/www/adm/OVERVIEW.md` och `docs/www/adm/ARCHITECTURE.md`; kontrollera `Dockerfile` för aktuella runtime-beroenden.
 - Modulernas egna dokument i `docs/www/adm/` är den kanoniska referensen för lokala flöden och beteenden.
+- Håll Docker-buildcontexten begränsad med `.dockerignore`; exkludera utvecklarfiler utan att ignorera nödvändiga byggindata eller runtime-filer.
 
 ## Övergripande utvecklingsmål
 

@@ -12,6 +12,11 @@
 README.md
 LICENSE
 docs/
+AGENTS.md
+Origo_admin_tutorial_swedish.pptx
+
+# CI configuration
+.github/
 
 # Temporary / build files
 *.log
