@@ -240,7 +240,7 @@ betydande typspecifik villkorslogik:
 |---|---|---|
 | `printTilegridForm.php` | (enkelt mönster) | tilesize, standardfält i övrigt |
 | `printUndoButton.php` | `printUndoButton($target, $visible=true)` | "Backa"-knappen: postar `target_key`/`target_table`/`target_id` och `command=undo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
-| `printUpdateButton.php` | `printUpdateButton($type)` | "Uppdatera"-knappen. Läser den globala `$formChangedGlobal`-flaggan (satt i `manage.php` vid failed update, se tidigare) för att visa den redan i "ändrad"-läge om ett sparförsök just misslyckades |
+| `printUpdateButton.php` | `printUpdateButton($type, $formChanged=false)` | "Uppdatera"-knappen. Får ändringsstatus som argument; `manage.php` skickar statusen via `_formChanged` i `inheritPosts` efter ett misslyckat sparförsök |
 | `printUpdateForm.php` | (enkelt mönster) | Namnet är missvisande – detta gäller entiteten "update" (en uppdateringsrutin/schema för när data anses föråldrad, kopplat till `updated`-modulen), inte formulärets egen uppdateringsknapp. Fält: `interval` (tidsintervall som text, t.ex. "+1 month" – ser ut som PHP:s `strtotime()`-kompatibla format), `method` (manuellt/automatiskt) |
 | `printUpdateSelect.php` | `printUpdateSelect($fullTarget, $configParamValues, $class, $label, $help=false, $options=null, $onchange='')` | Motsvarigheten till `printTextarea()` men för `<select>`-fält istället för fritext. Om `$options` inte anges härleds de automatiskt från `$configParamValues` |
 | `printUrlButton.php` | `printUrlButton($url, $type)` | Typknapp som öppnar en URL i ny flik utan att skapa ett nästlat formulär; använder typen för knapptexten, exempelvis karta eller externt verktyg |
@@ -298,7 +298,7 @@ betydande typspecifik villkorslogik:
 | `printAddRemoveOperations.php` | `printAddRemoveOperations($target, $operationTables, $inheritPosts, $labels=array())` | Gemensam renderer för add/remove-operationer. `exclusiveOperationGroups.php` kan ange singleton-poster eller grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs när målet redan finns i någon förälder i gruppen |
 | `printConfigPreviewButton.php` | `printConfigPreviewButton($mapId, $group=null, $layer=null)` | Typknapp som öppnar en förhandsgranskning via `writeConfig.php?getHtml=y` i en ny flik, utan att skriva till disk eller skapa ett nästlat formulär. Kan begränsas till en specifik grupp eller ett specifikt lager |
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
-| `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med `onclick`-bekräftelse; skickar delete-kommandot via det omgivande entitetsformuläret, utan att skapa ett eget formulär. **Visas bara om `$viewDepthGlobal == 1`** (se flaggning – innebär att radering bara är möjlig för toppnivåobjekt, inte nästlade) |
+| `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med `onclick`-bekräftelse; skickar delete-kommandot via det omgivande entitetsformuläret, utan att skapa ett eget formulär. Visas bara när `_viewDepth` i `inheritPosts` är `1` |
 | `printExportJsonButton.php` | `printExportJsonButton($mapId)` | Typknapp som laddar ner kartans JSON-konfiguration via `writeConfig.php?getJson=y&download=y` i den dolda iframen (`hiddenFrame`) så sidan inte navigerar bort; inget nästlat formulär |
 | `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + normalt ett textfält och en knapp för att skapa nytt. Skapadelen döljs för `edits`. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `all_from_table()` redan läser raderna sorterade på `edit_id` |
 | `printHeadForms.php` | `printHeadForms($view, $configTables, $focusTable, $inheritPosts)` | Skriver ut hela toppraden av urvalsformulär, en `printHeadForm()`-kolumn per tabell som ingår i vald `$view` (styrt av `constants/views.php`). Placerar `$focusTable` först och ger den fokus-styling |
@@ -437,12 +437,6 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   XML-format) måste tre olika ställen uppdateras. Kandidat för att
   bryta ut till en delad common-funktion, t.ex. `qgisProjectMetadata($service,
   $sourceId)`, vid framtida förenkling.
-- **Global användning av variabler som `$viewDepthGlobal`,
-  `$formChangedGlobal`** (namngivna med `Global`-suffix, till skillnad
-  från writeConfig-modulens råa `GLOBAL`-nyckelord utan
-  namnkonvention) – en medveten, mer läsbar konvention för globala
-  variabler jämfört med writeConfig. Värt att notera som en god
-  praxis-skillnad mellan de två stora modulerna.
 - **Inkonsekvent felhantering vid databasfel:** vid `pg_query()`-fel
   byggs ett JS `alert()` med rått `pg_last_error()`-innehåll
   (escapat för JS-strängen, men inte HTML-escapat) som visas direkt för
@@ -577,8 +571,8 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   utkommenterat. Ofarligt men gör filen svårare att läsa – kandidat för
   borttagning om logiken verkligen inte längre behövs, eller
   återinförande med förklaring om den faktiskt saknas.
-- **`printDeleteButton()`s villkor `$viewDepthGlobal == 1`** betyder att
-  raderaknappen bara visas för det **första** nivån av vald hierarki
+- **`printDeleteButton()`s villkor `inheritPosts['_viewDepth'] == 1`** betyder att
+  raderaknappen bara visas för den **första** nivån av vald hierarki
   (t.ex. den valda kartan, men inte en nästlad grupp längre ner, eller
   ett valt lager om det nås via flera kaskaderande urval). Det är
   oklart om detta är en avsiktlig begränsning (för att undvika

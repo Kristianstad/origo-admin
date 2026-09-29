@@ -22,8 +22,6 @@ tidigare granskning i en miljö där filerna fanns, som referens för den
 organisation som äger den koden — inte utifrån filer som går att läsa
 i just detta arbetsytträd.
 
-**Relaterad, äldre variant:** `export.old.php` finns kvar i samma mapp
-men dokumenteras inte (se tidigare beslut att hoppa över `.old`-filer).
 Det finns även en delvis duplicerad kopia av flera av dessa
 funktionsfiler i den fristående `export/`-mappen på toppnivå (utanför
 `adm/`) – se anteckning i ARCHITECTURE.md om detta, följs upp vid
@@ -98,7 +96,7 @@ hämtad kartdata dit, och städar upp katalogen i slutet (inkl. en
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `allLayerIds.php` | `allLayerIds($mapOrGroup, $allLayerIds=[])` | Samlar rekursivt ihop alla lager-id:n för en karta, inklusive lager i undergrupper. Använder `GLOBAL $groups, $layers` (se flaggning) |
+| `allLayerIds.php` | `allLayerIds($mapOrGroup, $allLayerIds=[])` | Samlar rekursivt ihop alla lager-id:n för en karta, inklusive lager i undergrupper |
 | `commonCurlSetopt.php` | `commonCurlSetopt($ch)` | Delade curl-inställningar för alla fetch-funktionerna: timeout, SSL, IPv4, DNS-cache, samt vidarebefordrar aktuell PHP-sessions-cookie till den bakomliggande tjänsten |
 | `fetchWms.php` | `fetchWms($serveraddr, $layers, $format, $bbox, $srs, $width, $height, $savefile)` | Hämtar en bildkarta (WMS GetMap) och sparar till fil |
 | `fetchDxf.php` | `fetchDxf($serveraddr, $layers, $bbox, $srs, $savefile)` | Hämtar en DXF-export (WMS GetMap med DXF-format, specialparametrar för symbolik/attribut) |
@@ -127,12 +125,6 @@ värden bryts ut.*
   fint), men är en ovanlig kombination värd en kommentar om vad den gör
   – "hitta första elementet som matchar villkoret" – för läsbarhetens
   skull vid framtida underhåll.
-- **`allLayerIds()` använder `GLOBAL $groups, $layers`** istället för
-  att ta emot dem som parametrar. Fungerar men gör funktionen svårare
-  att testa isolerat och otydlig om vilka globala variabler som måste
-  vara satta innan anrop (`export.php` sätter `$groups`/`$layers` innan
-  `allLayerIds()` anropas – ett dolt beroende som inte syns i
-  funktionssignaturen).
 - **Stor utkommenterad kodblock i `export.php`** (rader kring
   `bas_dxf`/`bas_tiff`-hantering av `$layerNames`, samt flera `var_dump`/
   `exit`-felsökningsrester i `fetchWfs.php`/`fetchDxf.php`/`fetchWms.php`).

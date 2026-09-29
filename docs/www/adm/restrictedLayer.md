@@ -3,9 +3,6 @@
 **Entry point:** `adm/restrictedLayer.php`
 **Funktionsfiler:** `adm/functions/restrictedLayer/*.php`
 
-*(Filerna `restrictedLayer-rancher.php` och `restrictedLayer-rancher.old.php`
-är tillfälliga/experimentella och dokumenteras inte.)*
-
 ## Syfte
 Fungerar som en säkerhetsgateway/proxy mellan Origo-kartan och den
 bakomliggande karttjänsten (WMS/WFS, t.ex. QGIS Server). Vissa kartlager
@@ -130,8 +127,7 @@ forwardauth-modulen).
   `restrictedLayer.php` läser istället motsvarande bilder direkt från
   disk via `file_get_contents()`. Oklart om konstanterna är kvarlämnad,
   oanvänd kod, eller används av en annan del av systemet vi inte
-  dokumenterat än (t.ex. `restrictedLayer-loader.php` eller
-  `restrictedLayer-rancher.php`). Följs upp vid loader-genomgången.
+  dokumenterat än (t.ex. en annan loader). Följs upp vid loader-genomgången.
 - **✅ Löst tidigare öppen fråga:** `constants/RESTRICTEDLAYERS.php`
   genereras av `writeConfig.php` (se writeConfig.md), som vid varje
   publicering av en karta bygger om listan över skyddade lager baserat

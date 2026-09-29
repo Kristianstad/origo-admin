@@ -12,7 +12,7 @@ funktioner/konstanter.
 |---|---|---|
 | manage | `manage.php` | Den centrala CRUD-motorn för all konfiguration: kartor, lager, grupper, källor, tjänster, m.fl., inklusive ångra/gör om för fältuppdateringar och återställning av raderade objekt (se manage.md) |
 | writeConfig | `writeConfig.php` | Genererar Origo-JSON + publicerad HTML-sida från databasen. "Kompileringssteget" |
-| read_json | `read_json.php` (**aktiv, ej avstängd**) | Motsatsen till writeConfig: importerar Origo-JSON till databasen. Körs i produktion — känd teknisk skuld (strängbyggd SQL, skör regex-parsning) är alltså en reell risk, inte bara vilande kod |
+| read_json | `read_json.php` | Importerar Origo-JSON till databasen. CSRF-skydd, validering, transaktion och parameteriserade INSERT-satser; se `read_json.md` |
 | sql_import | `sql_import.php` | Kör inklistrad SQL eller uppladdad `.sql`-fil mot admin-databasen via Verktyg-vyn |
 | news | `news.php` | Nyheter/meddelanden för inloggade användare |
 | mapstate | `mapstate.php` | Stateless JSON-API för att spara/hämta karttillstånd (delbara länkar) |
@@ -50,9 +50,9 @@ funktioner/konstanter.
 | export | `export.php` | Asynkron export av kartutsnitt via FME Server. **Ej i publikt repo, hårt org-specifik** |
 
 ## Ej dokumenterade / lågprioriterade
+## Övriga filer
 
 | Fil | Anteckning |
 |---|---|
-| `export.old.php`, `read_json.php.off.old`, `restrictedLayer-rancher*.php`, `importmeta.php.old`, diverse `_old`/`_old2`-filer i `info/plan/` | Gamla varianter, kandidater för radering — avsiktligt inte dokumenterade |
 | Loader-filer (`authorization/`, `export/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `news/`, `updated/` på toppnivå) | Bekräftat aktivt använda (se authorization.md) men saknar ännu egen dokumentation |
 | `export/` (toppnivå, med egen `functions/`/`constants/`) | Delvis dubblerad kod jämfört med `adm/functions/export/` – mer än en tunn loader |

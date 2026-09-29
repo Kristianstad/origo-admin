@@ -66,12 +66,12 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `addControlsToJson.php` | `addControlsToJson($mapControls=null, &$mapCss, &$mapJs, &$mapOnload): array` | Bygger en PHP-array för kartkontroller, samlar även ihop respektive kontrolls CSS/JS/onload-kod i de refererade variablerna |
-| `addGroupsToJson.php` | `addGroupsToJson($mapGroups): array` | Rekursivt: bygger en PHP-array för grupphierarkin, bygger samtidigt upp `$mapLayers` (global) med vilka lager som hör till varje grupp |
-| `addLayersToJson.php` | `addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false): array` | Den mest centrala och komplexa funktionen i modulen. Bygger en PHP-array för varje lager: grundfält, typspecifik logik (WMS/WFS/GEOJSON), en sammansatt HTML-"abstract"-beskrivning, legend-/ikon-URL:er mot bakomliggande WMS-tjänst och hantering av klusterstilar. Rekursiv för GROUP-lager. Samlar även ihop `$mapSources`/`$mapStyles`; källor och stilar serialiseras därefter av `writeConfig.php` |
-| `addPlugins.php` | `addPlugins($mapPlugins=null, &$mapCssFiles, &$mapJsFiles, &$mapCss, &$mapJs, &$mapOnload)` | Samlar ihop JS/CSS (inline och som filer) samt onload-kod för varje aktiverat plugin |
-| `addSourcesToJson.php` | `addSourcesToJson(): array` | Bygger en PHP-array för datakällor (`source`), inkl. URL-uppbyggnad, tile grid-inställningar och query-parametrar. Läser globalt (`GLOBAL`) istället för parametrar |
-| `addStylesToJson.php` | `addStylesToJson(): array` | Bygger en PHP-array för lagerstilar. Om `style_config` saknas i databasen, byggs en enkel standardstil (label/ikon/filter) istället |
+| `addControlsToJson.php` | `addControlsToJson($mapControls=null, &$mapCss='', &$mapJs='', &$mapOnload='', array &$context=array()): array` | Bygger kontroller som PHP-array och samlar CSS/JS/onload-kod i referensargument; delat konfigurationstillstånd finns i `$context` |
+| `addGroupsToJson.php` | `addGroupsToJson($mapGroups, array &$context): array` | Bygger grupphierarkin rekursivt och uppdaterar grupp-/lagerdata i den explicita kontextarrayen |
+| `addLayersToJson.php` | `addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, array &$context=array()): array` | Bygger lager som PHP-arrayer, inklusive typspecifik logik (WMS/WFS/GEOJSON), abstract, legend-/ikon-URL:er och klusterstilar. GROUP-lager hanteras rekursivt; delat konfigurationstillstånd skickas i `$context` |
+| `addPlugins.php` | `addPlugins($mapPlugins=null, &$mapCssFiles=array(), &$mapJsFiles=array(), &$mapCss='', &$mapJs='', &$mapOnload='', array &$context=array())` | Samlar JS/CSS (inline och som filer) samt onload-kod för aktiverade pluginer; konfigurationstillstånd skickas i `$context` |
+| `addSourcesToJson.php` | `addSourcesToJson(array &$context): array` | Bygger en PHP-array för datakällor (`source`), inklusive URL, tile grid-inställningar och query-parametrar från konfigurationstillståndet |
+| `addStylesToJson.php` | `addStylesToJson(array &$context): array` | Bygger en PHP-array för lagerstilar. Om `style_config` saknas i databasen byggs en enkel standardstil (label/ikon/filter) |
 | `array_move.php` | `array_move(&$a, $oldpos, $newpos)` | Generisk hjälpfunktion: flyttar ett element i en array från ett index till ett annat |
 | `compressBrotli.php` | `compressBrotli(string $data): ?string` | Komprimerar med Brotli om PHP-tillägget finns, annars `null` |
 | `compressGzip.php` | `compressGzip(string $data): ?string` | Komprimerar med gzip (nivå 9) |
@@ -79,8 +79,8 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 | `fetchResourceContent.php` | `fetchResourceContent(string $resource): string\|false` | Hämtar innehåll från en lokal fil eller URL, med tillfälligt katalogbyte för att lösa relativa sökvägar. Används sannolikt för att bädda in externa CSS/JS-resurser i den publicerade HTML-sidan |
 | `fixDuplicateDeclarations.php` | `fixDuplicateDeclarations($jsCode): string` | Textbaserad JS-transformation: hittar dubbeldeklarerade variabler (`const`/`let`/`var` med samma namn i samma "rot-scope") i administratörsskriven onload-JS, och skriver om dem till giltig JS (undviker `SyntaxError: Identifier has already been declared`). Se flaggning nedan – detta är en betydande mängd egen parsning |
 | `getArrayValuesRecursively.php` | `getArrayValuesRecursively(array $array): array` | Plattar ut en nästlad array till en enkel lista med alla "löv"-värden |
-| `groupDepth.php` | `groupDepth($groupIds, $layerIds=[])` | Rekursivt: bygger en nästlad struktur som visar vilka lager som finns i varje grupp (och undergrupper), med lagernamn prefixade med sin grupps sökväg (`grupp>lager`) |
-| `indexweightedLayersList.php` | `indexweightedLayersList($layersList)` | Sorterar om lagerlistan baserat på ett `indexweight`-värde per lager – flyttar viktade lager till en specifik position i listan via upprepad `array_move()` |
+| `groupDepth.php` | `groupDepth($groupIds, $layerIds=array(), array &$context=array())` | Rekursivt: bygger en nästlad struktur över lager och undergrupper, med lagernamn prefixade av gruppsökvägen (`grupp>lager`); använder kontextarrayen för delat konfigurationstillstånd |
+| `indexweightedLayersList.php` | `indexweightedLayersList($layersList, array &$context)` | Sorterar lagerlistan efter `indexweight` och använder kontextarrayen för delat konfigurationstillstånd |
 | `json_format.php` | `json_format($json): string` | Formaterar en JSON-sträng med indrag för läsbarhet (egen handskriven parser, äldre ursprung enligt kodkommentar – "Nicejson", 2008) |
 | `markMapUnchanged.php` | `markMapUnchanged(&$dbh, $mapId)` | Sätter `maps.changed = 'f'` efter lyckad publicering |
 | `pgArrayToText.php` | `pgArrayToText($pgArray): string` | Konverterar Postgres arraysyntax (`{a,b,c}`) till kommaseparerad text utan klamrar – enklare variant av `pgArrayToPhp()` som ger en sträng istället för en PHP-array |
@@ -126,32 +126,18 @@ prestandaoptimering för statiska filer.
 
 ## Kända begränsningar / observationer (preliminära – gäller granskade filer)
 
-- **Fas 3 JSON-konvertering klar:** hela kartkonfigurationen byggs nu som
+- Hela kartkonfigurationen byggs som
   PHP-arrayer, inklusive kontroller, `pageSettings`, kartmetadata,
   proj4-definitioner, grupper, lager, sources och styles, och serialiseras
   med `json_encode()`. SEO-blockets JSON-LD byggs också som array och
   serialiseras separat. CSS-, JS- och onload-bihang hanteras fortfarande
   via befintliga referensparametrar. Sitemap-filen är XML och byggs därför
   fortsatt som XML-text.
-- **Tung användning av globala variabler (`GLOBAL`)** genomgående i
-  writeConfig-funktionerna (`$json`, `$map`, `$groups`, `$layers`,
-  `$sources`, `$services`, `$tilegrids`, `$mapLayers`, `$mapSources`,
-  `$mapStyles`, `$controls`, `$plugins` m.fl.), i kombination med
-  `extract($configTables)` i huvudfilen som skapar okänt antal lokala
-  variabler dynamiskt. Detta gör det **mycket svårt att spåra
-  dataflödet** genom modulen utan att läsa alla filer samtidigt – en
-  funktion som `addSourcesToJson()` tar inga parametrar alls utan
-  litar helt på att rätt globala variabler redan är satta i rätt skick
-  när den anropas. Detta är den svåraste delen av hela kodbasen att
-  bryta ner i mindre, oberoende delar utan en genomgripande omskrivning
-  till att skicka data explicit via parametrar/returvärden.
-- **`extract($configTables)`** skapar lokala variabler med namn som
-  bestäms av `configTables()`s returvärde, vilket inte syns i
-  `writeConfig.php` själv. Det går inte att veta vilka variabler
-  (`$maps`, `$groups`, etc.) som faktiskt existerar utan att läsa
-  `configTables.php` (finns i `functions/common/`, ej dokumenterad
-  ännu). Detta är samma typ av "dolt beroende" som vi flaggade för
-  `allLayerIds()` i export-modulen, men i större skala.
+- `writeConfig.php` hämtar tabeller via `configTables()` och använder
+  `extract($configTables)` för att skapa lokala variabler. Därefter
+  samlas delat tillstånd i `$writeConfigContext`, som skickas explicit
+  till de helpers som behöver det. Vid ändring av kontextens innehåll,
+  följ både initieringen i entry pointen och helper-anropen.
 - **`fixDuplicateDeclarations()` är en handskriven, förenklad
   JS-parser** (radbaserad, med enkel sträng/scope-djup-spårning via
   räkning av `{`/`}`). Den hanterar inte flerradiga deklarationer,
@@ -260,24 +246,10 @@ prestandaoptimering för statiska filer.
   värdena, utan för att separera "bygg en legend-URL" som ett eget,
   testbart, dokumenterat koncept från resten av den redan komplexa
   funktionen.
-- **Tung, konsekvent användning av `GLOBAL`** (`$map, $layers, $json,
-  $mapStyles, $mapSources, $sources, $services, $mapStyleLayers,
-  $contacts, $origins, $tables`), i linje med resten av
-  writeConfig-modulen. Denna funktion är den som gör flest globala
-  läsningar/skrivningar av alla writeConfig-filer, och är därför den
-  svåraste att förstå isolerat eller testa separat.
-- **Rekursion för GROUP-lager fungerar, men delar samma `$json`-sträng
-  globalt** – när `addLayersToJson()` anropar sig själv rekursivt för en
-  undergrupp, skriver den rekursiva anropet till samma globala `$json`-
-  variabel som föräldern. Detta fungerar eftersom PHP:s `GLOBAL`-nyckelord
-  refererar till samma variabel oavsett anropsdjup, men gör kontrollflödet
-  svårare att följa än om varje anrop byggde sin egen sträng och
-  returnerade den till föräldern.
-- **`unset($styleSource, $styleService, ...)` mitt i funktionen** – ett
-  tecken på medveten hantering av att globala/långlivade variabler i en
-  lång loop annars riskerar att "läcka" värden mellan iterationer. Bra
-  försiktighetsåtgärd givet kodens struktur, men samtidigt ett symptom
-  på att så mycket delas via variabler i vidare scope än nödvändigt.
+- Helpers som bygger grupper, lager, källor och stilar tar emot
+  `$writeConfigContext` explicit. `addLayersToJson()` returnerar en array
+  och skickar samma kontext vidare vid rekursion, i stället för att bygga
+  resultatet i en delad JSON-sträng.
 - Ingen `strict_types` eller parametertypning (`$mapLayersList`,
   `&$layersMeta`, `$groupLayer` är alla otypade), konsekvent med övriga
   äldre delar av writeConfig-modulen.
