@@ -112,7 +112,7 @@ if (!empty($childId)) {
 	}
 
 	echo "&nbsp;<form action='manage.php' method='post' target='_blank' style='display:inline'><button type='submit' name='" . $childType . "Id' value='" . $childId . "'>Administrera</button></form>";
-	echo "&nbsp;<button type=\"button\" onclick=\"window.parent.postMessage({ action: 'close' }, window.location.origin);\">Stäng</button>";
+	echo "&nbsp;<button type=\"button\" title=\"Stäng\" aria-label=\"Stäng\" onclick=\"window.parent.postMessage({ action: 'close' }, window.location.origin);\"><span aria-hidden=\"true\">&#x22A0;</span></button>";
 }
 
 pg_close($dbh);

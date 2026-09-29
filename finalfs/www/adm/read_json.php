@@ -115,7 +115,7 @@ HTML;
 
 	<div class="readJsonButtonDiv">
 		<button class="updateButton" type="submit" name="submit" value="submit">Importera</button>
-		<button class="updateButton" type="button" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);">Stäng</button>
+		<button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
 	</div>
 	</div>
 </form>
@@ -565,7 +565,7 @@ echo <<<HTML
 </head>
 <body>
 <div class="importSuccessMessage">Import lyckades!</div>
-<button class="updateButton" type="button" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);">Stäng</button>
+<button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
 </body>
 </html>
 HTML;

@@ -23,6 +23,7 @@
 		.historyButton[value="undo"] > span,
 		.historyButton[value="redo"] > span,
 		.historyButton[value="restore"] > span { transform:translateY(1px) }
+		button[aria-label="Stäng"] > span { display:inline-block; transform:translateY(-2px) }
 		.deleteButton > span { filter:none }
 		.deleteButton	{ margin-right:0.2em; color:var(--skin-danger, #ffcdd2); font-weight:bold }
 		.smallMultiselectButton { margin-left:-0.3em; margin-right:0.1em; height:unset; border-style:none; padding:0.1em 0.2em; vertical-align:middle }

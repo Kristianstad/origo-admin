@@ -28,7 +28,7 @@ HTML;
 </head>
 <body>
 <div class="$class">$safeMessage</div>
-<button class="updateButton" type="button" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);">Stäng</button>
+<button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
 </body>
 </html>
 HTML;

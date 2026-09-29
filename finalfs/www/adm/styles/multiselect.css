@@ -1,6 +1,7 @@
 		html		{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
 		body		{ height:100%; line-height:1.4; font-family:var(--skin-font, 'Roboto', sans-serif); font-size:clamp(7px, 0.9vw, 12px); background-color:var(--skin-bg, #cfd8dc); color:var(--skin-text, #212121); margin:0 }
 		button, .btn	{ height:1.7em; font-family:inherit; font-size:inherit; border:none; padding:0.3em; position:relative; margin-left:0.1em; white-space:nowrap; background-color:var(--skin-primary, #455a64); color:var(--skin-button-text, #FFFFFF); border-radius:var(--skin-radius, 0.25em); cursor:pointer; transition:background-color 0.3s ease; vertical-align:middle }
+		button[aria-label="Stäng"] > span { display:inline-block; transform:translateY(-2px) }
 		button:hover, .btn:hover { background-color:var(--skin-hover, #0097a7) }
 		button:active	{ background-color:var(--skin-active, #b2ebf2); box-shadow:inset 0 0 0.3125em var(--skin-shadow, #c1c1c1); outline:none }
 		h3			{ display:inline-block; margin-block-start:0; margin-block-end:0.5em; font-size:clamp(9px, 1vw, 14px) }

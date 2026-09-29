@@ -101,7 +101,7 @@ if (!empty($currentValue)) {
 echo <<<HTML
 <button onClick='document.querySelector("#selection").innerHTML=null;document.querySelector("#selection").value=null;document.querySelector("#selectbox").setAttribute("data-sorted-values", "");document.querySelector("#selectbox").value="";document.querySelector("#selectbox")?.querySelectorAll("option").forEach(o => o.removeAttribute("selected"));'>Töm</button>&nbsp;
 <button type="button" onclick="sendSelectionAndClose('{$textareaIdEsc}');">Använd värde</button>&nbsp;
-<button type="button" onclick="closeTopFrame();">Stäng</button>
+<button type="button" title="Stäng" aria-label="Stäng" onclick="closeTopFrame();"><span aria-hidden="true">&#x22A0;</span></button>
 <script>selectOptionsByValues('selectbox', '{$dataSortedValuesEsc}');makeSelectToggleOnly('selectbox');</script>
 </body>
 </html>

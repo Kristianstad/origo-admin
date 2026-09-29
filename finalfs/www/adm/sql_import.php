@@ -52,7 +52,7 @@ HTML;
         <span class="optionSpan sqlFileOption"><label title="sql_import:sql_file" for="sql_file">SQL-fil:</label>{$helpSqlFile}<input class="sqlImportFile" type="file" id="sql_file" name="sql_file" accept=".sql,text/plain" onchange="updateSqlInputState(this)"></span><wbr>
 		<div class="readJsonButtonDiv">
 			<button class="updateButton" type="submit">Kör SQL</button>
-			<button class="updateButton" type="button" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);">Stäng</button>
+            <button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
 		</div>
 	</div>
 </form>
