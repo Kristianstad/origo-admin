@@ -7,6 +7,6 @@
 		'Origo' => array('maps', 'controls', 'plugins', 'groups', 'layers', 'sources', 'services', 'footers'),
 		'Extra' => array('tilegrids', 'proj4defs', 'formats', 'mapstates', 'news', 'adusers'),
 		'Meta'	=> array('databases', 'schemas', 'tables', 'contacts', 'origins', 'updates', 'keywords'),
-		'Infoförv' => array('classes', 'infogroups'),
+		'Infoförv' => array('classes', 'infogroups', 'layers', 'tables'),
 		'Verktyg' => array('helps', 'exttools', 'skins', 'edits')
 	);
