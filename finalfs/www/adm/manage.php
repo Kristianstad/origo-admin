@@ -447,6 +447,7 @@ HTML;
 
 // Include all js-code from the given directory
 includeDirectory("./js-functions/manage");
+echo "preservePageScroll();\n";
 
 // Prepare js-code to run later that sets the contents of the item selection boxes based on selected keyword category, store it in $updateSelects (string)
 // Create and expose a js-variable for each keyword category, each containing a list of items that has the specified keyword among their keywords
@@ -935,9 +936,6 @@ unset($helps, $idPosts);
 
 echo <<<HTML
 	<script>
-		/* Save scroll position at form submission and restore after page load. */
-		preservePageScroll();
-		
 		/* Change the appearance of the "Uppdatera" button on form edit. */
 		formChangeButton();
 		
