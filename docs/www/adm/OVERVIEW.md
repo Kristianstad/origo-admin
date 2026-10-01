@@ -49,10 +49,9 @@ funktioner/konstanter.
 |---|---|---|
 | export | `export.php` | Asynkron export av kartutsnitt via FME Server. **Ej i publikt repo, hårt org-specifik** |
 
-## Ej dokumenterade / lågprioriterade
 ## Övriga filer
 
 | Fil | Anteckning |
 |---|---|
-| Loader-filer (`authorization/`, `export/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `news/`, `updated/` på toppnivå) | Bekräftat aktivt använda (se authorization.md) men saknar ännu egen dokumentation |
+| Loader-filer (`authorization/`, `export/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `news/`, `updated/` på toppnivå) | Aktivt använda (se authorization.md) |
 | `export/` (toppnivå, med egen `functions/`/`constants/`) | Delvis dubblerad kod jämfört med `adm/functions/export/` – mer än en tunn loader |

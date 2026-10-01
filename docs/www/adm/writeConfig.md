@@ -12,12 +12,9 @@ som innehåller den färdiga kartan. Skriver resultatet till disk under
 `<webRoot>/maps/<mapNamn>/`. Genererar även SEO-relaterad strukturerad
 data (schema.org JSON-LD) och en `sitemap.xml` för kartor som är
 markerade som sökmotorindexerbara. **Skriver även `RESTRICTEDLAYERS`-
-konstanten** som används av `restrictedLayer.php` (se nedan) – detta är
-den bekräftade källan till den kopplingen vi tidigare flaggade som
-öppen fråga.
+konstanten** som används av `restrictedLayer.php`.
 
-Anropas troligen från en "Publicera"/"Spara"-knapp i `manage.php` (se
-`functions/manage/printWriteConfigButton.php`, ej dokumenterad ännu).
+Anropas av knappen `printWriteConfigButton()` i `manage.php`.
 
 ## Anropas med
 `writeConfig.php?map=<mapId>&<flaggor>`
@@ -33,16 +30,15 @@ Anropas troligen från en "Publicera"/"Spara"-knapp i `manage.php` (se
 
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
-- `dbh()`, `configTables($dbh)` – **ny, ej tidigare dokumenterad**,
-  hämtar sannolikt samtliga konfigtabeller (`maps`, `groups`, `layers`,
-  `sources`, `services`, `styles`, `plugins`, `controls`, `proj4defs`,
-  `tilegrids`, `footers`, m.fl.) i ett svep, extraheras sedan till
-  lokala variabler med `extract()` (se flaggning nedan)
+- `dbh()`, `configTables($dbh)` – hämtar samtliga konfigtabeller (`maps`,
+  `groups`, `layers`, `sources`, `services`, `styles`, `plugins`,
+  `controls`, `proj4defs`, `tilegrids`, `footers`, m.fl.) i ett svep.
+  `writeConfig.php` extraherar dem sedan till lokala variabler med
+  `extract()`.
 - `pgArrayToPhp()`, `array_column_search()`
-- `defineFileConstant($name, $value)` – **ny, ej tidigare dokumenterad**,
-  skriver en PHP-konstant till en fil på disk (grund för hur
-  `RESTRICTEDLAYERS` och andra `includeFileConstant()`-lästa konstanter
-  uppstår)
+- `defineFileConstant($name, $value)` – skriver en PHP-konstant till en fil
+  på disk (källan till `RESTRICTEDLAYERS` och andra
+  `includeFileConstant()`-lästa konstanter)
 
 **Konstanter:**
 - `constants/webRoot.php` → `$webRoot`
@@ -76,8 +72,8 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 | `compressBrotli.php` | `compressBrotli(string $data): ?string` | Komprimerar med Brotli om PHP-tillägget finns, annars `null` |
 | `compressGzip.php` | `compressGzip(string $data): ?string` | Komprimerar med gzip (nivå 9) |
 | `createSymlinkIfNotExists.php` | `createSymlinkIfNotExists(string $target, string $link): bool` | Skapar eller ersätter en symlänk; befintliga filer och kataloger på länkmålet tas bort |
-| `fetchResourceContent.php` | `fetchResourceContent(string $resource): string\|false` | Hämtar innehåll från en lokal fil eller URL, med tillfälligt katalogbyte för att lösa relativa sökvägar. Används sannolikt för att bädda in externa CSS/JS-resurser i den publicerade HTML-sidan |
-| `fixDuplicateDeclarations.php` | `fixDuplicateDeclarations($jsCode): string` | Textbaserad JS-transformation: hittar dubbeldeklarerade variabler (`const`/`let`/`var` med samma namn i samma "rot-scope") i administratörsskriven onload-JS, och skriver om dem till giltig JS (undviker `SyntaxError: Identifier has already been declared`). Se flaggning nedan – detta är en betydande mängd egen parsning |
+| `fetchResourceContent.php` | `fetchResourceContent(string $resource): string\|false` | Hämtar innehåll från en lokal fil eller URL, med tillfälligt katalogbyte för att lösa relativa sökvägar. Används av `renderCssTags()` och `renderJavaScriptTags()` för att läsa in resurser som ska bäddas in i den publicerade HTML-sidan |
+| `fixDuplicateDeclarations.php` | `fixDuplicateDeclarations($jsCode): string` | Textbaserad JS-transformation: hittar dubbeldeklarerade variabler (`const`/`let`/`var` med samma namn i samma "rot-scope") i administratörsskriven onload-JS, och skriver om dem till giltig JS (undviker `SyntaxError: Identifier has already been declared`). Radbaserad egen parsning; se "Begränsningar och risker" nedan |
 | `getArrayValuesRecursively.php` | `getArrayValuesRecursively(array $array): array` | Plattar ut en nästlad array till en enkel lista med alla "löv"-värden |
 | `groupDepth.php` | `groupDepth($groupIds, $layerIds=array(), array &$context=array())` | Rekursivt: bygger en nästlad struktur över lager och undergrupper, med lagernamn prefixade av gruppsökvägen (`grupp>lager`); använder kontextarrayen för delat konfigurationstillstånd |
 | `indexweightedLayersList.php` | `indexweightedLayersList($layersList, array &$context)` | Sorterar lagerlistan efter `indexweight` och använder kontextarrayen för delat konfigurationstillstånd |
@@ -95,14 +91,11 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 
 ## Koppling till manage-modulen: "changed"-flaggan
 
-Nu bekräftad i sin helhet: `manage.php` (via `markMapsChanged()`)
-sätter `maps.changed = 't'` varje gång en ändring görs som påverkar en
-publicerad karta (lager, grupper, källor, etc.), och `writeConfig.php`
-(via `markMapUnchanged()`) nollställer flaggan (`'f'`) efter lyckad
-publicering. Detta ger sannolikt underlag för en "denna karta har
-osparade ändringar, klicka för att publicera"-indikator någonstans i
-manage-gränssnittet (troligen i `printWriteConfigButton.php`, ej
-granskad ännu).
+`manage.php` (via `markMapsChanged()`) sätter `maps.changed = 't'` varje
+gång en ändring görs som påverkar en publicerad karta (lager, grupper,
+källor, etc.), och `writeConfig.php` (via `markMapUnchanged()`) nollställer
+flaggan (`'f'`) efter lyckad publicering. `printWriteConfigButton()` använder
+flaggan för att visa knappen i "ändrad"-läge.
 
 ## Publiceringskedjan till disk
 
@@ -118,13 +111,11 @@ writeConfig.php
 └─ createSymlinkIfNotExists() → skapar root-länkar i <webRoot> som pekar
   via kartkatalogens symlink till samma fysiska filer
 
-Anledningen till att både okomprimerade och förkomprimerade varianter
-sparas är sannolikt att webbservern (nginx/Apache) är konfigurerad att
-servera `.br`/`.gz`-varianten direkt till klienter som stödjer det,
-utan att behöva komprimera vid varje request – en vanlig
-prestandaoptimering för statiska filer.
+Okomprimerade och förkomprimerade varianter sparas båda. Hur webbservern
+serverar `.br`/`.gz` styrs av webbserverkonfigurationen i basavbilden och kan
+inte verifieras i det här repot.
 
-## Kända begränsningar / observationer (preliminära – gäller granskade filer)
+## Begränsningar och risker
 
 - Hela kartkonfigurationen byggs som
   PHP-arrayer, inklusive kontroller, `pageSettings`, kartmetadata,
@@ -138,118 +129,48 @@ prestandaoptimering för statiska filer.
   samlas delat tillstånd i `$writeConfigContext`, som skickas explicit
   till de helpers som behöver det. Vid ändring av kontextens innehåll,
   följ både initieringen i entry pointen och helper-anropen.
-- **`fixDuplicateDeclarations()` är en handskriven, förenklad
-  JS-parser** (radbaserad, med enkel sträng/scope-djup-spårning via
-  räkning av `{`/`}`). Den hanterar inte flerradiga deklarationer,
-  kommentarer som innehåller `{`/`}`, template literals, eller andra
-  JS-syntax-särfall fullt ut. Fungerar sannolikt för det begränsade
-  JS-mönster administratörer faktiskt skriver i onload-fält, men är
-  skört mot mer komplex JS. Innehåller även en stor utkommenterad
-  kodsektion (`$mapOnloadInit`) samt ett exempel-testblock i botten av
-  filen – båda kan städas bort om funktionen anses stabil.
-- **`json_format()` är en egen, handskriven JSON-formaterare** från
-  2008 (enligt kommentar), med en kommentar om att anpassa den till
-  PHP ≥5.4 – PHP har sedan version 5.4 haft `JSON_PRETTY_PRINT` inbyggt
-  i `json_encode()`. Funktionen har redan logik för att använda detta
-  (`if (phpversion() >= 5.4) return json_encode($json, JSON_PRETTY_PRINT);`)
-  men **bara om indata inte redan är en sträng** – eftersom
-  `writeConfig.php` alltid skickar in en redan färdig JSON-**sträng**
-  (`json_format($json)` där `$json` redan är en strängvariabel), tas
-  denna genväg aldrig i praktiken, och hela den manuella
-  tecken-för-tecken-parsningen körs alltid. Kandidat för enkel
-  förenkling: `json_encode(json_decode($json), JSON_PRETTY_PRINT |
-  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)` skulle sannolikt
-  kunna ersätta hela filen, given att `$json` redan valideras med
-  `json_decode()` strax innan i `writeConfig.php`.
-- **`markMapUnchanged.php` har SQL injection-risk:** `$mapId` klistras
-  in direkt i SQL-strängen utan escaping, samma mönster som flera
-  tidigare `die()`-baserade underhållsfunktioner. `$mapId` kommer
-  ursprungligen från `$_GET['map']` (bearbetad genom flera `explode()`-
-  steg, men inte SQL-escapad).
-- **`createSymlinkIfNotExists.php` har en `// GROK:`-kommentar** – ännu
-  ett tecken på AI-assisterad kod i denna modul, konsekvent med
-  mönstret i forwardauth/grouplayerfix.
-- **God separation i de mindre hjälpfunktionerna** (`array_move`,
-  `compressBrotli`, `compressGzip`, `getArrayValuesRecursively`) – dessa
-  är rena, väldokumenterade, testbara funktioner utan globala
-  beroenden. Bra förebilder för hur resten av modulen skulle kunna se
-  ut efter refaktorering.
-- Blandad kodstil: vissa filer har PHP 8-stil typade parametrar och
-  returtyper (`compressBrotli`, `fetchResourceContent`,
-  `getArrayValuesRecursively` delvis), andra har ingen typning alls
-  (`addControlsToJson`, `groupDepth`, m.fl.) – bekräftar att modulen är
-  en blandning av äldre och nyare kod, i linje med tidigare
-  observationer om kodbasens historik.
-- **Dödkod i både `renderCssTags.php` och `renderJavaScriptTags.php`:**
-  variabeln `$url` byggs upp (`$proxyRoot . $_SERVER["REQUEST_URI"] . ...
-  . 'badJson=y'`) i felhanteringsgrenen men **används aldrig** – koden
-  skriver bara ut ett `alert()` med felmeddelandet och avslutar med
-  `exit`, utan att navigera till `$url` (till skillnad från motsvarande
-  felhantering i `writeConfig.php` självt, som *gör* en
-  `window.location.href`-omdirigering till en `badJson=y`-variant för
-  felsökning). Sannolikt en ofärdig kopiering av samma mönster – om
-  avsikten var att erbjuda samma felsöknings-omväg här, saknas
-  `window.location.href`-raden. Enkel att åtgärda eller ta bort
-  variabeln om den inte behövs.
-- **`renderCssTags.php` och `renderJavaScriptTags.php` är nästan
-  identiska** i struktur (loop, regex-matchning av `include(...)`,
-  felhantering, minifiering) – JS-varianten har bara fler kommandovarianter
-  (`include_minify`/`include_nominify`). Kandidat att slå ihop till en
-  gemensam hjälpfunktion med en parameter för tagg-typ, om ni vill minska
-  dubblering vid framtida förenkling.
-- **Blandat `require` / `require_once`** för samma konstant
-  (`constants/proxyRoot.php`) mellan de två annars nästan identiska
-  filerna (`renderCssTags.php` använder `require_once`,
-  `renderJavaScriptTags.php` använder `require`) – ofarligt eftersom
-  koden ändå avslutar med `exit` direkt efter, men ytterligare ett tecken
-  på att filerna kopierats från varandra utan fullständig konsekvens.
-- **`pgBoxToText()` gör antagandet att en box alltid har exakt två
-  koordinatpar** (`explode('),(', ...)` följt av indexering `[0]`/`[1]`
-  utan kontroll). Detta är korrekt för Postgres `box`-typen per
-  definition, så ingen bugg, men värt att notera som ett implicit
-  antagande om indata-formatet.
-- **God, tydlig dokumentation i `publishMapFiles.php`** (PHPDoc-kommentar
-  med parameterbeskrivningar) – bra förebild jämfört med de äldre
-  `pg*ToText`-funktionerna som saknar all dokumentation.
-- Fortsatt blandad typning: `publishMapFiles`, `renderCssTags`,
-  `renderJavaScriptTags`, `saveFile` har fullständig PHP 8-typning;
-  `pgArrayToText`, `pgBoolToText`, `pgBoxToText`, `pgCoordsToText` har
-  ingen alls – ytterligare bekräftelse på åldersskiktning inom samma
-  funktionsmapp.
-- **HTML byggs ihop som ett enda JSON-strängvärde** för `"abstract"`-fältet:
-  kontaktinfo, källinfo, tabellbeskrivningar och en hel `<form>` med
-  inbäddad "Administrera"-knapp slås ihop till en lång HTML-sträng.
-  Strängen läggs nu in i en PHP-array och escapes av `json_encode()`, så
-  citattecken och radbrytningar förstör inte längre JSON-strukturen. HTML-
-  innehållets egen säkerhet och presentation är fortfarande en separat
-  fråga.
-- **`$adminForm`-HTML:en bäddar in en hel `<form>`-tagg i
-  `"abstract"`-strängen**, inklusive ett `<button>` som postar tillbaka
-  till samma sida med lagrets id. Fungerar, men gör "abstract"-fältet
-  till en blandning av faktisk beskrivning och UI-kontroller – lite
-  ovanligt datamodellsmässigt (adminverktyg inbäddat i det som
-  konceptuellt är "lagerbeskrivning"), värt att känna till om
-  abstract-fältet någonsin ska återanvändas i ett annat sammanhang
-  (t.ex. sökmotorexport, vilket vi redan sett i `writeConfig.php`s
-  SEO-logik – där används dock `$layersMeta['abstract']`, en **separat**
-  och renare kopia av beskrivningen utan adminformuläret, vilket är bra
-  och undviker att adminknappen läcker ut i sökmotordata).
-- **Mycket djup, delvis odokumenterad domänlogik för legend-/ikon-
-  generering** (DPI, symbolstorlekar, LAYERSPACE, LAYERFONTSIZE, etc. som
-  query-parametrar mot QGIS Servers `GetLegendGraphic`). Dessa "magiska
-  siffror" (DPI=250, ICONLABELSPACE=3, BOXSPACE=1.8, etc.) är sannolikt
-  resultatet av mycket manuellt visuellt finjusterande, och bör **inte**
-  ändras utan att förstå att de påverkar hur legendikoner faktiskt ser
-  ut i den publicerade kartan. Detta är en bra kandidat för en egen,
-  namngiven hjälpfunktion (t.ex. `buildLegendUrl($service, $sourceProject,
-  $layerName, $variant)`) vid framtida förenkling – inte för att ändra
-  värdena, utan för att separera "bygg en legend-URL" som ett eget,
-  testbart, dokumenterat koncept från resten av den redan komplexa
-  funktionen.
+- `fixDuplicateDeclarations()` är en radbaserad JavaScript-parser med enkel
+  spårning av sträng- och scope-djup via räkning av `{`/`}`. Den hanterar
+  inte flerradiga deklarationer, kommentarer som innehåller `{`/`}`,
+  template literals eller andra syntaxfall fullt ut. Filen innehåller en
+  stor utkommenterad sektion (`$mapOnloadInit`) och ett exempel-testblock.
+- `json_format()` är en handskriven JSON-formaterare från 2008 (enligt
+  kodkommentar). Genvägen `json_encode($json, JSON_PRETTY_PRINT)` används
+  bara om indata inte redan är en sträng; `writeConfig.php` skickar en
+  färdig JSON-sträng, så den manuella tecken-för-tecken-parsningen körs
+  alltid.
+- `markMapUnchanged.php` bygger in `$mapId` direkt i SQL-strängen utan
+  escaping. `$mapId` kommer från `$_GET['map']` (efter flera
+  `explode()`-steg).
+- `renderCssTags.php` och `renderJavaScriptTags.php` bygger i
+  felhanteringsgrenen variabeln `$url` (`$proxyRoot . $_SERVER["REQUEST_URI"] . ...
+  . 'badJson=y'`) men använder den aldrig: koden skriver ett `alert()` med
+  felmeddelandet och avslutar med `exit`. `writeConfig.php` gör motsvarande
+  `window.location.href`-omdirigering till en `badJson=y`-variant.
+- `renderCssTags.php` och `renderJavaScriptTags.php` är nästan identiska i
+  struktur (loop, regex-matchning av `include(...)`, felhantering,
+  minifiering). JS-varianten har fler kommandovarianter
+  (`include_minify`/`include_nominify`). De läser `constants/proxyRoot.php`
+  med `require_once` respektive `require`.
+- `pgBoxToText()` förutsätter att en box har exakt två koordinatpar
+  (`explode('),(', ...)` med indexering `[0]`/`[1]` utan kontroll). Det gäller
+  för Postgres `box`-typen.
+- Typningen är blandad: `publishMapFiles`, `renderCssTags`,
+  `renderJavaScriptTags`, `saveFile`, `compressBrotli` och
+  `fetchResourceContent` har PHP 8-typning, medan `pgArrayToText`,
+  `pgBoolToText`, `pgBoxToText`, `pgCoordsToText`, `addControlsToJson` och
+  `groupDepth` saknar typning.
+- Lagrets `"abstract"`-fält byggs som en HTML-sträng: kontaktinfo,
+  källinfo, tabellbeskrivningar och en hel `<form>` med en
+  "Administrera"-knapp som postar tillbaka till samma sida med lagrets id.
+  Strängen läggs i en PHP-array och escapes av `json_encode()`. SEO-logiken
+  använder i stället `$layersMeta['abstract']`, en separat kopia utan
+  adminformuläret, så att adminknappen inte hamnar i sökmotordata.
+- Legend- och ikon-URL:erna mot QGIS Servers `GetLegendGraphic` använder
+  fasta värden (DPI=250, ICONLABELSPACE=3, BOXSPACE=1.8, LAYERSPACE,
+  LAYERFONTSIZE m.fl.) som påverkar hur legendikoner ser ut i den
+  publicerade kartan. Ändra dem inte utan visuell kontroll.
 - Helpers som bygger grupper, lager, källor och stilar tar emot
   `$writeConfigContext` explicit. `addLayersToJson()` returnerar en array
   och skickar samma kontext vidare vid rekursion, i stället för att bygga
   resultatet i en delad JSON-sträng.
-- Ingen `strict_types` eller parametertypning (`$mapLayersList`,
-  `&$layersMeta`, `$groupLayer` är alla otypade), konsekvent med övriga
-  äldre delar av writeConfig-modulen.

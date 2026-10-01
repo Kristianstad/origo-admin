@@ -91,52 +91,29 @@ för att `forwardauth.php` ska kunna återskapa ursprunglig URL.
 | `getAzureAuthUrl.php` | `getAzureAuthUrl()` | Bygger Azure-inloggnings-URL och sparar `oauth2state` i sessionen (CSRF-skydd) |
 | `getAzureGroups.php` | `getAzureGroups($graphToken): array` | Hämtar (paginerat) användarens Azure AD-gruppmedlemskap via Microsoft Graph |
 | `getAzureProvider.php` | `getAzureProvider()` | Skapar en konfigurerad OAuth2-klient (`TheNetworg\OAuth2\Client\Provider\Azure`), tvingar Microsoft Graph som API-mål |
-| `getGraphToken.php` | `getGraphToken($token)` | Växlar ett access-token mot ett Graph-specifikt token via refresh_token-flödet. **Verkar för närvarande oanvänd** – se flaggning nedan |
+| `getGraphToken.php` | `getGraphToken($token)` | Växlar ett access-token mot ett Graph-specifikt token via refresh_token-flödet. Har inga aktiva anropare: anropen i `azure-callback.php` är utkommenterade |
 | `getOnPremisesSamAccountName.php` | `getOnPremisesSamAccountName($graphToken)` | Hämtar användarens lokala AD-kontonamn (`onPremisesSamAccountName`) via Microsoft Graph |
-| `isSafeReturnTo.php` | `isSafeReturnTo(string $url): bool` | Validerar att en return-URL:s host slutar på `kristianstad.se`. **Hårdkodad domän** – se flaggning nedan |
+| `isSafeReturnTo.php` | `isSafeReturnTo(string $url): bool` | Validerar att en return-URL:s host slutar på `kristianstad.se`. Hårdkodad domän |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ Hårdkodad organisationsdomän** i `isSafeReturnTo.php`
-  (`kristianstad.se`) och som fallback-URL i `azure-callback.php`
-  (`https://kartor.kristianstad.se`). Det här avslöjar för första gången
-  vilken organisation systemet tillhör – i sig ofarligt, men **bör flyttas
-  till en konstant** (t.ex. `constants/allowedReturnDomain.php`) både för
-  konsekvens med resten av kodbasen och för att göra koden
-  miljöoberoende (test/demo-miljöer med annan domän).
-- **⚠️ Två olika funktioner med snarlika namn och syfte men olika logik:**
-  `isSafeReturnUrl()` (authorization-modulen, matchar mot `HTTP_HOST`) och
-  `isSafeReturnTo()` (denna modul, matchar mot hårdkodad `kristianstad.se`).
-  Namnlikheten (`ReturnUrl` vs `ReturnTo`) gör det lätt att förväxla dem
-  vid framtida ändringar. Kandidat att antingen slå ihop till en
-  gemensam, konfigurerbar common-funktion, eller döpa om tydligare för
-  att markera att de har olika skyddsnivå/syfte.
-- **`getGraphToken.php` verkar vara död kod:** i `azure-callback.php` är
-  anropen till `getGraphToken($token)` utkommenterade
-  (`//$graphToken = getGraphToken($token);`) till förmån för att skicka
-  `$token` direkt till `getAzureGroups()`/`getOnPremisesSamAccountName()`.
-  Funktionen `getGraphToken()` verkar därmed oanvänd i nuvarande flöde –
-  kandidat för borttagning, om inte den behövs någon annanstans vi inte
-  sett än.
-- **Missvisande kommentar i `getOnPremisesSamAccountName.php`:** filens
-  docblock säger `Hämtar grupper med Microsoft Graph token` (kopierad
-  från `getAzureGroups.php`) trots att funktionen hämtar
-  `onPremisesSamAccountName`, inte grupper. Enkel copy-paste-bugg i
-  kommentaren, bör rättas vid nästa redigering av filen.
-- **`getAzureGroups()` hanterar paginering korrekt** (`@odata.nextLink`)
-  – bra praxis värd att notera som förebild om andra Graph-anrop
-  tillkommer.
-- **Utökad felsökningslogik finns kvar men avstängd** (utkommenterade
-  `error_log(sprintf(...))`-block överst i båda filerna) – ofarligt, men
-  värt att städa bort eller flytta bakom en debug-flagga vid
-  refaktorering, snarare än att lämnas som utkommenterad kod.
-- **Ingen typad `strict_types`**, och flera funktioner saknar
-  returtypdeklaration (`getAzureProvider()`, `getGraphToken()`,
-  `getOnPremisesSamAccountName()`) trots att de har tydliga, enhetliga
-  returtyper i praktiken.
-- **`forwardauth.php` litar på `X-Forwarded-*`/`X-Original-*`-headers**
-  för att återskapa ursprunglig URL. Detta är korrekt *förutsatt* att
-  Traefik är konfigurerad att sätta dessa headers pålitligt och att
-  applikationen aldrig nås direkt förbi proxyn (annars kan headers
-  förfalskas av klienten). Värt att bekräfta som en infrastrukturell
-  förutsättning snarare än en kodbugg.
+- **Hårdkodad organisationsdomän** i `isSafeReturnTo.php` (`kristianstad.se`)
+  och som fallback-URL i `azure-callback.php`
+  (`https://kartor.kristianstad.se`). Andra miljöer med annan domän kräver
+  kodändring.
+- `isSafeReturnUrl()` (authorization-modulen) matchar mot `HTTP_HOST`,
+  medan `isSafeReturnTo()` (denna modul) matchar mot den hårdkodade
+  domänen. De har olika skyddsnivå och är inte utbytbara.
+- `getGraphToken()` har inga aktiva anropare: anropen i
+  `azure-callback.php` är utkommenterade (`//$graphToken = getGraphToken($token);`)
+  och `$token` skickas direkt till `getAzureGroups()` och
+  `getOnPremisesSamAccountName()`.
+- Docblocket i `getOnPremisesSamAccountName.php` beskriver gruppuppslag
+  (kopierat från `getAzureGroups.php`), trots att funktionen hämtar
+  `onPremisesSamAccountName`.
+- Utkommenterade `error_log(sprintf(...))`-block överst i båda entry points
+  är avstängd felsökningslogik.
+- `forwardauth.php` litar på `X-Forwarded-*`/`X-Original-*`-headers för att
+  återskapa ursprunglig URL. Det förutsätter att Traefik sätter dem pålitligt
+  och att applikationen aldrig nås direkt förbi proxyn; annars kan klienten
+  förfalska dem.

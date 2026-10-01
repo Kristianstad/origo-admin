@@ -7,23 +7,20 @@ Ett **underhålls-/batchscript** snarare än en vanlig sida: går igenom
 samtliga QGIS-baserade lager i systemet som saknar en ifylld
 `tables`-kolumn, läser motsvarande QGIS-projektfil (`.qgs`) från disk,
 och fyller i vilka databastabeller lagret använder (via
-`tablesFromQgsXml()`). Troligen körs detta manuellt eller periodiskt
-efter att nya lager lagts till, för att slippa manuellt ange vilka
-tabeller varje QGIS-lager bygger på – informationen härleds istället
-direkt ur QGIS-projektfilen.
+`tablesFromQgsXml()`). Det slipper manuell angivelse av vilka tabeller
+varje QGIS-lager bygger på: informationen härleds direkt ur
+QGIS-projektfilen.
 
 Filen delar den gemensamma QGIS-helpern `tablesFromQgsXml()` med
-manage-modulen (se "Beror på" nedan).
-Resultatet (`layers.tables`) används sannolikt av manage-modulen
-(t.ex. vid visning av "vilka tabeller påverkas av detta lager", jämför
-`info.php`s "Används av"-funktion).
+manage-modulen (se "Beror på" nedan). Resultatet skrivs till
+`layers.tables`.
 
 ## Anropas med
 `writeTablesForAllLayers.php` (inga parametrar) – körs för samtliga
 lager i systemet i ett svep.
 
-**Svar:** inget synligt HTML-innehåll (endast `<!DOCTYPE html>` skrivs
-ut, sedan tyst bearbetning).
+**Svar:** en HTML-sida med antal uppdaterade lager och en lista över
+eventuella fel (QGS-fil som inte kan läsas, SQL-fel).
 
 ## Beror på
 **Common-funktioner:**
@@ -44,18 +41,8 @@ ut, sedan tyst bearbetning).
 `/services/<service>/<sourceName>.qgs` – samma mönster som i
 `info.php` för `source`-typer.
 
-## Kända begränsningar / observationer
-- **⚠️ Strängbyggd SQL vid UPDATE:** `$layerId` klistras in direkt i
-  SQL-strängen. `$layerId` kommer från databasen (inte direkt
-  användarinput i denna körning), så risken är låg i praktiken, men
-  avviker från `pg_query_params()`-mönstret i nyare kod.
-- **`die()` vid SQL-fel**, konsekvent med tidigare observerade
-  underhållsscript.
-- Script utan parametrar som körs över **alla** lager i systemet –
-  potentiellt tungt/långsamt om systemet har många lager. Ingen
-  batchning eller framstegsindikator syns. Värt att känna till om
-  scriptet någonsin timear ut vid körning via webbserver (ingen
-  `set_time_limit()` justering syns).
-- Namnmönstret `writeTablesForAllLayers.php` (ingen `functions/`-mapp,
-  logik direkt i entry point-filen) skiljer sig från övriga moduler –
-  rimligt för ett litet, sällan använt underhållsscript.
+## Begränsningar och risker
+- Skriptet saknar parametrar och körs över alla lager som saknar `tables`.
+  Det har ingen batchning, framstegsvisning eller `set_time_limit()`.
+- Logiken ligger direkt i entry pointen i stället för i en
+  `functions/`-mapp.

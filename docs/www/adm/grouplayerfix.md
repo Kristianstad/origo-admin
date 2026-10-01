@@ -62,85 +62,37 @@ tillbaka baserat på filens ändringstid jämfört med TTL.
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `forwardToQgisServer.php` | `forwardToQgisServer($url, $params, $maxRetries = 4): array` | Skickar ett anrop till QGIS Server via curl, med retry vid transienta fel (ingen HTTP-status alls, d.v.s. nätverksfel – **inte** vid 4xx/5xx specifikt, se flaggning). Returnerar `['body' => ..., 'headers' => ...]` |
+| `forwardToQgisServer.php` | `forwardToQgisServer($url, $params, $maxRetries = 4): array` | Skickar ett anrop till QGIS Server via curl, med retry vid transienta fel (ingen HTTP-status alls, d.v.s. nätverksfel, inte vid 4xx/5xx). Returnerar `['body' => ..., 'headers' => ...]` |
 | `getCachedDescribeFeatureType.php` | `getCachedDescribeFeatureType($qgisUrl, $typeName): string` | Hämtar describeFeatureType-JSON för ett enskilt lager, cachad enligt samma mönster |
 | `getCachedProjectSettings.php` | `getCachedProjectSettings($qgisUrl): string` | Hämtar QGIS-projektets `GetProjectSettings`-XML, cachad (APCu eller fil) enligt TTL |
 | `getLayerNamesInGroup.php` | `getLayerNamesInGroup($xml, $groupName): array` | Rekursiv, namespace-säker XPath-sökning: hittar alla "löv"-lagernamn under en given grupp i projekt-XML:en. Returnerar tom array om `$groupName` inte är en grupp |
-| `getResponseContentType.php` | `getResponseContentType($params): string` | Bestämmer Content-Type baserat på `outputFormat`-parametern, annars `text/xml`. **Verkar oanvänd** – se flaggning |
+| `getResponseContentType.php` | `getResponseContentType($params): string` | Bestämmer Content-Type baserat på `outputFormat`-parametern, annars `text/xml`. Har ingen anropare |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ Sannolik bugg: odefinierad variabel `$DEFAULT_QGIS_SERVER_PATH`.**
-  Koden sätter `$DEFAULT_QGIS_SERVER_URL = '';` men läser sedan
-  `$_GET['qgis_url'] ?? $DEFAULT_QGIS_SERVER_PATH` – **fel variabelnamn**
-  (`_PATH` istället för `_URL`). Eftersom `$DEFAULT_QGIS_SERVER_PATH`
-  aldrig sätts, kommer detta antingen ge en PHP-varning (undefined
-  variable) och falla tillbaka till `null`/tom sträng, eller ett fatalt
-  fel beroende på PHP-version och felnivå. I praktiken fungerar koden
-  troligen ändå eftersom `qgis_url` verkar skickas med i alla riktiga
-  anrop, men fallback-beteendet är trasigt. **Bör rättas** till
-  `$DEFAULT_QGIS_SERVER_URL` vid nästa redigering.
-- **⚠️ Operatorprecedens-bugg i `getCachedProjectSettings.php`:**
-  `if ($response['headers']['http_code'] ?? 0 >= 200 && ...)` – på grund
-  av PHP:s operatorprioritet tolkas detta som
-  `$response['headers']['http_code'] ?? (0 >= 200 && ...)`, **inte** som
-  avsett `($response['headers']['http_code'] ?? 0) >= 200`. Eftersom
-  `0 >= 200` alltid är `false`, blir hela högerledet `?? false`, vilket
-  betyder att villkoret i praktiken bara utvärderas till sanningsvärdet
-  av `$response['headers']['http_code']` direkt (utan `>= 200`-kontrollen
-  någonsin appliceras meningsfullt). **Detta är en riktig bugg** som gör
-  att cachning kan ske (eller utebli) på fel grunder. Jämförelsevis har
-  `getCachedDescribeFeatureType.php` samma kontroll skriven korrekt med
-  parenteser (`$httpCode >= 200 && $httpCode < 300`) – bra referens för
-  hur det ska se ut. **Rekommenderas åtgärdas snarast**, då det är i en
-  cache-vägen och kan orsaka cachning av felaktiga/tomma svar.
-- **⚠️ Duplicerad kodblock i `grouplayerfix.php`:** i specialfall 2
-  (describeFeatureType) finns två identiska kommentarsblock och
-  variabeltilldelningar i rad:
-```php
-  // Grupp → parallell hämtning av describe för alla lager
-  $combinedFeatureTypes = [];
-  ...
-  // Grupp → parallell hämtning av describe för alla lager med retry per handle
-  $combinedFeatureTypes = [];
-  ...
-```
-  (samma för `$ttl`-blocket). Ofarligt (andra tilldelningen skriver bara
-  över med samma värden) men tydligt en kopieringsrest från
-  AI-assisterad redigering. Kandidat för enkel städning.
-- **`forwardToQgisServer()`s retry-villkor skiljer sig från
-  `fetchWithStatus()`i restrictedLayer-modulen:** här görs om vid
-  *nätverksfel* (`$rawResponse === false || $httpCode === 0`), medan
-  `fetchWithStatus()` gör om specifikt vid *5xx-svar*. Två olika
-  QGIS-proxyer i samma kodbas med olika retry-strategier för i grunden
-  samma typ av problem (opålitlig bakomliggande karttjänst) – värt att
-  fundera på om detta är medvetet (olika krav på de två endpointarna)
-  eller om det vore bättre att harmonisera till en delad
-  retry-hjälpfunktion vid refaktorering.
-- **`getResponseContentType()` verkar oanvänd** i den kod vi ser –
-  `grouplayerfix.php` sätter Content-Type-headers direkt inline på flera
-  ställen istället för att anropa denna funktion. Kandidat för
-  borttagning, eller så är den avsedd för framtida bruk – oklart utan
-  mer kontext.
-- **Mycket omfattande `// GROK:`-kommentering** genomgående i denna
-  modul (betydligt mer än i forwardauth-modulen där vi såg det första
-  gången) – bekräftar att denna modul till stor del AI-genererats/
-  redigerats. Kommentarerna är i sig informativa och kan behållas, men
-  om ni vill ha en enhetlig kommentarstil i kodbasen är det här den fil
-  där flest sådana kommentarer behöver bedömas/städas.
-- **Bekräftat: ingen säkerhetsrisk trots avsaknad av behörighetskontroll.**
-  `grouplayerfix.php` och `restrictedLayer.php` pekar mot **två skilda
-  QGIS-tjänster**, så avsaknaden av koppling till `RESTRICTEDLAYERS`/
+- **Odefinierad variabel `$DEFAULT_QGIS_SERVER_PATH`:** koden sätter
+  `$DEFAULT_QGIS_SERVER_URL = '';` men läser
+  `$_GET['qgis_url'] ?? $DEFAULT_QGIS_SERVER_PATH`. `_PATH`-variabeln sätts
+  aldrig, så fallbacken när `qgis_url` saknas ger en PHP-varning
+  (undefined variable) och `null`.
+- **Operatorprioritet i `getCachedProjectSettings.php`:**
+  `if ($response['headers']['http_code'] ?? 0 >= 200 && ($response['headers']['http_code'] ?? 0) < 300)`
+  tolkas som `$response['headers']['http_code'] ?? (0 >= 200 && ...)`.
+  Villkoret blir därför sant för varje satt, icke-noll statuskod, och
+  felsvar kan cachas. `getCachedDescribeFeatureType.php` har motsvarande
+  kontroll skriven med parenteser (`$httpCode >= 200 && $httpCode < 300`).
+- `grouplayerfix.php` har i specialfall 2 (describeFeatureType) två
+  identiska block efter varandra med kommentar, `$combinedFeatureTypes = []`
+  och `$ttl`; den andra tilldelningen skriver över den första med samma
+  värden.
+- `forwardToQgisServer()` gör om anropet vid *nätverksfel*
+  (`$rawResponse === false || $httpCode === 0`), medan `fetchWithStatus()` i
+  restrictedLayer-modulen gör om vid *5xx-svar*.
+- `getResponseContentType()` har ingen anropare; `grouplayerfix.php` sätter
+  Content-Type-headers direkt på flera ställen.
+- `grouplayerfix.php` och `restrictedLayer.php` pekar mot **två skilda
+  QGIS-tjänster**, så avsaknaden av koppling till `RESTRICTEDLAYERS` och
   `$_SESSION['user']` i grouplayerfix läcker inte skyddad information.
-  Det finns för närvarande inget behov att slå ihop de två proxy-vägarna.
-- **Begränsad nuvarande användning:** enligt uppgift har
-  `grouplayerfix.php` för närvarande begränsad användning i systemet.
-  Kan vara relevant vid prioritering av framtida refaktoreringsinsatser
-  – troligen lägre prioritet än mer centrala moduler som `manage`.
-- **Curl-inställningarna är dupliterade tre gånger** inom
-  `grouplayerfix.php` (initiering + retry-block för describeFeatureType)
-  och en fjärde gång i `forwardToQgisServer.php` – samma
-  `CURLOPT_*`-uppsättning kopierad om och om igen. Stark kandidat för att
-  brytas ut till en delad hjälpfunktion, t.ex. `buildQgisCurlHandle($url,
-  $headers)`, vid förenkling.
-- Ingen `strict_types` eller parametertypning i någon fil.
+- Curl-inställningarna (`CURLOPT_*`) upprepas tre gånger i
+  `grouplayerfix.php` (initiering och retry-block för describeFeatureType)
+  och en fjärde gång i `forwardToQgisServer.php`.

@@ -7,7 +7,7 @@
 ## Syfte
 Generisk komponent för att välja flera poster ur en databastabell via en
 `<select multiple>`, tänkt att öppnas i en iframe/popup från ett annat
-formulär (troligen `manage.php`). Håller reda på urvalsordning (senast
+formulär (`manage.php`, via `printMultiselectButton()`). Håller reda på urvalsordning (senast
 tillagd sist) och skickar tillbaka resultatet som en kommaseparerad sträng
 till förälderfönstret via `postMessage`, för visning i ett textarea-fält
 där.
@@ -36,7 +36,7 @@ som id-kolumn istället för det generella mönstret `<singularis>_id`.
 - `all_from_table($dbh, $schema, $table)` – hämtar alla rader från angiven
   tabell. **OBS:** schemat är här hårdkodat till `'map_configs'` istället
   för att läsas från `constants/configSchema.php` som i info-modulen – se
-  flaggning nedan.
+  begränsningar nedan.
 - `toSwedish($string)` – översätter tabellnamn till svensk rubrik
 
 **JS-funktioner** (`adm/js-functions/multiselect/`, laddas inline via
@@ -65,40 +65,15 @@ tillsammans inline i samma `<script>`-block spelar filordningen inom
 `includeDirectory()` ingen praktisk roll här, men vore det viktigt att
 veta om filerna någonsin laddas separat.
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ Hårdkodat schemanamn `'map_configs'`** i anropet till
-  `all_from_table()`, till skillnad från info-modulen som använder
-  `$configSchema` från `constants/configSchema.php`. Om schemat någonsin
-  ändras (t.ex. olika miljöer, multi-tenant) kommer denna modul sluta
-  fungera medan andra fortsätter fungera korrekt. Bör harmoniseras –
-  sannolikt ska `require("./constants/configSchema.php")` läggas till
-  och `'map_configs'` bytas mot `$configSchema`.
-- **⚠️ `$table` (och därmed tabellnamnet i SQL-frågan, inuti
-  `all_from_table`) kommer direkt från `$_GET['table']` utan whitelist
-  eller validering mot en känd uppsättning tillåtna tabeller.** Vi har
-  inte sett `all_from_table()`s implementation än, men om tabellnamnet
-  klistras in direkt i SQL utan validering är detta en SQL
-  injection-risk (eller åtminstone risk att exponera godtycklig
-  tabelldata). Bör verifieras när vi dokumenterar `all_from_table.php`.
-- **Bra exempel i övrigt:** all utskrift av användarstyrd data
-  (`$textareaId`, `$currentValue`, `$header`, options-värden) går genom
-  `htmlspecialchars()` innan det skrivs till HTML – till skillnad från
-  flera tidigare moduler. Denna fil är alltså en förebild för
-  XSS-skydd, värt att lyfta fram som referens vid förenkling av äldre
-  filer.
-- **Parsning av `$_GET['table']` är svårläst:** `explode('::', ..., 2)`
-  följt av `explode(':', ..., 2)` för att packa upp tre värden ur en
-  enda sträng med två olika separatorer (`::` och `:`) är en ovanlig och
-  lätt förvirrande kodningsform. Kandidat för förenkling, t.ex. tre
-  separata query-parametrar (`?textareaId=...&table=...&values=...`)
-  istället för hopkodad sträng – skulle även göra `?`-anropet mer
-  läsbart och mindre felbenäget vid framtida ändringar.
-- **Inline `onclick`-JS med hopslagna strängar** i "Töm"-knappen
-  (flera DOM-anrop i en enda `onClick`-attributsträng) är svårläst och
-  bör brytas ut till en egen namngiven JS-funktion (t.ex. `clearSelection()`)
-  i samma stil som övriga knappar.
-- Kommentarer i `makeSelectToggleOnly.js` innehåller en attribuering
-  till "GROK" (`// GROK: behövs för att undvika...`) — tyder på att viss
-  kod genererats/felsökts med hjälp av ett annat AI-verktyg. Ofarligt,
-  men värt att känna till som kontext.
+- Schemat är hårdkodat till `'map_configs'` i anropet till
+  `all_from_table()`; info-modulen använder i stället `$configSchema` från
+  `constants/configSchema.php`.
+- `$table` från `$_GET['table']` valideras inte mot en tillåten uppsättning
+  tabeller och byggs in i SQL-frågan i `all_from_table()`. Godtyckligt
+  tabellinnehåll i schemat kan därför läsas.
+- `table`-parametern kodar tre värden i en sträng med två separatorer:
+  `explode('::', ..., 2)` följt av `explode(':', ..., 2)`.
+- All utskrift av användarstyrd data (`$textareaId`, `$currentValue`,
+  `$header`, options-värden) går genom `htmlspecialchars()`.

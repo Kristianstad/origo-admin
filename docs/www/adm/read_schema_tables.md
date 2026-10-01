@@ -6,12 +6,10 @@
 Systerfunktion till `read_db_schemas.php`, men ett steg djupare: där
 `read_db_schemas.php` listar **scheman** i en extern databas, listar
 denna modul **tabeller** i ett specifikt schema och registrerar dem i
-konfigurationsdatabasens `tables`-tabell. Anropas troligen när en
-administratör väljer ett schema i `manage.php` och systemet behöver
-lista vilka tabeller som finns däri.
+konfigurationsdatabasens `tables`-tabell. Anropas av knappen
+`printReadSchemaTablesButton()` i `manage.php` för det valda schemat.
 
-Inget eget svar skrivs ut (`pg_flush($dbh)` i slutet, men inget `echo`)
-– ett "fire and forget"-anrop, i linje med `read_db_schemas.php`.
+Lyckade anrop ger ett tomt svar; felkoder beskrivs under "Svar och fel".
 
 ## Anropas med
 `read_schema_tables.php?schema=<database_id>.<schema_name>`
@@ -33,18 +31,10 @@ Inget eget svar skrivs ut (`pg_flush($dbh)` i slutet, men inget `echo`)
 **Databas:** läser `<configSchema>.databases`, skriver till
 `<configSchema>.tables` (kolumn `table_id`, format `db.schema.tabell`).
 
-## Kända begränsningar / observationer
-- ~~**⚠️ Strängbyggd SQL utan escaping vid INSERT**~~ Koden
-  använder numera `pg_query_params()` med platshållare (`VALUES ($1)`)
-  för `INSERT INTO {$configSchema}.tables(table_id)`, samma säkra
-  mönster som `read_db_schemas.php`. Ingen SQL-injektionsrisk kvar här.
-- ~~**`die()` vid SQL-fel** utan att stänga någon av databasanslutningarna~~
-  Koden loggar felet (`error_log()`), stänger båda
-  databasanslutningarna explicit (`pg_close($dbh)`/`pg_close($dbh_config)`)
-  och avslutar med `http_response_code(500)` + `exit()` — motsvarande
-  gäller även vid saknad databas (`404`) och saknad parameter (`400`).
-- Doctype (`<!DOCTYPE html>`) skrivs ut överst trots att filen aldrig
-  producerar något annat HTML-innehåll – sannolikt en kopieringsrest
-  från en mall, ofarlig men vilseledande.
-- Samma `unset($_GET)`-mönster som i `read_db_schemas.php` – konsekvent
-  försiktighetsåtgärd för databasanslutningsmoduler.
+## Svar och fel
+- Saknad `schema`-parameter ger HTTP 400, okänd databas 404 och SQL-fel 500.
+- Vid SQL-fel loggas felet med `error_log()` och båda databasanslutningarna
+  stängs.
+- INSERT-satsen använder `pg_query_params()` med platshållare.
+- `read_schema_tables.php` kör `unset($_GET)` efter att `schema` lästs, som
+  `read_db_schemas.php`.

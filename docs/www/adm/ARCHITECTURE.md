@@ -20,8 +20,7 @@ includeDirectory("./functions/<modulnamn>");
 - Alla filer i `functions/common/` laddas alltid, oavsett modul, även om
   modulen bara använder ett fåtal av dem.
 - Ingen modul-fil visar i sig själv exakt vilka common-funktioner som är
-  tillgängliga – se `common.md` för en växande referens baserad på
-  faktiskt observerad användning.
+  tillgängliga – se `common.md` för referens.
 - **Undantag:** `grouplayerfix.php` inkluderar **inte** `functions/common/`
   (medvetet bortkommenterat, modulen behöver inga common-funktioner för
   närvarande).
@@ -45,7 +44,7 @@ require("./constants/configSchema.php");
 En konstant är alltså **inte** automatiskt tillgänglig bara för att den
 finns i mappen. Vid dokumentation av en modul listas därför bara de
 konstanter modulen faktiskt inkluderar – se `constants.md` för
-fullständig, växande referens.
+fullständig referens.
 
 ## JS-filer
 
@@ -87,18 +86,17 @@ forwardauth är den långsiktiga riktningen; LDAP finns kvar som alternativ.
 `restrictedLayer.php` fungerar med båda spåren utan att bry sig om
 vilket som satt `$_SESSION['user']`.
 
-## Loader-filer utanför adm/ (dokumenteras separat)
+## Loader-filer utanför adm/
 
 Toppnivåmapparna `authorization/`, `export/`, `forwardauth/`,
 `grouplayerfix/`, `mapstate/`, `news/`, `updated/` innehåller
-`*-loader.php`-filer som speglar entry points i `adm/`. Bekräftat aktivt
-använda (se `authorization.md`: `login.php`/`displayLogout.php` anpassar
-beteende baserat på om anropet kom via en loader). De saknar ännu egen
-dokumentation – se OVERVIEW.md, "Ej dokumenterade / lågprioriterade".
+`*-loader.php`-filer som speglar entry points i `adm/`. De används aktivt
+(se `authorization.md`: `login.php`/`displayLogout.php` anpassar
+beteende baserat på om anropet kom via en loader).
 
 **Undantag:** `export/` (toppnivå) har egen `functions/`/`constants/`-mapp
 med kod som delvis dubblerar `adm/functions/export/` – mer än en tunn
-loader, extra uppmärksamhet vid loader-genomgången.
+loader.
 
 ## Extern exportpipeline (FME Server)
 
@@ -116,14 +114,12 @@ Den fysiska kartkatalogen ligger under `<webRoot>/maps/<kartnamn>`.
 `maps` använder en enda uppsättning filer. Befintliga mål ersätts rekursivt
 innan symlänken skapas.
 Samma fil skriver även `constants/RESTRICTEDLAYERS.php`
-(`defineFileConstant()`), vilket är den bekräftade källan till
-konstanten `restrictedLayer.php` läser.
+(`defineFileConstant()`), som `restrictedLayer.php` läser.
 
 `manage.php` (`markMapsChanged()`) sätter `maps.changed='t'` när något
 som påverkar en publicerad karta ändras; `writeConfig.php`
 (`markMapUnchanged()`) nollställer flaggan efter lyckad publicering.
-Detta ger sannolikt underlag för en "osparade ändringar"-indikator i
-manage-gränssnittet.
+`printWriteConfigButton()` visar knappen i "ändrad"-läge när flaggan är satt.
 
 WriteConfig-funktionerna använder ett explicit context-array med referenser
 till kartans konfigurationsdata. Manage- och news-helpers tar motsvarande
@@ -143,10 +139,9 @@ administratörer.
 ## Den dedikerade "preview"-kartan
 
 En Origo-karta med id `'preview'` existerar specifikt för
-adminverktygets förhandsgranskningsfunktion (`printConfigPreviewButton()`
-i manage.md, anropad från grupp- och lagerformulär). Detta är alltså
-inte ett användarfel eller en bugg när `'preview'` hårdkodas som mapId i
-dessa anrop, utan en avsiktlig, dedikerad resurs.
+adminverktygets förhandsgranskningsfunktion (`printConfigPreviewButton()`,
+anropad från grupp- och lagerformulär). `'preview'` hårdkodas som mapId i
+dessa anrop; det är avsiktligt.
 
 ## Datastrukturen "target" (manage-modulen)
 
@@ -162,16 +157,8 @@ och info-vyn) kan hantera alla entitetstyper (map/layer/group/source/...)
 generiskt utan att skriva om samma logik för varje typ. `manage.php` och
 `info.php` delar därför basic/full target-kontraktet, medan
 `writeConfig.php` medvetet behåller kartans konfigurationsrad som en lokal
-JSON-arbetsstruktur.
-
-Target-kärnans rena representationer och accessorer ligger i
-`functions/common/`: `isTarget()`, `isBasicTarget()`, `isFullTarget()`,
-`targetType()`, `targetId()`, `targetTable()`, `targetIdColumn()`,
-`typeTableName()`, `makeBasicTarget()`, `makeFullTarget()`,
-`makeTargetBasic()`, `targetConfigParam()` och
-`setTargetConfigParam()`. Manage-lagret behåller de config-/databasberoende
-funktionerna `targetConfig()`, `makeTargetFull()`, `tableConfigs()` och
-`updatedFullTarget()`. Fullständig beskrivning finns i `manage.md`.
+JSON-arbetsstruktur. Funktionerna listas i `common.md` och `manage.md`; den
+fullständiga beskrivningen finns i `manage.md`.
 
 ## Historik: ångra/gör om (manage-modulen)
 

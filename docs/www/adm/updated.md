@@ -8,9 +8,7 @@
 Tar reda på **när en eller flera databastabeller senast ändrades**,
 genom att fråga Postgres commit-tidsstämpel (`pg_xact_commit_timestamp`)
 för varje tabells senaste rad. Returnerar det senaste datumet (endast
-datumdel, `YYYY-MM-DD`) bland de angivna tabellerna. Används troligen av
-Origo-kartan eller adminpanelen för att visa "senast uppdaterad"-datum
-för en karta eller ett lager.
+datumdel, `YYYY-MM-DD`) bland de angivna tabellerna.
 
 **Förutsättning:** kräver att `track_commit_timestamp` är påslaget i
 Postgres-konfigurationen, annars returnerar
@@ -30,10 +28,9 @@ av tidsstämpeln för den senast ändrade tabellen).
 **Common-funktioner:** `dbh($connectionString)`
 
 **Konstanter:** `constants/dbhConnectionStringForUpdated.php` →
-`$dbhConnectionStringForUpdated` – **egen, dedikerad anslutningssträng**
-för denna modul, skild från standardanslutningen. Möjlig anledning:
-kanske en läsreplika, eller en anslutning med särskilda rättigheter för
-`pg_xact_commit_timestamp()`. Värt att bekräfta.
+`$dbhConnectionStringForUpdated` – egen anslutningssträng för denna modul,
+skild från standardanslutningen och enligt kommentaren i konstantfilen
+skrivskyddad.
 
 ## Filer och funktioner
 
@@ -41,20 +38,11 @@ kanske en läsreplika, eller en anslutning med särskilda rättigheter för
 |---|---|---|
 | `updated_from_table2.php` | `updated_from_table2($dbh, $tableWithSchema): array\|null` | Kör `pg_xact_commit_timestamp`-frågan för en tabell, returnerar `[tidsstämpel, xmin]` för senast ändrade rad |
 
-## Kända begränsningar / observationer
-- **⚠️ SQL injection-risk:** `$tableWithSchema` klistras in direkt i SQL
-  utan escaping (`"SELECT ... FROM $tableWithSchema ..."`), och kommer
-  från `$_GET['table']` (kommaseparerad, ej validerad mot en whitelist av
-  tillåtna tabellnamn). Eftersom detta är ett tabellnamn (inte ett värde)
-  kan det inte parameteriseras med `pg_query_params()` på vanligt sätt –
-  rekommenderad åtgärd är att validera mot en känd lista tillåtna
-  scheman/tabeller, eller använda `pg_escape_identifier()` per
-  del (schema och tabellnamn separat).
-- **Funktionsnamnet `updated_from_table2`** antyder att det finns/fanns
-  en `updated_from_table.php` (utan `2`) – vi har inte sett den filen
-  men den kan finnas i `functions/common/` eller vara borttagen.
-  *(Not: en `updated_from_table.php` finns faktiskt listad i
-  `functions/common/` i filträdet – värt att jämföra de två när vi ser
-  den filen, för att förstå varför två varianter finns.)*
-- **`die()` vid SQL-fel**, samma mönster som tidigare noterat i andra
-  moduler.
+## Begränsningar och risker
+- **SQL-injektionsrisk:** `$tableWithSchema` kommer från `$_GET['table']`
+  (kommaseparerad) och byggs in direkt i SQL utan validering mot tillåtna
+  tabeller. Tabellnamn kan inte bindas med `pg_query_params()`.
+- `updated_from_table2()` returnerar tidsstämpel och `xmin` för den senast
+  ändrade raden. `updated_from_table()` i `functions/manage/` returnerar
+  bara tidsstämpeln och används av manage för tabellformuläret.
+- SQL-fel avslutar skriptet med `die()`.

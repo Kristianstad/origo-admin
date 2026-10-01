@@ -2,8 +2,7 @@
 
 **Entry point:** `adm/read_db_schemas.php`
 **Funktionsfiler:** `adm/functions/read_db_schemas/*.php`
-**Anropas troligen från:** en knapp i manage-modulen (se
-`functions/manage/printReadDbSchemasButton.php`, ej dokumenterad ännu)
+**Anropas från:** knappen `printReadDbSchemasButton()` i manage-modulen
 
 ## Syfte
 Ansluter till en extern, i förväg registrerad databas (identifierad via
@@ -14,9 +13,8 @@ finns) i formatet `<database_id>.<schema_name>`. Detta gör de externa
 schemana valbara i övriga delar av adminpanelen (t.ex. vid konfiguration
 av databaskällor för kartlager).
 
-Ger inget svar till klienten vid lyckat resultat (svaret är
-utkommenterat i koden) – detta är alltså troligen ett "fire and forget"-
-anrop, inte en sida menad att visas för en användare.
+Lyckat resultat ger ett tomt svar: anropet körs i en dold iframe och är
+inte avsett att visas för en användare.
 
 ## Anropas med
 `read_db_schemas.php?database=<database_id>`
@@ -34,12 +32,9 @@ anrop, inte en sida menad att visas för en användare.
 
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
-- `dbh($connectionString = null)` – **OBS: `dbh()` kan ta emot en
-  anslutningssträng som argument** för att ansluta till en *annan*
-  databas än standardkonfigurationen. Denna modul är första stället vi
-  sett detta – tidigare moduler har bara anropat `dbh()` utan argument
-  (ansluter till standard-/konfigurationsdatabasen). Uppdaterat i
-  `common.md`.
+- `dbh($connectionString = null)` – ansluter till standarddatabasen utan
+  argument, annars till databasen i anslutningssträngen (här en extern
+  databas).
 - `all_from_table($dbh, $schema, $table)` – hämtar alla rader ur
   `databases`-tabellen
 - `array_column_search($value, $column, $rows)` – slår upp raden för
@@ -60,34 +55,11 @@ till en **extern databas** vars scheman listas via
 |---|---|---|
 | `schemaNamesFromDb.php` | `schemaNamesFromDb(&$dbh): array` | Listar namn på alla scheman i en databas, exkluderar `information_schema` och `pg_%`-scheman (Postgres interna scheman) |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **✅ Bra exempel: parameteriserad SQL.** Denna fil använder
-  `pg_query_params()` för INSERT-satsen istället för strängbyggd SQL –
-  till skillnad från t.ex. `readDelete.php` i news-modulen. Värt att
-  lyfta fram som förebild när äldre kod (som `readDelete.php`)
-  refaktoreras för att åtgärda SQL injection-risker.
-- **⚠️ Känslig data i klartext i databasen:** `databases`-tabellens
-  `connectionstring`-kolumn innehåller sannolikt databasuppgifter
-  (host, användarnamn, lösenord) i klartext, hämtade och använda direkt
-  utan synlig kryptering. Detta är i sig kanske en medveten, accepterad
-  designavvägning (jämför cookie-kryptering i authorization-modulen som
-  visar att man är medveten om känslig data), men värt att bekräfta – är
-  `databases`-tabellen extra skyddad (t.ex. bara läsbar av
-  databasanvändaren appen kör som, ingen bredare åtkomst)?
-- **`unset($_GET)` direkt efter att `database`-parametern lästs ut** är
-  ett ovanligt men defensivt mönster (troligen för att förhindra att
-  någon längre ner i koden råkar läsa fler `$_GET`-värden än avsett).
-  Fungerar men är inte ett mönster vi sett i andra moduler – värt att
-  notera om det är en medveten säkerhetspraxis som borde spridas till
-  fler moduler, eller en enstaka försiktighetsåtgärd för just denna
-  känsliga operation (extern databasanslutning).
-- **`schemaNamesFromDb()` använder `die()` vid SQL-fel** istället för
-  att kasta ett exception eller returnera ett felvärde. Detta avslutar
-  scriptet abrupt **utan att stänga `$dbh_config`** (konfigurationsdatabas-
-  anslutningen öppnad i `read_db_schemas.php`), vilket är en mindre
-  resursläcka vid fel (ofarligt eftersom PHP städar upp anslutningar vid
-  scriptets slut ändå, men inkonsekvent med den i övrigt noggranna
-  felhanteringen i `read_db_schemas.php`, som konsekvent stänger båda
-  anslutningarna vid andra felvägar).
-- Ingen `strict_types` eller parametertypning.
+- `databases.connectionstring` innehåller anslutningsuppgifter i klartext och
+  används direkt. Skyddet bestäms av vem som kan läsa tabellen.
+- `schemaNamesFromDb()` använder `die()` vid SQL-fel, så `$dbh_config`
+  stängs inte vid det felet.
+- `read_db_schemas.php` kör `unset($_GET)` efter att `database` lästs, så
+  koden längre ned kan inte läsa fler frågeparametrar.

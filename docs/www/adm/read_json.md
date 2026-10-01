@@ -71,13 +71,8 @@ stället för `GLOBAL`. `ensureSessionWritable()` används för att skapa eller
 - Databasschemat hämtas från `constants/configSchema.php`.
 - Importhelpersen använder explicita parametrar i stället för globala variabler.
 
-## Kvarstående arbete
+## Begränsningar
 
-CSRF-skyddet är ännu inte infört på övriga admin-sidor. Andra äldre moduler
-kan också innehålla strängbyggd SQL, bland annat delar av `manage.php`,
-`news.php`, `updated.php` och `writeConfig.php`; de ligger utanför denna
-refaktorering.
-
-Importen bör smoke-testas mot en riktig PostgreSQL-databas med en giltig
-Origo-export, inklusive import med specialtecken i titlar, URL:er och
-beskrivningar samt rollback efter ett avsiktligt databasfel.
+CSRF-token används i `read_json.php` och `sql_import.php`; övriga admin-sidor
+saknar CSRF-skydd. Importen verifieras inte av automatiska tester mot en
+riktig PostgreSQL-databas.

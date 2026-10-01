@@ -4,17 +4,14 @@
 **Funktionsfiler:** `adm/functions/mapstate/*.php`
 
 ## Syfte
-Ett stateless JSON-API för att spara och återläsa "karttillstånd" (state) –
-troligen kameraposition, synliga lager m.m. i en Origo-karta – identifierat
-med ett genererat UUID. Används sannolikt för att generera delbara/bokmärkbara
-länkar till en specifik kartvy. Rensar automatiskt bort gamla, oanvända
-tillstånd vid varje anrop.
+Ett stateless JSON-API för att spara och återläsa karttillstånd (state) i en
+Origo-karta, identifierat med ett genererat UUID. Tillståndet gör det möjligt
+att dela länkar till en specifik kartvy (kolumnen `mapurl`). Gamla, oanvända
+tillstånd rensas automatiskt vid varje anrop.
 
 **OBS:** till skillnad från news-modulen finns **ingen inloggnings- eller
-sessionskontroll** i denna fil. Endpointen är öppen för alla (CORS tillåter
-`*`). Detta kan vara avsiktligt (frontend-kartan är publik och behöver kunna
-spara/läsa state utan inloggning) men bör bekräftas – annars är det en
-säkerhetslucka värd att åtgärda.
+sessionskontroll** i denna fil. Endpointen är öppen för alla och CORS tillåter
+`*`, så den publika kartan kan spara och läsa tillstånd utan inloggning.
 
 ## Anropas med
 Rent REST-liknande API, ingen `action`-parameter:
@@ -40,9 +37,9 @@ Felsvar (400/404/500) returneras alltid som `{"error": "..."}`.
 
 **Databas:** tabellen `<configSchema>.mapstates` med kolumner
 `mapstate_id, state, created, lastuse, mapurl, preserve`.
-(`preserve`-kolumnen förhindrar att en post städas bort av cleanup —
-funktionen för att sätta `preserve` finns inte i denna modul, så den sätts
-sannolikt från ett annat ställe i systemet, t.ex. manage-modulen.)
+(`preserve`-kolumnen förhindrar att en post städas bort av cleanup. Den
+satts inte i denna modul utan i manage-modulen via fältet "Rensas ej" i
+`printMapstateForm()`.)
 
 ## Filer och funktioner
 
@@ -57,35 +54,19 @@ sannolikt från ett annat ställe i systemet, t.ex. manage-modulen.)
 | `updateLastUse.php` | `updateLastUse($dbh, string $id): void` | Sätter `lastuse = NOW()` för ett givet id |
 | `validateMapStateId.php` | `validateMapStateId(string $id): bool` | Validerar att id matchar UUID-formatet via regex |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ Ingen inloggningskontroll** — se OBS ovan under Syfte. Bör bekräftas
-  om detta är avsiktligt.
-- **⚠️ Öppen CORS-policy** (`Access-Control-Allow-Origin: *`) — tillåter
-  anrop från vilken domän som helst. Rimligt om endpointen är avsedd att
-  vara publik, men värt att notera som medvetet vägval snarare än
-  standardinställning.
-- **`$id` i `retrieveMapState.php`/`updateLastUse.php` valideras via regex
-  men escapas inte** när den byggs in i SQL-strängen (`WHERE mapstate_id =
-  '$id'`). Eftersom `validateMapStateId()` strikt begränsar formatet till
-  hexadecimala tecken och bindestreck är detta i praktiken säkert idag,
-  men är en annan säkerhetsstil än `createMapState.php` som konsekvent
-  använder `pg_escape_literal()`. Bör harmoniseras vid refaktorering –
-  antingen alltid `pg_escape_literal()`/parameteriserade frågor, eller en
-  tydlig kommentar om varför regex-validering anses tillräcklig här.
-- **`updateLastUse()` litar på att anroparen redan validerat `$id`** —
-  funktionen har ingen egen validering. Fungerar idag eftersom enda
-  anroparen (`retrieveMapState`) validerar innan anrop, men är sårbart om
-  funktionen återanvänds någon annanstans utan samma försiktighet.
-- **`mapstate.php` anropar `pg_close($dbh)` efter OPTIONS-svar** även om
-  `$dbh` skulle vara `false` (databasanslutning misslyckad) — `dbh()`
-  anropas *innan* OPTIONS-kontrollen, så ett `pg_close(false)`-anrop är
-  tekniskt möjligt om anslutningen faller på just en OPTIONS-request.
-  Litet ofarligt men värt att känna till.
-- **UUID genereras i PHP med `mt_rand()`** snarare än en kryptografiskt
-  säker källa (`random_bytes()`) eller databasens `gen_random_uuid()`.
-  Sannolikt tillräckligt bra för detta syfte (inte säkerhetskritiskt),
-  men avviker från best practice för UUID-generering.
-- Ingen av filerna har `declare(strict_types=1)` överst, trots att
-  parametrar och returvärden är typade — typkontroll är alltså inte strikt
-  trots typdeklarationerna.
+- **Ingen inloggningskontroll:** endpointen är öppen för alla anrop.
+- **Öppen CORS** (`Access-Control-Allow-Origin: *`): anrop tillåts från
+  vilken domän som helst.
+- `retrieveMapState.php` och `updateLastUse.php` bygger in `$id` i
+  SQL-strängen. `retrieveMapState()` validerar id:t med
+  `validateMapStateId()` (UUID-format) före anropet; `updateLastUse()`
+  validerar inte själv och får därför bara anropas med ett validerat id.
+  `createMapState.php` använder `pg_escape_literal()`.
+- UUID genereras i PHP med `mt_rand()`, inte med en kryptografiskt säker
+  källa.
+- `mapstate.php` anropar `pg_close($dbh)` efter OPTIONS-svar även om
+  `dbh()` skulle ha misslyckats.
+- Filerna saknar `declare(strict_types=1)`; typdeklarationerna är därför
+  inte strikta.

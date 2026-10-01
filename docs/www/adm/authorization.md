@@ -41,9 +41,8 @@ inloggningsformulär.
   **skriver och stänger sessionen som en bieffekt** (se `login.php`s
   kommentar `// skriver + stänger sessionen`) – viktigt att känna till
   vid felsökning av sessionsrelaterade buggar
-- `ensureSessionWritable()` – säkerställer att sessionen kan skrivas till
-  (troligen löser ett låsningsproblem – bör läsas i sin helhet vid
-  dokumentation av `common.md`)
+- `ensureSessionWritable()` – öppnar sessionen igen med applikationens
+  cookie-inställningar om den är stängd (till exempel efter `read_and_close`)
 - `getCookieOptions($expiryTimestamp)` – bygger array med cookie-inställningar
   (path, domain, secure, httponly, samesite) givet ett utgångsdatum
 
@@ -60,10 +59,10 @@ tredjepartsberoende utanför `adm/`. **OBS:** denna `require_once` ligger
 på toppnivå i `login.php` (inte inuti en `if`), vilket betyder att
 autoloadern alltid laddas så fort `functions/authorization/` inkluderas
 via `includeDirectory()` — även när `$authMethod` inte är `'ldap'`. Se
-flaggning nedan.
+begränsningar nedan.
 
 **Session:** sätter `$_SESSION['user']` vid lyckad inloggning (exakt
-struktur sätts av `initUserLdap()`, ej dokumenterad ännu).
+struktur sätts av `initUserLdap()`, se common.md).
 
 **Cookies:** sätter en egen krypterad cookie (`$cookieConfig['cookieName']`)
 utöver PHP:s sessionscookie, för att identifiera användaren mellan
@@ -84,48 +83,25 @@ sessioner (AES-256-CBC-krypterat användarnamn).
 | `login.php` | `login(&$dbh)` | Autentiserar mot LDAP, sätter krypterad cookie, initierar session, redirectar till `return_to` eller visar "inloggad"-vy |
 | `logout.php` | `logout()` | Förstör session och cookies (session, autentiseringscookie, refresh-cookie), visar inloggningsformulär igen |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ Cookie-format kan vara skört:** i `login.php` byggs cookien som
-  `base64_encode($encrypted . '::' . $iv)` – d.v.s. binär krypterad data
-  och binär IV slås ihop med separatorn `'::'` som en vanlig sträng.
-  Eftersom `$encrypted` är rå binärdata (inte text) finns en teoretisk
-  risk att bytesekvensen `::` råkar förekomma i den krypterade datan,
-  vilket skulle göra uppdelningen vid avkodning felaktig. Vi har inte
-  sett avkodningsfunktionen än (troligen i `common/` eller
-  `initUserLdap.php`) – bör verifieras där, men ett säkrare mönster är
-  att lagra IV med fast längd (t.ex. alltid först N bytes) istället för
-  en textseparator.
-- **⚠️ `adldap2`-biblioteket laddas ovillkorligt** vid varje request till
-  `authorization.php`, oavsett `$authMethod` – se OBS ovan under "Beror
-  på". Om `$authMethod` någon gång är något annat än `'ldap'` (t.ex. vid
-  lokal utveckling utan AD) kan detta orsaka ett fatalt fel om
-  composer-biblioteket inte är installerat. Kandidat att flytta `require_once`
-  in i `login()`-funktionen, villkorat på `$authMethod === 'ldap'`.
-- ~~**`displayLogout.php` har dödkodskommentar:** `if ($authMethod === 'ldap')`
-  är utkommenterad men koden innanför körs alltid ändå~~ Villkoret är
-  aktiv, ej utkommenterad kod – utloggningsknappen byggs faktiskt bara
-  när `$authMethod === 'ldap'`. Ingen dödkod, ingen bugg.
-- **`$_GET['call']` skickas genom till formuläret som ett dolt fält utan
-  synlig användning** i den kod vi sett hittills (varken läses eller
-  valideras förutom escaping). Oklart syfte – flaggar för uppföljning,
-  eventuellt använt av anropande kod utanför denna modul (t.ex. en
-  loader-fil eller frontend-integration).
-- **`login.php` och `displayLogout.php` innehåller identisk logik** för
-  att avgöra `$src` (news-iframens URL) baserat på
-  `basename($formAction) === 'authorization-loader.php'`. Duplicerad kod
-  – kandidat för att brytas ut till en delad hjälpfunktion, t.ex.
-  `getNewsIframeSrc($formAction)`, när vi förenklar modulen. Kopplingen
-  till `authorization-loader.php` (utanför `adm/`) är också ett konkret
-  exempel på varför loader-filerna bör dokumenteras – den här modulen
-  beter sig olika beroende på hur den anropas utifrån.
-- **Lösenord hanteras källkodsmässigt korrekt** (nollas explicit med
-  `$passwd = null; unset($passwd);` direkt efter användning) – bra
-  säkerhetspraxis värd att lyfta fram som förebild.
-- **`isSafeReturnUrl()` är ett bra, återanvänt skyddsmönster** – används
-  konsekvent i både `displayLogin()` och `login()`. Värd att peka på om
-  liknande redirect-hantering behövs i andra moduler framöver.
-- Ingen `strict_types` eller parametertyper i `logout()`, `displayLogin()`,
-  `displayLogout()`, `displayWithHtml()`, `displayHtmlHeader()`,
-  `displayHtmlFooter()` (endast `login()` har typad referensparameter,
-  `isSafeReturnUrl()` är helt typad).
+- Cookien byggs i `login.php` som `base64_encode($encrypted . '::' . $iv)`.
+  `openssl_encrypt()` med `options=0` ger base64-text som inte kan innehålla
+  `::`, och `initUserLdap()` delar upp värdet med
+  `explode('::', $decoded, 2)`. IV:n (binär) kan därför innehålla vilka
+  bytes som helst.
+- `login.php` och `initUserLdap.php` kräver `../../composer/adldap2/autoload.php`
+  med `require_once` på toppnivå, så biblioteket läses in när
+  `functions/authorization` eller `functions/common` inkluderas, oavsett
+  `$authMethod`. Saknas composer-biblioteket orsakar det ett fatalt fel.
+- Villkoret `$authMethod === 'ldap'` i `displayLogout.php` är aktivt:
+  utloggningsknappen byggs bara för LDAP-metoden.
+- `$_GET['call']` skickas (escapad) vidare som dolt fält i formuläret;
+  modulen läser den inte.
+- `login.php` och `displayLogout.php` avgör news-iframens URL med samma
+  logik (`basename($formAction) === 'authorization-loader.php'`), så modulen
+  beter sig olika beroende på om den anropas via `authorization-loader.php`
+  (utanför `adm/`).
+- Användarens lösenord nollas explicit (`$passwd = null; unset($passwd);`)
+  direkt efter användning.
+- `isSafeReturnUrl()` används i både `displayLogin()` och `login()`.

@@ -73,3 +73,4 @@ Vid ändringar i iframe-flöden, läs `manage.md` och kontrollera huvudsida, bar
 - `docs/www/adm/ARCHITECTURE.md` – gemensamma arkitekturmönster och target-modell.
 - `docs/www/adm/manage.md` – CRUD-flöden, formulärbyggstenar, POST-kommandon, undo/redo och restore.
 - Övriga `docs/www/adm/*.md` – modulernas detaljer, till exempel `authorization.md`, `read_json.md`, `writeConfig.md` och `multiselect.md`.
+- `docs/DEVELOPMENT_PLAN.md` – planerat förbättringsarbete. Lägg nya förbättringsidéer och uppskjutna åtgärder där, inte som önskelistor i modulreferenserna; ta bort punkter när de är genomförda.

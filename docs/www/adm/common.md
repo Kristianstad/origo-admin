@@ -9,7 +9,7 @@
 
 | Funktion | Fil | Beskrivning | Används av |
 |---|---|---|---|
-| `all_from_table($dbh, $schema, $table)` | `all_from_table.php` | Hämtar alla rader från angiven tabell | info, multiselect (⚠️ hårdkodar schema `map_configs`), read_db_schemas, export, writeTablesForAllLayers |
+| `all_from_table($dbh, $schema, $table)` | `all_from_table.php` | Hämtar alla rader från angiven tabell | info, multiselect (hårdkodar schema `map_configs`), read_db_schemas, export, writeTablesForAllLayers |
 | `array_column_search($value, $column, $rows)` | `array_column_search.php` | Hittar första raden där given kolumn matchar värdet | info, read_db_schemas, export, writeConfig, manage, writeTablesForAllLayers |
 | `assoc_array_values($array)` | `assoc_array_values.php` | Kontrollerar/hämtar faktiska värden i nästlad associativ array | info, manage |
 | `clearAuthSession()` | `clearAuthSession.php` | Nollställer `$_SESSION['user']`, sätter en ny `login_time_stamp` och stänger sessionen. Anropas av `initUserLdap()` när ingen giltig användare kan slås upp | authorization (indirekt via initUserLdap) |
@@ -48,6 +48,5 @@
 | `usedInMaps($dbh, $target, $checkedTargets=[], $usedInMaps=[])` | `usedInMaps.php` | Rekursivt: hittar alla kartor (`map`-target) som ett givet target ytterst ingår i, via `findAllParents()`. Håller reda på redan besökta targets för att undvika oändlig rekursion vid cirkulära referenser | manage (avgör vilka kartor som ska markeras `changed` vid en ändring) |
 | `includeDirectory($path)` | *(i `adm/functions/`, ej i `common/` — placerad sist, utanför den alfabetiska listan, eftersom den fysiskt hör hemma på en annan plats)* | Laddar alla `.php`-filer i angiven mapp med `require_once` | samtliga moduler |
 
-> **Not:** `updated_from_table()` beskrevs tidigare felaktigt här som en
-> common-funktion. Den ligger i `functions/manage/` — se manage.md. Samma
-> gäller `targetConfig()`, som också hör till `functions/manage/`.
+> `updated_from_table()` och `targetConfig()` ligger i `functions/manage/`;
+> se manage.md.

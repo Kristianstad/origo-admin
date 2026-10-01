@@ -8,12 +8,12 @@
 Visar och hanterar nyheter/meddelanden för inloggade användare i adminpanelen.
 Varje användare kan se en lista över nyheter, läsa en nyhet (markeras då som
 läst), radera en nyhet ur sin egen vy (raderar inte för andra användare),
-och kolla om det finns olästa nyheter (används troligen för en notis-badge
-i gränssnittet).
+och kolla om det finns olästa nyheter.
 
-Anropas via GET med parametern `action`, och används sannolikt inbäddat
-(iframe/AJAX) i huvudgränssnittet snarare än som en fristående sida –
-flera actions returnerar rått JSON eller HTML-fragment utan layout.
+Anropas via GET med parametern `action`. Nyhetslistan bäddas in som iframe
+i inloggnings- och utloggningsvyerna i authorization-modulen (`news.php`
+eller `news-loader.php`). Flera actions returnerar rått JSON eller
+HTML-fragment utan layout.
 
 ## Anropas med
 `news.php?action=<action>&newId=<id>&return=<fält>`
@@ -66,24 +66,15 @@ i auktoriseringsmodulen, se `authorization.php`).
 | `testUnread.php` | `testUnread($username, $userNews)` | Returnerar `"true"`/`"false"` om det finns olästa nyheter |
 | `userNews.php` | `userNews($username, $pgNewsArray)` | Filtrerar bort nyheter som användaren själv raderat; konverterar pg-arrayer till PHP-arrayer |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ SQL injection-risk i `readDelete.php`:** `$newId` (kommer från
-  `$_GET['newId']` i `news.php`) klistras in direkt i SQL-strängen utan
-  escaping eller parameteriserad fråga. Detta bör åtgärdas vid
-  refaktorering (`pg_query_params()` istället för strängbyggd SQL).
-- **`pgNewsArray.php` har död kod:** `pg_free_result($result);` står
-  *efter* `return`-satsen och exekveras därför aldrig.
-- **`includeDirectory("./functions/common")` laddar hela mappen** (25+
-  filer) trots att `news`-modulen bara använder en handfull av dem
-  (`readAndCloseSession`, `dbh`, `initUserLdap`, `pgArrayToPhp`). Bra att
-  känna till vid nedbrytning — vi kan inte anta att en fil i `common/`
-  bara används av en modul.
-- **Inget escaping av `abstract`/`text`** vid utskrift i `printNewsSubjects.php`
-  eller `printNews.php` (ingen `htmlspecialchars()`) – potentiell XSS om
-  nyhetsinnehåll någonsin kan komma från en annan källa än betrodda
-  administratörer. Troligen lågrisk idag eftersom nyheter sannolikt
-  skrivs av administratörer själva, men värt att notera.
-- **`selectNew.php` har en `break` efter `return`**, vilket är dött (ofarligt, men onödigt).
-- Ingen av funktionsfilerna har PHP `declare(strict_types=1)` eller
-  typdeklarationer på parametrar/returvärden.
+- **SQL-injektionsrisk i `readDelete.php`:** `$newId` (från
+  `$_GET['newId']` i `news.php`) byggs in direkt i SQL-strängen utan
+  escaping eller parametrisering.
+- `abstract` och `text` skrivs ut utan `htmlspecialchars()` i
+  `printNewsSubjects.php` och `printNews.php`. Innehållet måste därför
+  komma från betrodda administratörer.
+- `includeDirectory("./functions/common")` laddar hela mappen, men modulen
+  använder bara `readAndCloseSession`, `dbh`, `initUserLdap` och
+  `pgArrayToPhp`. Andra moduler delar därför filerna i `common/`.
+- Funktionsfilerna saknar `declare(strict_types=1)` och typdeklarationer.

@@ -5,7 +5,7 @@ restrictedLayer.php
  ├─ includeDirectory("./functions/restrictedLayer")
  ├─ readAndCloseSession()                    [common]
  ├─ includeFileConstant('RESTRICTEDLAYERS')  [common] → laddar RESTRICTEDLAYERS-konstanten (lista över skyddade lager)
- ├─ (om authMethod === 'ldap') initUserLdap()   ⚠️ se flaggning – saknar $dbh-argument
+ ├─ (om authMethod === 'ldap') initUserLdap()   → öppnar en egen databasanslutning när $dbh saknas
  ├─ tolkar QUERY_STRING manuellt (byter ut '&?' och '?' mot '&', för att hantera Origos url-format)
  ├─ bygger $call = URL mot bakomliggande karttjänst (restrictedServiceUrl + path + querystring)
  ├─ plockar ut begärda lagernamn ur LAYERS/LAYER/TYPENAME-parametrar

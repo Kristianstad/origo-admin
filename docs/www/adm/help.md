@@ -9,9 +9,8 @@ info- och multiselect-modulerna). Utan parameter visas en generisk lista
 med länkar till Origo-dokumentation och ett externt JSON-valideringsverktyg
 (för att kontrollera att t.ex. `style_config`/`options`-fält innehåller
 giltig JSON innan de sparas). Med en
-`id`-parameter visas istället en specifik hjälptext hämtad från databasen
-(troligen kontextuell hjälp kopplad till ett visst formulärfält i
-`manage.php`).
+`id`-parameter visas istället en specifik hjälptext hämtad från databasen,
+kopplad till ett formulärfält i `manage.php` (`printHelpButton()`).
 
 ## Anropas med
 `help.php` eller `help.php?id=<help_id>`
@@ -31,11 +30,10 @@ giltig JSON innan de sparas). Med en
 **Filsystem:** länkar till (men läser inte) `../Origo_admin_tutorial_swedish.pdf`
 på toppnivå.
 
-## Kända begränsningar / observationer
-- **`$help['abstract']` skrivs ut utan `htmlspecialchars()`** – troligen
-  avsiktligt eftersom hjälptexter förväntas innehålla HTML-formatering
-  (skriven av administratörer), men värt att notera som samma mönster
-  som `news.php`s XSS-observation.
-- Inkluderar `functions/common` villkorat inuti `if (isset($_GET['id']))`
-  – ett ovanligt men logiskt mönster (undviker databasanslutning helt
-  när den inte behövs).
+## Begränsningar och risker
+- `$help['abstract']` skrivs ut utan `htmlspecialchars()` eftersom
+  hjälptexterna skrivs av administratörer och innehåller HTML. Samma
+  mönster som i `news.php`; texten måste därför komma från betrodda
+  källor.
+- `functions/common` inkluderas bara när `id` anges, så den generella
+  hjälpen öppnar ingen databasanslutning.

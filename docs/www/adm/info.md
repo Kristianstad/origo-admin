@@ -53,8 +53,8 @@ manage-vyn använder samma target-kontrakt för objektidentitet.
 - `makeTargetBasic($target)`, `makeBasicTarget()`, `makeFullTarget()`,
   `targetType()`, `targetId()`, `targetTable()`, `targetIdColumn()` och
   `targetConfigParam()` – bygger och läser objekt-targets
-- `assoc_array_values($array)` – (används i `printParents`, sannolikt för
-  att kontrollera om en nästlad array har några faktiska värden)
+- `assoc_array_values($array)` – (används i `printParents`) kontrollerar om
+  en nästlad array har några faktiska värden
 
 **Konstanter:**
 - `constants/configSchema.php` → `$configSchema`
@@ -72,33 +72,18 @@ utanför webbroten (för `source`-typer med QGIS-tjänst).
 | `printParents.php` | `printParents($allParents)` | Skriver ut en länkad, grupperad lista över objekt som refererar till det aktuella objektet. Grupperas per tabell och "relationstyp" (kolumn). Länkar rekursivt till `info.php` för varje förälder |
 | `printUniqueLogins.php` | `printUniqueLogins($lastlogins)` | Beräknar och skriver ut antal unika AD-inloggningar idag/denna vecka/månad/år samt senaste vecka/månad/år, baserat på en lista av `lastlogin`-tidsstämplar |
 
-## Kända begränsningar / observationer (ej åtgärdat ännu)
+## Begränsningar och risker
 
-- **⚠️ Ingen inloggnings-/behörighetskontroll** i `info.php` själv (till
-  skillnad från `news.php`) — bör bekräftas om detta är avsiktligt (t.ex.
-  om åtkomst styrs på annat sätt, som via nätverk/proxy) eller en lucka.
-- **⚠️ `$childId` och `$childType` skrivs ut direkt i HTML utan
-  `htmlspecialchars()`** (t.ex. `echo "<h2>$childId</h2>"`), samt `$_GET`-
-  värden används för att bygga filsökväg till `.qgs`-filen
-  (`'/services/' . $childFull['service'] . '/' . ...`). `$childFull['service']`
-  kommer visserligen från databasen (inte direkt från `$_GET`), men
-  `$childType` i URL:en (`?type=`) avgör vilken tabell som slås upp –
-  värt att dubbelkolla att `all_from_table`/tabellnamnet är skyddat mot
-  godtycklig `type`-input (SQL injection eller path traversal via
-  tabellnamn).
-- **`printUniqueLogins.php` använder `strftime()`**, vilket är
-  **deprecated sedan PHP 8.1** och borttaget i PHP 9. Bör ersättas med
-  `IntlDateFormatter` eller `DateTime::format()` vid refaktorering –
-  detta är den enda platsen hittills i kodbasen vi sett som kommer sluta
-  fungera vid PHP-uppgradering.
-- **`printUniqueLogins.php` är lång och repetitiv** — samma
-  filtrerings-/räknelogik upprepas 7 gånger (idag, vecka, månad, år,
-  -1 vecka, -1 månad, -1 år) med bara olika tidsintervall. Bra kandidat
-  för att brytas ut till en hjälpfunktion, t.ex.
-  `countLoginsSince(DateTime $from, DateTime $to, array $timestamps): int`.
-- **Blandat ansvar i `info.php`:** filen blandar routing, datahämtning,
-  HTML-generering och en gren av domänlogik (QGIS-filläsning) i en och
-  samma fil. Kandidat för att bryta ut till egna funktioner i
-  `functions/info/` vid förenkling (t.ex. `renderSourceDetails()`,
-  `renderAdUserDetails()`).
-- Ingen typning (`strict_types`, parametertyper) i någon av filerna.
+- **Ingen inloggnings-/behörighetskontroll** i `info.php` (till skillnad från
+  `news.php`). Åtkomsten beror på hur sidan nås utifrån, till exempel via
+  nätverk eller proxy.
+- **`$childId` och `$childType` skrivs ut direkt i HTML utan
+  `htmlspecialchars()`** (t.ex. `echo "<h2>$childId</h2>"`). `?type=` avgör
+  vilken tabell som slås upp via `all_from_table()`, som bygger in
+  tabellnamnet i SQL utan validering mot tillåtna tabeller. `.qgs`-sökvägen
+  byggs av `service` från databasen och käll-id:t.
+- `printUniqueLogins.php` använder `strftime()`, som är deprecated sedan
+  PHP 8.1 och borttaget i PHP 9. Samma filtrerings- och räknelogik
+  upprepas sju gånger med olika tidsintervall.
+- `info.php` blandar routing, datahämtning, HTML-generering och
+  QGIS-filläsning i samma fil.
