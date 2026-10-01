@@ -3,6 +3,8 @@
 		div			{ float:left }
 		button, .btn	{ height:1.7em; font-family:inherit; font-size:inherit; border:none; padding:0.3em; position:relative; margin-left:0.1em; white-space:nowrap; background-color:var(--skin-primary, #455a64); color:var(--skin-button-text, #FFFFFF); border-radius:var(--skin-radius, 0.25em); cursor:pointer; transition:background-color 0.3s ease; vertical-align:middle }
 		.backArrow		{ display:inline-block; font-size:1.25em; font-weight:900; line-height:1; -webkit-text-stroke:0.07em currentColor; transform:translateY(-3px) scaleX(0.65) }
+		.adminArrow		{ display:inline-block; transform:translateY(-1px) }
+		.adminAsterisk	{ display:inline-block; margin-left:0.05em; font-size:1.2em; font-weight:700; line-height:1; -webkit-text-stroke:0.02em currentColor; transform:translateY(2px) }
 		button[aria-label="Stäng"] > span { display:inline-block; transform:translateY(-2px) }
 		button:hover, .btn:hover { background-color:var(--skin-hover, #0097a7) }
 		button:active	{ background-color:var(--skin-active, #b2ebf2); box-shadow:inset 0 0 0.3125em var(--skin-shadow, #c1c1c1); outline:none }

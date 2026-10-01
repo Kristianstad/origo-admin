@@ -11,9 +11,11 @@ karta, ett lager, en källa, en tabell eller en AD-användare) samt en lista
 hämtat rekursivt via `findAllParents`). Tänkt att visas i en iframe – sidan
 skickar `postMessage`-anrop (`resize`, `close`) till föräldrafönstret.
 
-Länken "Administrera" skickar objektets id till `manage.php` för redigering,
-och "Används av"-listan länkar till `info.php` för varje förälder, vilket
-gör sidan rekursivt navigerbar mellan relaterade objekt.
+Ikonknappen "Administrera" visar samma pil som Hämta följd av en fet
+asterisk. Knappens tillgängliga namn är "Administrera"; den skickar
+objektets id till `manage.php` för redigering.
+"Används av"-listan länkar till `info.php` för varje förälder, vilket gör
+sidan rekursivt navigerbar mellan relaterade objekt.
 
 ## Anropas med
 `info.php?type=<typ>&id=<id>`

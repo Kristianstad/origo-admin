@@ -111,8 +111,8 @@ if (!empty($childId)) {
 		echo '&nbsp;<button type="button" title="Tillbaka" aria-label="Tillbaka" onclick="history.back()"><span class="backArrow" aria-hidden="true">&#x2190;</span></button>';
 	}
 
+	echo "&nbsp;<form action='manage.php' method='post' target='_blank' style='display:inline'><button type='submit' title='Administrera' aria-label='Administrera' name='" . $childType . "Id' value='" . $childId . "'><span class='adminArrow' aria-hidden='true'>&#x21AA;</span><span class='adminAsterisk' aria-hidden='true'>*</span></button></form>";
 	echo "&nbsp;<button type=\"button\" title=\"Stäng\" aria-label=\"Stäng\" onclick=\"window.parent.postMessage({ action: 'close' }, window.location.origin);\"><span aria-hidden=\"true\">&#x22A0;</span></button>";
-	echo "&nbsp;<form action='manage.php' method='post' target='_blank' style='display:inline'><button type='submit' name='" . $childType . "Id' value='" . $childId . "'>Administrera</button></form>";
 }
 
 pg_close($dbh);
