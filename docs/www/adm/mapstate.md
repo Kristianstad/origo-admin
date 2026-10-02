@@ -25,6 +25,13 @@ Rent REST-liknande API, ingen `action`-parameter:
 
 Felsvar (400/404/500) returneras alltid som `{"error": "..."}`.
 
+## Loader-filer
+
+`mapstate/mapstate-loader.php` gör `chdir('../adm/')` och inkluderar
+`mapstate.php`. Loadern är värdet för `serviceEndpoint` i kontrollen
+`sharemap#1` (`060.origo.sql`) och i `demokarta/index.json` och
+`preview/index.json`.
+
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `dbh()` – öppnar databasanslutning (enda common-funktionen som används här)

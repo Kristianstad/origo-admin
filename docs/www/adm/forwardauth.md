@@ -40,6 +40,21 @@ med `code` och `state` som Azure sätter):
 | `state` | Måste matcha `$_SESSION['oauth2state']` (CSRF-skydd) |
 | `error` / `error_description` | Sätts av Azure vid misslyckad inloggning |
 
+## Loader-filer
+
+Båda entry points nås via loaders som gör `chdir('../adm/')` och inkluderar
+entry pointen:
+
+- `forwardauth/forwardauth-loader.php` → `forwardauth.php`
+- `authorization/forwardauth-loader.php` → `forwardauth.php` (samma innehåll;
+  båda filerna finns)
+- `forwardauth/azure-callback-loader.php` → `azure-callback.php`
+
+Exempelvärdet för `redirectUri` i `constants/azureConfig.php` pekar på
+`/php/forwardauth/azure-callback-loader.php`, i enlighet med loaderns plats
+i `finalfs/www/forwardauth/`. Redirect-adressen i Azure och i
+`azureConfig.php` måste matcha den katalog som faktiskt används.
+
 ## Session-struktur
 Vid lyckad inloggning sätts:
 

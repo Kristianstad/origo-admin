@@ -11,11 +11,6 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 - Återstående faser körs i ordningen 3, 5, 4, 6 och 7. Varje fas gås igenom i detalj med ägaren innan implementationen börjar, så upplägget kan ändras.
 - Nya och ändrade funktioner bör få parameter- och returtyper i vanligt läge (ingen bred omskrivning), men typning är en riktlinje och får vika om den försvårar förenkling eller generalisering av koden. Använd nullbara typer (`?string`) eller `mixed` där databasen kan ge `NULL`, och unionstyper som `array|false` där en funktion kan returnera `false`.
 
-## Fas 1. Dokumentation
-
-- [ ] Lägg till en länk från README:s konstantavsnitt till `constants.md`. README behåller sin installationsanpassade beskrivning, eftersom `constants.md` är teknisk referens.
-- [ ] Dokumentera loader-filerna (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `updated/`, `restrictedLayer/`) i respektive modulreferens.
-
 ## Fas 3. Target-abstraktionen
 
 Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. Ett separat typregister behövs inte.

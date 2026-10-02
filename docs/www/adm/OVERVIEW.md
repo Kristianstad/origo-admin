@@ -53,5 +53,5 @@ funktioner/konstanter.
 
 | Fil | Anteckning |
 |---|---|
-| Loader-filer (`authorization/`, `export/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `news/`, `updated/` på toppnivå) | Aktivt använda (se authorization.md) |
-| `export/` (toppnivå, med egen `functions/`/`constants/`) | Delvis dubblerad kod jämfört med `adm/functions/export/` – mer än en tunn loader |
+| Loader-filer (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `updated/` på toppnivå) | Aktivt använda; förteckning i ARCHITECTURE.md och beskrivning i respektive modulreferens |
+| `export/` (toppnivå, med egen `functions/`/`constants/`) | Finns enligt export.md, men inte i arbetsytan och kan inte verifieras |

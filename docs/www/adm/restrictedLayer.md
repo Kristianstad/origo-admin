@@ -36,6 +36,11 @@ som anger vilken delsökväg på karttjänsten som ska anropas.
 | `GetFeatureInfo` | Tom GeoJSON FeatureCollection |
 | Övriga | HTTP 500 "Rättigheter saknas!" |
 
+## Loader-filer
+
+`authorization/restrictedLayer-loader.php` gör `chdir('../adm/')` och
+inkluderar `restrictedLayer.php`.
+
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `readAndCloseSession()` – läser in sessionen

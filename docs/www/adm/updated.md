@@ -28,6 +28,13 @@ Ogiltig eller oregistrerad `table`-parameter ger HTTP 400.
 **Svar:** ett enkelt textdatum, t.ex. `2025-06-12` (de första 10 tecknen
 av tidsstämpeln för den senast ändrade tabellen).
 
+## Loader-filer
+
+`updated/updated-loader.php` gör `chdir('../adm/')` och inkluderar
+`updated.php`. `addLayersToJson()` bygger iframe-adressen
+`/php/updated/updated-loader.php?table=<tabeller>` för lagrets
+"Uppdaterad"-knapp.
+
 ## Beror på
 **Common-funktioner:** `dbh($connectionString)`
 

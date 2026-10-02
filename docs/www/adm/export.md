@@ -21,8 +21,8 @@ filer i detta arbetsträd.
 
 Det finns även en delvis duplicerad kopia av flera av dessa
 funktionsfiler i den fristående `export/`-mappen på toppnivå (utanför
-`adm/`) – se anteckning i ARCHITECTURE.md om detta, följs upp vid
-loader-genomgången.
+`adm/`) – se anteckning i ARCHITECTURE.md. Mappen finns inte i arbetsytan
+och kan inte verifieras.
 
 ## Syfte
 Låter en inloggad användare beställa export av ett kartutsnitt (angivet

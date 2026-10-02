@@ -115,15 +115,34 @@ vilket som satt `$_SESSION['user']`.
 
 ## Loader-filer utanför adm/
 
-Toppnivåmapparna `authorization/`, `export/`, `forwardauth/`,
-`grouplayerfix/`, `mapstate/`, `news/`, `updated/` innehåller
-`*-loader.php`-filer som speglar entry points i `adm/`. De används aktivt
-(se `authorization.md`: `login.php`/`displayLogout.php` anpassar
-beteende baserat på om anropet kom via en loader).
+Mapparna `authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/` och
+`updated/` under `finalfs/www/` innehåller `*-loader.php`-filer som gör
+`chdir('../adm/')` och därefter `require` av motsvarande entry point, så att
+entry pointens relativa sökvägar (`./functions`, `./constants`, `./styles`)
+fungerar. Loadern innehåller ingen egen logik.
 
-**Undantag:** `export/` (toppnivå) har egen `functions/`/`constants/`-mapp
-med kod som delvis dubblerar `adm/functions/export/` – mer än en tunn
-loader.
+| Loader | Entry point | Beskrivning |
+|---|---|---|
+| `authorization/authorization-iframe.php` | (egen HTML-sida) | Bäddar in `authorization-loader.php` i en iframe; se `authorization.md` |
+| `authorization/authorization-loader.php` | `authorization.php` | Se `authorization.md` |
+| `authorization/forwardauth-loader.php` | `forwardauth.php` | Samma innehåll som `forwardauth/forwardauth-loader.php`; se `forwardauth.md` |
+| `authorization/news-loader.php` | `news.php` | Se `news.md` |
+| `authorization/restrictedLayer-loader.php` | `restrictedLayer.php` | Se `restrictedLayer.md` |
+| `forwardauth/azure-callback-loader.php` | `azure-callback.php` | Se `forwardauth.md` |
+| `forwardauth/forwardauth-loader.php` | `forwardauth.php` | Se `forwardauth.md` |
+| `grouplayerfix/grouplayerfix-loader.php` | `grouplayerfix.php` | Se `grouplayerfix.md` |
+| `mapstate/mapstate-loader.php` | `mapstate.php` | Se `mapstate.md` |
+| `updated/updated-loader.php` | `updated.php` | Se `updated.md` |
+
+Exempel i koden använder URL-prefixet `/php/` (till exempel
+`/php/updated/updated-loader.php`). Hur prefixet mappas till `finalfs/www/`
+bestäms av webbserverkonfigurationen utanför det här repot och kan inte
+verifieras här.
+
+**Undantag:** modulen `export` har enligt `export.md` en egen
+`export/`-mapp på toppnivå med `functions/`/`constants/` som delvis
+dubblerar `adm/functions/export/`. Mappen finns inte i den här arbetsytan
+och kan därför inte verifieras.
 
 ## Extern exportpipeline (FME Server)
 

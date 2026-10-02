@@ -316,7 +316,8 @@ Miljö- och installationsspecifika inställningar för adminverktyget ligger i
 `finalfs/www/adm/constants`. Vid Docker-drift kan katalogen monteras från
 hosten på `/www/adm/constants`. Vid installation utan Docker redigeras filerna
 direkt i motsvarande katalog. Ändra normalt bara de lokala konfigurationsfilerna
-och behåll en säkerhetskopia före uppgradering.
+och behåll en säkerhetskopia före uppgradering. En teknisk referens över alla
+konstantfiler finns i [docs/www/adm/constants.md](docs/www/adm/constants.md).
 
 #### Databas och sökvägar
 

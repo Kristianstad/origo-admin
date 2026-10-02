@@ -4,8 +4,8 @@
 **Iframe-wrapper:** `adm/authorization-iframe.php`
 **Funktionsfiler:** `adm/functions/authorization/*.php`
 **Stilmall:** `adm/styles/authorization.css`
-**Extern startpunkt (dokumenteras separat):** `authorization/authorization-loader.php`,
-`authorization/authorization-iframe.php` (toppnivå, utanför adm – se separat loader-genomgång)
+**Externa startpunkter:** `authorization/authorization-loader.php` och
+`authorization/authorization-iframe.php` (utanför `adm/`, se "Loader-filer")
 
 ## Syfte
 Hanterar inloggning och utloggning för adminpanelen mot Active Directory
@@ -33,6 +33,21 @@ sida efter lyckad inloggning, skyddad mot open redirect via
 Route-logiken (i tur och ordning): logout → visa "inloggad"-vy (om
 inloggad utan SERVICE-param) → hantera POST som inloggningsförsök → visa
 inloggningsformulär.
+
+## Loader-filer
+
+- `authorization/authorization-loader.php` gör `chdir('../adm/')` och
+  inkluderar `authorization.php`. Enligt kodkommentaren är den en ren loader
+  utan HTML-utskrift före PHP-logiken och används både av ForwardAuth-
+  redirecten och av formulärets POST.
+- `authorization/authorization-iframe.php` är en HTML-sida som bäddar in
+  `authorization-loader.php` i en iframe; adressen byggs av `$proxyRoot`
+  (`constants/proxyRoot.php`) och skriptets katalog. Kontrollen
+  `splash#login1` i `060.origo.sql` pekar på `./authorization/authorization-iframe.php`.
+- `adm/authorization-iframe.php` är en motsvarande iframe-sida inuti `adm/`
+  som pekar på `../php/adm/authorization.php`.
+- `authorization/news-loader.php` används för nyhetslistan när formuläret
+  postas via `authorization-loader.php`; se news.md.
 
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):

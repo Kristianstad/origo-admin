@@ -32,6 +32,12 @@ t.ex. `return=text` ger en färdig HTML-sida med nyhetstexten, medan
 `return=abstract,date` ger JSON med bara de fälten. `return=all` eller
 tomt ger alla fält som JSON.
 
+## Loader-filer
+
+`authorization/news-loader.php` gör `chdir('../adm/')` och inkluderar
+`news.php`. `login()` och `displayLogout()` väljer den som nyhetsiframens
+adress när formulärets action är `authorization-loader.php`.
+
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `readAndCloseSession()` – läser in sessionen

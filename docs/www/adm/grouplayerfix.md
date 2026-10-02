@@ -38,6 +38,11 @@ ihop till ett enda `featureTypes`-svar.
 
 **Allt annat:** vidarebefordras oförändrat via `forwardToQgisServer()`.
 
+## Loader-filer
+
+`grouplayerfix/grouplayerfix-loader.php` gör `chdir('../adm/')` och
+inkluderar `grouplayerfix.php`.
+
 ## Beror på
 **OBS: `functions/common/` inkluderas INTE i denna modul** – till skillnad
 från nästan alla andra moduler vi dokumenterat. Detta är medvetet
