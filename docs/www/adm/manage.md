@@ -450,7 +450,9 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   `$inheritPosts` per objekttyp. Raderaknappen visas bara när
   `inheritPosts['_viewDepth'] == 1`, alltså för den första nivån av vald
   hierarki (till exempel den valda kartan, men inte en nästlad grupp längre
-  ner).
+  ner). Det är avsiktligt: raderingskontrollen (`findAllParents()`) blockerar
+  objekt som används av andra objekt, och objekt under första nivån används
+  alltid av sitt överordnade objekt.
 - `printFormatForm.php` har bara fälten `format_id`, `abstract` och `info`.
 - `printHeadForm.php` och `printChildSelect.php` har var sin implementation
   av förkortade etiketter (prefix-strippning av föräldrans id) för
@@ -482,9 +484,10 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
 - **`validateUpdate()` validerar bara multiselect-fält.** Den enda
   serversidesvalideringen före ett `UPDATE` är kontrollen att kommaseparerade
   referens-id:n (för multiselect-fält som `adusers` och `adgroups`) finns.
-  Alla andra fält (fritext, siffror, ja/nej-val, URL:er och JSON-liknande fält
-  som `style_config`, `options` och `clusteroptions`) skrivs till databasen
-  utan kontroll av innehåll eller format.
+  Alla andra fält (fritext, siffror, ja/nej-val och URL:er) skrivs utan
+  kontroll av innehåll utöver kolumntypen. Kolumner av typen `json` (till
+  exempel `style_config`, `options` och `clusteroptions`) valideras av
+  PostgreSQL, som avvisar ogiltig JSON med ett databasfel.
 - **`updatedFullTarget()` sätter fält som inte postats till tom sträng**, inte
   till tidigare värde. `sqlForUpdate()` skriver därför över alla kolumner i
   tabellraden vid varje uppdatering. Ett fält som ett formulär inte postar

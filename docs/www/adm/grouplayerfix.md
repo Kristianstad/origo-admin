@@ -66,7 +66,6 @@ tillbaka baserat på filens ändringstid jämfört med TTL.
 | `getCachedDescribeFeatureType.php` | `getCachedDescribeFeatureType($qgisUrl, $typeName): string` | Hämtar describeFeatureType-JSON för ett enskilt lager, cachad enligt samma mönster |
 | `getCachedProjectSettings.php` | `getCachedProjectSettings($qgisUrl): string` | Hämtar QGIS-projektets `GetProjectSettings`-XML, cachad (APCu eller fil) enligt TTL |
 | `getLayerNamesInGroup.php` | `getLayerNamesInGroup($xml, $groupName): array` | Rekursiv, namespace-säker XPath-sökning: hittar alla "löv"-lagernamn under en given grupp i projekt-XML:en. Returnerar tom array om `$groupName` inte är en grupp |
-| `getResponseContentType.php` | `getResponseContentType($params): string` | Bestämmer Content-Type baserat på `outputFormat`-parametern, annars `text/xml`. Har ingen anropare |
 
 ## Begränsningar och risker
 
@@ -88,8 +87,6 @@ tillbaka baserat på filens ändringstid jämfört med TTL.
 - `forwardToQgisServer()` gör om anropet vid *nätverksfel*
   (`$rawResponse === false || $httpCode === 0`), medan `fetchWithStatus()` i
   restrictedLayer-modulen gör om vid *5xx-svar*.
-- `getResponseContentType()` har ingen anropare; `grouplayerfix.php` sätter
-  Content-Type-headers direkt på flera ställen.
 - `grouplayerfix.php` och `restrictedLayer.php` pekar mot **två skilda
   QGIS-tjänster**, så avsaknaden av koppling till `RESTRICTEDLAYERS` och
   `$_SESSION['user']` i grouplayerfix läcker inte skyddad information.

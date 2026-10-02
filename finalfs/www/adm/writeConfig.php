@@ -414,22 +414,22 @@ HERE;
 			require("./constants/searchEngineMeta.php");
 			$structuredData['geo'] = array(
 				'@type' => 'GeoCoordinates',
-				'latitude' => $geoLatitude + 0,
-				'longitude' => $geoLongitude + 0
+				'latitude' => $searchEngineMeta['geo']['latitude'],
+				'longitude' => $searchEngineMeta['geo']['longitude']
 			);
 			$structuredData['contentLocation'] = array(
 				'@type' => 'Place',
-				'name' => $contentLocationName,
+				'name' => $searchEngineMeta['contentLocation']['name'],
 				'address' => array(
 					'@type' => 'PostalAddress',
-					'addressLocality' => $contentLocationAddressLocality,
-					'addressCountry' => $contentLocationAddressCountry
+					'addressLocality' => $searchEngineMeta['contentLocation']['addressLocality'],
+					'addressCountry' => $searchEngineMeta['contentLocation']['addressCountry']
 				)
 			);
 			$structuredData['publisher'] = array(
 				'@type' => 'Organization',
-				'name' => $publisherName,
-				'url' => $publisherUrl
+				'name' => $searchEngineMeta['publisher']['name'],
+				'url' => $searchEngineMeta['publisher']['url']
 			);
 
 			$structuredDataJson = json_encode($structuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

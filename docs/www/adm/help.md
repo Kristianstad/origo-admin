@@ -34,6 +34,7 @@ på toppnivå.
 - `$help['abstract']` skrivs ut utan `htmlspecialchars()` eftersom
   hjälptexterna skrivs av administratörer och innehåller HTML. Samma
   mönster som i `news.php`; texten måste därför komma från betrodda
-  källor.
+  källor. Det är avsiktligt: förutsättningen är att administratörer är
+  betrodda.
 - `functions/common` inkluderas bara när `id` anges, så den generella
   hjälpen öppnar ingen databasanslutning.

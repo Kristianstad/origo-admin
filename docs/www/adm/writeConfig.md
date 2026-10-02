@@ -43,7 +43,7 @@ Anropas av knappen `printWriteConfigButton()` i `manage.php`.
 **Konstanter:**
 - `constants/webRoot.php` → `$webRoot`
 - `constants/proxyRoot.php`, `constants/previewBase.php`
-- `constants/searchEngineMeta.php` → geo/publisher-metadata för strukturerad data
+- `constants/searchEngineMeta.php` → `$searchEngineMeta`, geo-/publisher-metadata för strukturerad data (array med `geo`, `contentLocation` och `publisher`)
 
 **Externt bibliotek:** `matthiasmullie/minify` (composer,
 `../../composer/minify/autoload.php`) för CSS/JS-minifiering.
@@ -88,6 +88,7 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 | `renderCssTags.php` | `renderCssTags(array $items): string` | Bygger HTML för CSS-inkludering: `include(sökväg)`-syntax läses in och minifieras som inline `<style>`, annars renderas som vanlig `<link rel="stylesheet">` |
 | `renderJavaScriptTags.php` | `renderJavaScriptTags(array $items): string` | Bygger HTML för JS-inkludering: stödjer `include(...)`/`include_minify(...)` (minifieras) och `include_nominify(...)` (lämnas oförändrad, för redan minifierade bundles), annars renderas som vanlig `<script src="...">` |
 | `saveFile.php` | `saveFile(string $path, string $content): bool` | Enkel, defensiv wrapper runt `file_put_contents()` |
+| `splitValues.php` | `splitValues($valueString): array` | Delar en kommaseparerad JS-värdelista utan att dela vid komma inom strängar eller `{}`/`[]`/`()`. Används av `fixDuplicateDeclarations()` |
 
 ## Koppling till manage-modulen: "changed"-flaggan
 
@@ -132,8 +133,8 @@ inte verifieras i det här repot.
 - `fixDuplicateDeclarations()` är en radbaserad JavaScript-parser med enkel
   spårning av sträng- och scope-djup via räkning av `{`/`}`. Den hanterar
   inte flerradiga deklarationer, kommentarer som innehåller `{`/`}`,
-  template literals eller andra syntaxfall fullt ut. Filen innehåller en
-  stor utkommenterad sektion (`$mapOnloadInit`) och ett exempel-testblock.
+  template literals eller andra syntaxfall fullt ut. Värdelistor delas av
+  `splitValues()`.
 - `json_format()` är en handskriven JSON-formaterare från 2008 (enligt
   kodkommentar). Genvägen `json_encode($json, JSON_PRETTY_PRINT)` används
   bara om indata inte redan är en sträng; `writeConfig.php` skickar en

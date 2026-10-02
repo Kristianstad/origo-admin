@@ -45,9 +45,12 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 
 - Följ lokal kodstil och gör minsta ändring som löser uppgiften; undvik bred formattering och orelaterad refaktorering.
 - Använd parametriserade SQL-värden. Dynamiska tabell- och kolumnnamn ska väljas eller valideras mot en tillåten uppsättning.
+- Nya och ändrade funktioner bör få parameter- och returtyper i vanligt läge, men det är en riktlinje, inte en strikt regel: utelämna typer om de försvårar förenkling eller generalisering av koden. Databasvärden är strängar eller `NULL`, så använd nullbara typer eller `mixed` där det behövs. `declare(strict_types=1)` används inte i befintliga filer utan beslut.
+- Filstruktur (detaljer och undantag i `ARCHITECTURE.md`, avsnittet "Strukturregler"): varje hjälpfunktion ligger i en egen fil med samma namn som funktionen, i `functions/<huvudfil>/` eller `functions/common/`. En huvudfil får bara använda hjälpfiler från sin egen mapp, `common` och Composer-tillägg på servern. Varje fil i `constants/` innehåller exakt en variabeldefinition med samma namn som filen (kommentarer är tillåtna).
 - Bevara korrekt escaping och samma-origin-kontroller för `postMessage`. Följ befintlig formulärstruktur; HTML-formulär får inte nästlas.
 - Föredra `json_encode()` för JSON och återanvänd befintliga helpers. Läs `ARCHITECTURE.md` och modulreferensen för lokala include-, target- och POST-mönster.
 - Behandla användartext som UTF-8 och använd multibyte-medvetna funktioner för teckenbaserad textbearbetning. Se `common.md` för gemensamma helpers.
+- Förutsättningen är att administratörer är betrodda och att den som installerar verktyget begränsar åtkomsten till `/adm`. Administratörsskriven HTML (till exempel hjälptexter och nyheter) skrivs därför ut utan escaping, och anslutningssträngar lagras i klartext. Data från andra källor (frågeparametrar, publika endpoints, importerad data) ska ändå escapas och valideras.
 
 ## Historik och schemaändringar
 

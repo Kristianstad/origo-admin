@@ -96,8 +96,8 @@ sessioner (AES-256-CBC-krypterat användarnamn).
   `$authMethod`. Saknas composer-biblioteket orsakar det ett fatalt fel.
 - Villkoret `$authMethod === 'ldap'` i `displayLogout.php` är aktivt:
   utloggningsknappen byggs bara för LDAP-metoden.
-- `$_GET['call']` skickas (escapad) vidare som dolt fält i formuläret;
-  modulen läser den inte.
+- `$_GET['call']` skickas (escapad) vidare som dolt fält i formuläret.
+  Inget i repot skickar parametern, och `login()` läser bara `return_to`.
 - `login.php` och `displayLogout.php` avgör news-iframens URL med samma
   logik (`basename($formAction) === 'authorization-loader.php'`), så modulen
   beter sig olika beroende på om den anropas via `authorization-loader.php`

@@ -56,9 +56,9 @@ satts inte i denna modul utan i manage-modulen via fältet "Rensas ej" i
 
 ## Begränsningar och risker
 
-- **Ingen inloggningskontroll:** endpointen är öppen för alla anrop.
-- **Öppen CORS** (`Access-Control-Allow-Origin: *`): anrop tillåts från
-  vilken domän som helst.
+- **Ingen inloggningskontroll och öppen CORS** (`Access-Control-Allow-Origin: *`)
+  är avsiktligt: den publika kartan ska kunna spara och läsa tillstånd utan
+  inloggning. Anrop tillåts från vilken domän som helst.
 - `retrieveMapState.php` och `updateLastUse.php` bygger in `$id` i
   SQL-strängen. `retrieveMapState()` validerar id:t med
   `validateMapStateId()` (UUID-format) före anropet; `updateLastUse()`

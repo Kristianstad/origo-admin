@@ -58,7 +58,9 @@ till en **extern databas** vars scheman listas via
 ## Begränsningar och risker
 
 - `databases.connectionstring` innehåller anslutningsuppgifter i klartext och
-  används direkt. Skyddet bestäms av vem som kan läsa tabellen.
+  används direkt. Åtkomsten till admingränssnittet ska begränsas till betrodda
+  administratörer av den som installerar verktyget; någon separat
+  rättighetsstyrning finns inte.
 - `schemaNamesFromDb()` använder `die()` vid SQL-fel, så `$dbh_config`
   stängs inte vid det felet.
 - `read_db_schemas.php` kör `unset($_GET)` efter att `database` lästs, så

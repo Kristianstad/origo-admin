@@ -13,60 +13,6 @@ function fixDuplicateDeclarations($jsCode) {
     // Regular expression to match variable declarations (single or multi-variable)
     $pattern = '/^\s*(const|let|var)\s+(.+?)\s*=\s*([^;]+);$/';
 
-    // Helper function to split values respecting nested structures
-    function splitValues($valueString) {
-        $values = [];
-        $current = '';
-        $depth = 0; // Tracks nested brackets/braces/parentheses
-        $inString = false;
-        $stringChar = '';
-
-        for ($i = 0; $i < strlen($valueString); $i++) {
-            $char = $valueString[$i];
-
-            if ($inString) {
-                if ($char === $stringChar && $valueString[$i - 1] !== '\\') {
-                    $inString = false;
-                }
-                $current .= $char;
-                continue;
-            }
-
-            if ($char === '"' || $char === "'") {
-                $inString = true;
-                $stringChar = $char;
-                $current .= $char;
-                continue;
-            }
-
-            if ($char === '{' || $char === '[' || $char === '(') {
-                $depth++;
-                $current .= $char;
-                continue;
-            }
-
-            if ($char === '}' || $char === ']' || $char === ')') {
-                $depth--;
-                $current .= $char;
-                continue;
-            }
-
-            if ($char === ',' && $depth === 0) {
-                $values[] = trim($current);
-                $current = '';
-                continue;
-            }
-
-            $current .= $char;
-        }
-
-        if (trim($current) !== '') {
-            $values[] = trim($current);
-        }
-
-        return $values;
-    }
-
     // First pass: Identify declarations and reassignments in root scope
     foreach ($lines as $line) {
         $line = trim($line);
@@ -203,36 +149,3 @@ function fixDuplicateDeclarations($jsCode) {
     // Join lines back into a string
     return implode("\n", $outputLines);
 }
-
-// Example usage with var/let declarations
-/*
-$jsCode = <<<JS
-const a = 1, arr = [2,1,3], obj = {x:1,y:2};
-var variable2 = 3;
-let variable1 = 5;
-let variable1 = 'banan';
-const variable3 = 'hej';
-const variable1 = 'boll';
-const variable2 = '3';
-const variable3 = 'hej';
-let a = 1, b = 2;
-const b = 3, variable1 = 'test';
-const arr = [1, 2, 3], obj = {x: 1, y: 2};
-// This is a comment
-console.log('Hello');
-x = 5;
-function test() {
-    const a = 10;
-    let variable1 = 'inner';
-    const arr = [4,5,6];
-    x = 10;
-    console.log('Inside function');
-}
-if (true) {
-    const variable2 = 42;
-}
-JS;
-
-$fixedCode = fixDuplicateDeclarations($jsCode);
-echo $fixedCode;
-*/

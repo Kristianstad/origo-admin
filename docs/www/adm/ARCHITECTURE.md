@@ -31,6 +31,33 @@ laddar redan alla filer i mappen) – men om `common/` bryts upp i
 undermappar måste `includeDirectory()`-anropet uppdateras i varje entry
 point som behöver den nya mappen.
 
+## Strukturregler
+
+1. **En funktion per fil.** Varje hjälpfunktion ligger i en egen fil med
+   samma namn som funktionen (`printHeadForm()` i `printHeadForm.php`),
+   i `functions/<huvudfil>/` eller i `functions/common/` om flera
+   huvudfiler använder den. Filen definierar bara den funktionen; en
+   hjälpfunktion definieras inte inuti en annan funktion.
+2. **Begränsade beroenden.** En huvudfil får bara använda hjälpfiler från
+   sin egen mapp och från `common/`, samt Composer-tillägg på servern
+   (`../../composer/`). Detsamma gäller funktionerna i mappen: de får
+   anropa funktioner i sin egen mapp och i `common/`, och `common/` får
+   inte anropa modulfunktioner.
+3. **En variabel per konstantfil.** Varje fil i `constants/` innehåller
+   exakt en variabeldefinition med samma namn som filen
+   (`constants/webRoot.php` definierar `$webRoot`). Kommentarer är
+   tillåtna. Flera värden samlas i en array.
+
+**Undantag:**
+
+- `functions/includeDirectory.php` ligger direkt i `functions/` eftersom
+  den behövs för att ladda mapparna.
+- `azure-callback.php` använder mappen `functions/forwardauth/` (samma
+  modul som `forwardauth.php`).
+- Huvudfiler utan egen funktionsmapp (till exempel `help.php`,
+  `read_schema_tables.php` och `writeTablesForAllLayers.php`) använder
+  bara `common/`.
+
 ## Konstanter kontra common-funktioner – laddningssätt
 
 Till skillnad från `functions/common/`, laddas filer i `adm/constants/`

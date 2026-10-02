@@ -8,10 +8,12 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 - Ändra inte POST-namn, command-värden, hidden fields eller databasschema utan separat beslut.
 - `export.php` finns inte i detta repo. Exportmodulen kan bara dokumenteras, inte ändras, här.
 - Nya förbättringsidéer läggs i den här filen, inte som önskelistor i modulreferenserna.
+- Faserna körs i ordningen 2, 3, 5, 4, 6 och 7. Varje fas gås igenom i detalj med ägaren innan implementationen börjar, så upplägget kan ändras.
+- Nya och ändrade funktioner bör få parameter- och returtyper i vanligt läge (ingen bred omskrivning), men typning är en riktlinje och får vika om den försvårar förenkling eller generalisering av koden. Använd nullbara typer (`?string`) eller `mixed` där databasen kan ge `NULL`, och unionstyper som `array|false` där en funktion kan returnera `false`.
 
 ## Fas 1. Dokumentation
 
-- [ ] Avgör om README:s beskrivning av filerna i `constants/` ska länka till `constants.md` i stället för att upprepa dem. README är installationsguiden och `docs/` ingår inte i Docker-avbilden.
+- [ ] Lägg till en länk från README:s konstantavsnitt till `constants.md`. README behåller sin installationsanpassade beskrivning, eftersom `constants.md` är teknisk referens.
 - [ ] Dokumentera loader-filerna (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `updated/`, `restrictedLayer/`) i respektive modulreferens.
 
 ## Fas 2. SQL och identifierare
@@ -19,16 +21,24 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 Värden ska alltid bindas med `pg_query_params()`. Tabell- och schemanamn kan inte bindas och ska valideras mot en tillåten uppsättning och citeras.
 
 - [ ] Parametrisera värden i `markMapsChanged`, `markMapUnchanged`, `functions/mapstate/*`, `functions/news/readDelete` och `tableNamesFromSchema`.
-- [ ] Validera och citera tabell- och schemanamn i `all_from_table`, `updated_from_table`, `updated_from_table2` och `multiselect.php`.
+- [ ] Inför en hjälpfunktion (till exempel `configTableNames($dbh)`) som läser tabellnamnen i konfigurationsschemat från databasen och cachar dem under anropet. Den används som tillåtelselista för tabell- och schemanamn; ingen genererad fil underhålls.
+- [ ] Validera och citera tabell- och schemanamn i `all_from_table`, `updated_from_table`, `updated_from_table2` och `multiselect.php` mot tillåtelselistan.
 - [ ] Samla de upprepade `die("Error in SQL query: ...")` i en gemensam hjälpfunktion.
-- [ ] Verifiera att `?type=` och `?table=` i `info.php` och `multiselect.php` valideras mot typregistret (se fas 3).
+- [ ] Kontrollera `?type=` i `info.php` och `?table=` i `multiselect.php` mot tillåtelselistan. För `multiselect.php` räcker de tabeller som `multiselectables.php` pekar ut via `tableAliases.php`.
+- [ ] Släpp bara igenom tabeller som är objekttyper med förväntad id-kolumn; `object_identity` och `edit_cursor` är interna tabeller.
 
 ## Fas 3. Target-abstraktionen
 
-- [ ] Inför ett typregister (typ → tabell, id-kolumn, formulärfunktion, singular/plural) som ersätter `.'s'`, `rtrim($x, 's')`, `proj4defs`-undantag och `'print'.ucfirst($type).'Form'`. Registret blir tillåtelselista för dynamiska typer.
-- [ ] Byt namn på konverterarna: `makeTargetBasic` → `toBasicTarget` och `makeTargetFull` → `toFullTarget`. Flytta `makeTargetFull`, `targetConfig` och `tableConfigs` till `functions/common/`.
+Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. Ett separat typregister behövs inte.
+
+- [ ] Låt `tableType()` ta bort exakt ett avslutande `s` (i dag tar `rtrim` bort alla), och ersätt alla `rtrim($x, 's')` med `tableType()`: `pkColumnOfTable`, `printParents`, `printAddRemoveOperations`, `printChildSelect`, `printHeadForm`, `printHeadForms` och `multiselect.php`.
+- [ ] Låt `targetIdColumn()` och `multiselect.php` anropa `pkColumnOfTable()` i stället för att upprepa `proj4defs`-undantaget.
+- [ ] Ersätt `$type.'s'` i `sqlForOperation` och `findParents` med `typeTableName()`.
+- [ ] Kontrollera dispatchen `'print'.ucfirst($type).'Form'` i `manage.php` med `function_exists()` efter att typen validerats mot tillåtelselistan.
+- [ ] Byt namn på konverterarna: `makeTargetBasic` → `toBasicTarget` och `makeTargetFull` → `toFullTarget` (23 anrop). Flytta `makeTargetFull`, `targetConfig` och `tableConfigs` till `functions/common/`.
 - [ ] Stärk kontraktet: `isTarget` kräver exakt en post, `targetId` validerar, id `"0"` accepteras, `array_key_first()` ersätter `key()`/`current()`.
 - [ ] Ersätt de manuella view-grenarna i `manage.php` och direkta `current($fullTarget)`-läsningar med target-helpers.
+- [ ] Låt `updatedFullTarget()` behålla tidigare värde för fält som saknas i POST i stället för att tömma dem.
 - [ ] Samla `die()` vid ogiltig target i en gemensam helper.
 
 ## Fas 4. `manage.php` delas upp
@@ -52,25 +62,33 @@ Värden ska alltid bindas med `pg_query_params()`. Tabell- och schemanamn kan in
 
 - [ ] `writeConfig.php`: ta bort `extract($configTables)` och ersätt `json_format` med `json_encode()` med pretty print.
 - [ ] `info`: ersätt `strftime()` (borttagen i PHP 9) och dela upp `printUniqueLogins`.
-- [ ] Ta bort kod utan anropare efter verifiering: `getResponseContentType`, `getGraphToken`.
+- [ ] Läs tillåtna domäner och fallback-URL i forwardauth från en ny konstant `constants/forwardauthReturnConfig.php` (`allowedDomains`, `defaultUrl`), i stil med `azureConfig.php`. `isSafeReturnTo()` och fallbacken i `azure-callback.php` använder den i stället för `kristianstad.se` och `https://kartor.kristianstad.se`.
 - [ ] CI: kör `php -l` över `finalfs/www/adm` och lägg till ett smoke-test mot PostgreSQL för import, CRUD och ångra/gör om.
-- [ ] CSRF för mutationer i `manage.php` och `news.php` (ändrar POST-kontraktet; kräver beslut).
+- [ ] Statisk analys: kör PHPStan på låg nivå (lokalt eller i CI) för att hitta odefinierade variabler, fel antal argument och `null`-användning utan att köra koden.
+- [ ] `declare(strict_types=1)` i rena hjälpfiler (target-funktionerna, `pg*ToText`, array-hjälpare) och i nya filer, men först när smoke-testerna ovan finns. Inte i entry points eller filer som blandar HTML och databasdata.
+- [ ] Förtydliga meddelandet när ett databasfel visas i `manage.php`; felets detaljer visas fortfarande för administratören.
+- [ ] CORS: ny konstant `constants/allowedOrigins.php` och en hjälpfunktion i `functions/common` (till exempel `sendCorsHeaders()`) som skickar `Access-Control-Allow-Origin` och `Vary: Origin` för tillåtna ursprung. Den levererade filen innehåller `'*'` så att dagens beteende bevaras; README beskriver hur listan begränsas. `mapstate.php` använder hjälpfunktionen och svarar 403 på POST från ett ursprung som inte är tillåtet. Hjälpfunktionen kan senare användas av `updated.php`, `restrictedLayer.php` och `news.php` om de behöver anropas från en separat Origo.
+- [ ] `mapstate`: begränsa storleken på request-bodyn i `createMapState()` och använd `random_bytes()` för UUID.
+
+
+## Fas 7. CSRF
+
+- [ ] CSRF-token för skrivande flöden i `manage.php` och `news.php`. Ändrar POST-kontraktet (nytt dolt fält), så designen gås igenom innan implementation.
 
 ## Modulbacklog
 
 Åtgärder som tidigare stod i modulreferenserna. Risker och begränsningar beskrivs fortfarande där.
 
-- **manage:** förenkla upprepad schema-/tabellvisning (`printHeadForm` och `printChildSelect` har var sin prefix-strippning av föräldrans id); bryt ut delad QGIS-metadatahantering (`qgisProjectMetadata`) som även `info.php` och `writeTablesForAllLayers.php` behöver; utred om `_viewDepth`-villkoret för radering är avsiktligt; lägg till null-kontroll i `initMessageListener.js` och ersätt den hopkodade `<textareaId>::<tabell>:<värden>`-strängen med separata data-attribut; validera fler fält i `validateUpdate()` (till exempel JSON-fält) och låt `updatedFullTarget()` bevara fält som inte postats; ersätt `exit(1)` utan meddelande i `tableConfigs()`; låt `markMapsChanged()` använda parametrar.
+- **manage:** förenkla upprepad schema-/tabellvisning (`printHeadForm` och `printChildSelect` har var sin prefix-strippning av föräldrans id); bryt ut delad QGIS-metadatahantering (`qgisProjectMetadata`) som även `info.php` och `writeTablesForAllLayers.php` behöver; lägg till null-kontroll i `initMessageListener.js`; överväg semantiska kontroller i `validateUpdate()` (PostgreSQL validerar redan kolumntyperna, inklusive `json`); ersätt `exit(1)` utan meddelande i `tableConfigs()`; låt `markMapsChanged()` använda parametrar.
 - **writeConfig:** utvärdera `fixDuplicateDeclarations` (radbaserad JavaScript-parser); slå ihop `renderCssTags` och `renderJavaScriptTags`; bryt ut en `buildLegendUrl` utan att ändra värdena (kräver visuell verifiering); städa oanvända delar.
 - **info:** bryt ut källdetaljer och AD-användardetaljer ur `info.php`; ersätt upprepad inloggningsräkning med en funktion.
-- **forwardauth:** flytta organisationsdomänen (`isSafeReturnTo`, fallback i `azure-callback.php`) till en konstant; rätta docblock i `getOnPremisesSamAccountName`; ta bort eller styr utkommenterade debugblock.
-- **authorization:** utred den vidarebefordrade `call`-parametern; bryt ut dubblerad logik för nyhets-iframens URL; läs in `adldap2` först när LDAP används.
-- **multiselect:** använd `$configSchema` i stället för hårdkodat schema; ersätt den hopkodade `table`-parametern med separata parametrar; flytta inline-`onclick` till en namngiven funktion.
-- **restrictedLayer:** lägg till `isset()`-kontroller för frågeparametrar; använd eller ta bort `$cause` i `finishError500`; kontrollera om `EMPTYPNG`/`LOCKPNG` finns i driftmiljön; överväg tydligare filnamn för `authorization_filter`.
+- **forwardauth:** rätta docblock i `getOnPremisesSamAccountName`; ta bort eller styr utkommenterade debugblock.
+- **authorization:** ta bort det dolda `call`-fältet i `displayLogin()` om ingen avsändare hittas (inget i repot skickar parametern och `login()` läser den inte); bryt ut dubblerad logik för nyhets-iframens URL; läs in `adldap2` först när LDAP används.
+- **multiselect:** använd `$configSchema` i stället för hårdkodat schema; flytta inline-`onclick` till en namngiven funktion.
+- **restrictedLayer:** lägg till `isset()`-kontroller för frågeparametrar; använd eller ta bort `$cause` i `finishError500`; överväg tydligare filnamn för `authorization_filter`.
 - **grouplayerfix:** rätta `$DEFAULT_QGIS_SERVER_PATH`/`_URL` och operatorprioritet i `getCachedProjectSettings`; ta bort dubblerade kodblock; harmonisera retry med `fetchWithStatus`; samla curl-inställningar.
-- **mapstate:** bekräfta att anonym åtkomst och öppen CORS är avsiktliga; använd `random_bytes()` för UUID.
 - **read_json:** smoke-testa mot en riktig PostgreSQL med specialtecken i titlar, URL:er och beskrivningar samt rollback efter databasfel.
-- **read_db_schemas:** utred skydd för `databases.connectionstring` och syftet med `unset($_GET)`.
+- **read_db_schemas:** utred syftet med `unset($_GET)`.
 - **news:** ta bort död kod i `pgNewsArray` och `selectNew`; begränsa `includeDirectory("./functions/common")` till nödvändiga filer.
 - **writeTablesForAllLayers:** överväg batchning och framsteg om timeout uppstår vid många lager.
 - **export:** städning och väntetider kan bara planeras efter verifiering i den organisationsspecifika implementationen.

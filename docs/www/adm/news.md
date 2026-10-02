@@ -73,7 +73,9 @@ i auktoriseringsmodulen, se `authorization.php`).
   escaping eller parametrisering.
 - `abstract` och `text` skrivs ut utan `htmlspecialchars()` i
   `printNewsSubjects.php` och `printNews.php`. Innehållet måste därför
-  komma från betrodda administratörer.
+  komma från betrodda administratörer. Det är avsiktligt: nyheterna
+  innehåller HTML, visas för alla inloggade användare och skrivs bara av
+  administratörer.
 - `includeDirectory("./functions/common")` laddar hela mappen, men modulen
   använder bara `readAndCloseSession`, `dbh`, `initUserLdap` och
   `pgArrayToPhp`. Andra moduler delar därför filerna i `common/`.

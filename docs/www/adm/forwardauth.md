@@ -91,7 +91,6 @@ för att `forwardauth.php` ska kunna återskapa ursprunglig URL.
 | `getAzureAuthUrl.php` | `getAzureAuthUrl()` | Bygger Azure-inloggnings-URL och sparar `oauth2state` i sessionen (CSRF-skydd) |
 | `getAzureGroups.php` | `getAzureGroups($graphToken): array` | Hämtar (paginerat) användarens Azure AD-gruppmedlemskap via Microsoft Graph |
 | `getAzureProvider.php` | `getAzureProvider()` | Skapar en konfigurerad OAuth2-klient (`TheNetworg\OAuth2\Client\Provider\Azure`), tvingar Microsoft Graph som API-mål |
-| `getGraphToken.php` | `getGraphToken($token)` | Växlar ett access-token mot ett Graph-specifikt token via refresh_token-flödet. Har inga aktiva anropare: anropen i `azure-callback.php` är utkommenterade |
 | `getOnPremisesSamAccountName.php` | `getOnPremisesSamAccountName($graphToken)` | Hämtar användarens lokala AD-kontonamn (`onPremisesSamAccountName`) via Microsoft Graph |
 | `isSafeReturnTo.php` | `isSafeReturnTo(string $url): bool` | Validerar att en return-URL:s host slutar på `kristianstad.se`. Hårdkodad domän |
 
@@ -104,10 +103,6 @@ för att `forwardauth.php` ska kunna återskapa ursprunglig URL.
 - `isSafeReturnUrl()` (authorization-modulen) matchar mot `HTTP_HOST`,
   medan `isSafeReturnTo()` (denna modul) matchar mot den hårdkodade
   domänen. De har olika skyddsnivå och är inte utbytbara.
-- `getGraphToken()` har inga aktiva anropare: anropen i
-  `azure-callback.php` är utkommenterade (`//$graphToken = getGraphToken($token);`)
-  och `$token` skickas direkt till `getAzureGroups()` och
-  `getOnPremisesSamAccountName()`.
 - Docblocket i `getOnPremisesSamAccountName.php` beskriver gruppuppslag
   (kopierat från `getAzureGroups.php`), trots att funktionen hämtar
   `onPremisesSamAccountName`.

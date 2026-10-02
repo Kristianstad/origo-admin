@@ -83,8 +83,8 @@ forwardauth-modulen).
   `SERVICE` läses på flera ställen utan `isset()`-kontroll och ger
   PHP-varningar (`Undefined array key`) om parametern saknas.
 - `finishError500($cause)` tar emot `$cause` men skriver alltid samma text.
-- Konstantfilerna `EMPTYPNG.php` och `LOCKPNG.php` finns inte i arbetsytan;
-  modulen läser bilderna direkt med `file_get_contents()`.
+- Konstantfilerna `EMPTYPNG.php` och `LOCKPNG.php` finns inte; modulen
+  läser bilderna direkt med `file_get_contents()`.
 - `RESTRICTEDLAYERS.php` genereras av `writeConfig.php` vid varje
   publicering via `defineFileConstant('RESTRICTEDLAYERS', ...)`, baserat på
   tjänster som är markerade `restricted` i databasen. En kopia ligger i

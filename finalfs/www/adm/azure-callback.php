@@ -68,9 +68,6 @@ if (!isset($_GET['code']) || !isset($_SESSION['oauth2state']) || !isset($_GET['s
 try {
     $token = $provider->getAccessToken('authorization_code', ['code' => $_GET['code']]);
     $azureUser = $provider->getResourceOwner($token);
-    //$graphToken = getGraphToken($token);
-    //$groups = getAzureGroups($graphToken);
-    //$adUser = mb_strtolower(getOnPremisesSamAccountName($graphToken) ?? $azureUser->getId(), 'UTF-8');
 	$groups = getAzureGroups($token);
     $adUser = mb_strtolower(getOnPremisesSamAccountName($token) ?? $azureUser->getId(), 'UTF-8');
 	//error_log("AD-user: ".$adUser." Grupper: ".json_encode($groups));

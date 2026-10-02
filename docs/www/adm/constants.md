@@ -28,7 +28,7 @@
 | `$previewBase` | `previewBase.php` | Bas-URL för förhandsgranskningsläge | writeConfig |
 | `$proxyRoot` | `proxyRoot.php` | Bas-URL-prefix, för korrekta länkar bakom proxy | news, authorization, writeConfig, renderCssTags/renderJavaScriptTags |
 | `$restrictedServiceUrl` | `restrictedServiceUrl.php` | Bas-URL till bakomliggande karttjänst för restrictedLayer | restrictedLayer |
-| (flera, geo/publisher) | `searchEngineMeta.php` | Metadata för strukturerad SEO-data (geo-koordinater, publisher-info) | writeConfig |
+| `$searchEngineMeta` | `searchEngineMeta.php` | Metadata för strukturerad SEO-data: array med `geo` (`latitude`, `longitude`), `contentLocation` (`name`, `addressLocality`, `addressCountry`) och `publisher` (`name`, `url`) | writeConfig |
 | `$sourcesQueryColumns` | `sourcesQueryColumns.php` | Vilka kolumner som ska med som query-parametrar för en källas URL | writeConfig (addSourcesToJson) |
 | `$swedishDic` | `swedishDic.php` | Ordlista engelska→svenska för interna typ-/kolumnnamn (map, layer, group, m.fl.), används av `toSwedish()` | manage, info (indirekt via `toSwedish()`) |
 | `$tableAliases` | `tableAliases.php` | Alias-mappning för tabellnamn använda av multiselect-knappar | manage (printMultiselectButton) |
