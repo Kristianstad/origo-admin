@@ -59,11 +59,11 @@ satts inte i denna modul utan i manage-modulen via fältet "Rensas ej" i
 - **Ingen inloggningskontroll och öppen CORS** (`Access-Control-Allow-Origin: *`)
   är avsiktligt: den publika kartan ska kunna spara och läsa tillstånd utan
   inloggning. Anrop tillåts från vilken domän som helst.
-- `retrieveMapState.php` och `updateLastUse.php` bygger in `$id` i
-  SQL-strängen. `retrieveMapState()` validerar id:t med
-  `validateMapStateId()` (UUID-format) före anropet; `updateLastUse()`
-  validerar inte själv och får därför bara anropas med ett validerat id.
-  `createMapState.php` använder `pg_escape_literal()`.
+- `retrieveMapState.php`, `updateLastUse.php` och `createMapState.php`
+  binder värden med `pg_query_params()`. `retrieveMapState()` validerar id:t
+  med `validateMapStateId()` före anropet; `updateLastUse()` validerar inte
+  själv och ska därför bara anropas med ett validerat id. `cleanupOldMapStates()`
+  binder även åldersgränserna.
 - UUID genereras i PHP med `mt_rand()`, inte med en kryptografiskt säker
   källa.
 - `mapstate.php` anropar `pg_close($dbh)` efter OPTIONS-svar även om

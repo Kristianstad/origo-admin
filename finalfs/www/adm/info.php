@@ -4,8 +4,9 @@ info.php
  ├─ includeDirectory("./functions/common")
  ├─ includeDirectory("./functions/info")   → laddar printParents.php, printUniqueLogins.php
  ├─ dbh()                                          [common]
+ ├─ validerar ?type= mot objekttabeller med förväntad id-kolumn (404 om ogiltig)
  ├─ toSwedish($childType)                          [common] → svensk översättning av typnamnet
- ├─ all_from_table($dbh, $configSchema, ...)        [common] → hämtar alla rader av given typ
+ ├─ all_from_table($dbh, $configSchema, ...)        [common] → hämtar rader från validerad typ
  ├─ array_column_search(...)                        [common] → hittar EN rad baserat på kolumnvärde
  ├─ makeBasicTarget()/makeFullTarget()               [common] → bygger basic/full target för objektet
  ├─ targetTable()/targetIdColumn()                   [common] → läser targetens tabell och id-kolumn
@@ -32,7 +33,16 @@ require("./constants/configSchema.php");
 $dbh = dbh();
 
 $childType   = $_GET['type'] ?? '';
+if (!is_string($childType)) {
+	http_response_code(404);
+	exit('Object type not found');
+}
 $childId     = $_GET['id'] ?? '';
+$childTable = typeTableName($childType);
+if (!in_array($childTable, configTableNames($dbh), true)) {
+	http_response_code(404);
+	exit('Object type not found');
+}
 $childTypeSv = toSwedish($childType);
 $currentSkin = currentSkin(all_from_table($dbh, $configSchema, 'skins'));
 

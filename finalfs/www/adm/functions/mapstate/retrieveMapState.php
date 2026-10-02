@@ -1,5 +1,4 @@
 <?php
-// www/adm/functions/mapstate/retrieveMapState.php
 
 function retrieveMapState($dbh): never
 {
@@ -14,8 +13,14 @@ function retrieveMapState($dbh): never
     updateLastUse($dbh, $id);
 
     $table  = getMapStatesTable();
-    $sql    = "SELECT state FROM $table WHERE mapstate_id = '$id'";
-    $result = pg_query($dbh, $sql);
+    $sql    = "SELECT state FROM $table WHERE mapstate_id = $1";
+    $result = pg_query_params($dbh, $sql, array($id));
+    if ($result === false) {
+        error_log("Läsning av mapstate misslyckades: " . pg_last_error($dbh));
+        http_response_code(500);
+        echo json_encode(['error' => 'Kunde inte läsa mapstate']);
+        exit;
+    }
     $row    = pg_fetch_assoc($result);
 
     if (!$row) {

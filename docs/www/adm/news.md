@@ -61,16 +61,16 @@ i auktoriseringsmodulen, se `authorization.php`).
 | `printNews.php` | `printNews($username, $selectedNew, $return)` | Skriver ut en enskild nyhet (HTML eller JSON), markerar den som läst vid textvisning |
 | `printNewsList.php` | `printNewsList($userNews)` | Skriver ut JSON-array med `new_id` för alla nyheter, nyast först |
 | `printNewsSubjects.php` | `printNewsSubjects($username, $userNews)` | Skriver ut HTML-tabell med rubriker + raderaknapp |
-| `readDelete.php` | `readDelete($username, $selectedNew, $action)` | Lägger till användaren i `reads`- eller `deletes`-arrayen i databasen |
+| `readDelete.php` | `readDelete($dbh, $username, $selectedNew, $action)` | Parametriserat: lägger till användaren i `reads`- eller `deletes`-arrayen i databasen; accepterar bara action `read` eller `delete` |
 | `selectNew.php` | `selectNew($userNews, $newId)` | Plockar ut en enskild nyhet från listan via `new_id` |
 | `testUnread.php` | `testUnread($username, $userNews)` | Returnerar `"true"`/`"false"` om det finns olästa nyheter |
 | `userNews.php` | `userNews($username, $pgNewsArray)` | Filtrerar bort nyheter som användaren själv raderat; konverterar pg-arrayer till PHP-arrayer |
 
 ## Begränsningar och risker
 
-- **SQL-injektionsrisk i `readDelete.php`:** `$newId` (från
-  `$_GET['newId']` i `news.php`) byggs in direkt i SQL-strängen utan
-  escaping eller parametrisering.
+- `readDelete.php` binder nyhets-id och arrayinnehåll som SQL-värden.
+  Kolumnnamnet väljs endast för `reads` eller `deletes`; andra action-värden
+  avvisas med HTTP 400.
 - `abstract` och `text` skrivs ut utan `htmlspecialchars()` i
   `printNewsSubjects.php` och `printNews.php`. Innehållet måste därför
   komma från betrodda administratörer. Det är avsiktligt: nyheterna

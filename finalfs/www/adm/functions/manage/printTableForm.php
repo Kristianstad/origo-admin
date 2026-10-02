@@ -17,7 +17,8 @@
 		printUpdateSelect($table, array('origin'=>$selectables['origins']), 'bodySelect', 'Ursprungskälla:', in_array('origin', $helps));
 		$dbh2=dbh($dbhConnectionString);
 		$tableWithSchema=substr(targetId($table), strpos(targetId($table), '.')+1);
-		$updated=substr(updated_from_table($dbh2, $tableWithSchema)[0], 0, 10);
+		$updatedRow=updated_from_table($dbh2, $tableWithSchema);
+		$updated=isset($updatedRow[0]) ? substr($updatedRow[0], 0, 10) : '';
 		setTargetConfigParam($table, 'updated', $updated);
 		printTextarea($table, 'updated', 'textareaMedium', 'Uppdaterad:', in_array('updated', $helps), $sizePosts, true);
 		printUpdateSelect($table, array('update'=>$selectables['updates']), 'bodySelect', 'Uppdatering:', in_array('update', $helps));

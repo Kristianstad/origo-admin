@@ -170,6 +170,25 @@ adminverktygets förhandsgranskningsfunktion (`printConfigPreviewButton()`,
 anropad från grupp- och lagerformulär). `'preview'` hårdkodas som mapId i
 dessa anrop; det är avsiktligt.
 
+## SQL-värden och identifierare
+
+SQL-värden skickas med `pg_query_params()` och placeholders. Tabell- och
+schemanamn kan inte bindas som värden: de valideras mot databasmetadata och
+citeras med `pg_escape_identifier()` innan de sätts in i SQL.
+
+`configTableNames($dbh)` cachar bastabellerna i `$configSchema` som har den
+förväntade id-kolumnen. `object_identity` och `edit_cursor` är interna
+historiktabeller och ingår inte. `all_from_table()` accepterar bara dessa
+tabeller i konfigurationsschemat. `info.php` kontrollerar typen mot samma
+lista; `multiselect.php` begränsar tabellerna ytterligare till
+`multiselectables.php`, efter aliasöversättning.
+
+För datatabeller använder `qualifiedTableIdentifier()` katalogen i den
+aktuella databasanslutningen för att kontrollera `schema.tabell` och citerar
+båda delarna. `updated.php` kräver dessutom att tabellen finns registrerad i
+`map_configs.tables`. Ogiltig `type` i info ger 404; ogiltiga tabellparametrar
+i multiselect och updated ger 400.
+
 ## Datastrukturen "target" (manage-modulen)
 
 Ett centralt begrepp i manage-modulen: en enhetlig representation av

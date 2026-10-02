@@ -33,17 +33,18 @@ som id-kolumn istället för det generella mönstret `<singularis>_id`.
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `dbh()` – databasanslutning
-- `all_from_table($dbh, $schema, $table)` – hämtar alla rader från angiven
-  tabell. **OBS:** schemat är här hårdkodat till `'map_configs'` istället
-  för att läsas från `constants/configSchema.php` som i info-modulen – se
-  begränsningar nedan.
+- `all_from_table($dbh, $schema, $table)` – hämtar alla rader från en
+  tillåten tabell och citerar identifierarna
+- `configTableNames($dbh)` – databasbaserad allowlist över objekttabeller
+- `pkColumnOfTable($table)` – hittar id-kolumnen, inklusive `proj4defs.code`
 - `toSwedish($string)` – översätter tabellnamn till svensk rubrik
 
 **JS-funktioner** (`adm/js-functions/multiselect/`, laddas inline via
 `includeDirectory()` i en `<script>`-tagg – se separat avsnitt nedan)
 
-**Databas:** läser alla rader från valfri tabell i `map_configs`-schemat,
-namnet kommer direkt från `$_GET['table']`.
+**Databas:** läser valda rader från tabeller angivna i
+`constants/multiselectables.php`; alias översätts via
+`constants/tableAliases.php`. Schemat hämtas från `configSchema.php`.
 
 ## JS-filer och funktioner
 
@@ -67,12 +68,9 @@ veta om filerna någonsin laddas separat.
 
 ## Begränsningar och risker
 
-- Schemat är hårdkodat till `'map_configs'` i anropet till
-  `all_from_table()`; info-modulen använder i stället `$configSchema` från
-  `constants/configSchema.php`.
-- `$table` från `$_GET['table']` valideras inte mot en tillåten uppsättning
-  tabeller och byggs in i SQL-frågan i `all_from_table()`. Godtyckligt
-  tabellinnehåll i schemat kan därför läsas.
+- `$table` från `$_GET['table']` måste finnas i `multiselectables.php`
+  efter aliasöversättning och i databasens allowlist över objekttabeller.
+  Ogiltig parameter ger HTTP 400; `all_from_table()` citerar identifierarna.
 - `table`-parametern kodar tre värden i en sträng med två separatorer:
   `explode('::', ..., 2)` följt av `explode(':', ..., 2)`.
 - All utskrift av användarstyrd data (`$textareaId`, `$currentValue`,

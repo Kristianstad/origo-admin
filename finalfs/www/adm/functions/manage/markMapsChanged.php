@@ -4,14 +4,21 @@
 	function markMapsChanged(&$dbh, $mapIds)
 	{
 		require("./constants/configSchema.php");
-		$sql='';
-		foreach ($mapIds as $mapId)
+		if (empty($mapIds))
 		{
-			$sql=$sql."UPDATE $configSchema.maps SET changed = 't' WHERE map_id = '$mapId'; ";
+			return;
 		}
-		$result=pg_query($dbh, $sql);
+		$placeholders = array();
+		$params = array_values($mapIds);
+		foreach (array_keys($params) as $index)
+		{
+			$placeholders[] = '$'.($index + 1);
+		}
+		$table = pg_escape_identifier($dbh, $configSchema).'.'.pg_escape_identifier($dbh, 'maps');
+		$sql = "UPDATE $table SET changed = 't' WHERE map_id IN (".implode(', ', $placeholders).')';
+		$result=pg_query_params($dbh, $sql, $params);
 		if (!$result)
 		{
-			die("Error in SQL query: " . pg_last_error());
+			sqlQueryError($dbh);
 		}
 	}

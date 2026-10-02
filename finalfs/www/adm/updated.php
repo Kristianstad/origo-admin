@@ -13,11 +13,38 @@ require("./constants/dbhConnectionStringForUpdated.php");
 $dbh = dbh($dbhConnectionStringForUpdated);
 
 $tablesWithSchema = $_GET['table'] ?? '';
-$tablesWithSchema = explode(',', $tablesWithSchema);
+if (!is_string($tablesWithSchema) || trim($tablesWithSchema) === '') {
+    pg_close($dbh);
+    http_response_code(400);
+    exit('Invalid table');
+}
+$tablesWithSchema = array_map('trim', explode(',', $tablesWithSchema));
+
+require("./constants/configSchema.php");
+$registeredTableIds = array_column(all_from_table($dbh, $configSchema, 'tables'), 'table_id');
+$allowedTables = array();
+foreach ($registeredTableIds as $registeredTableId) {
+    $parts = explode('.', $registeredTableId);
+    if (count($parts) >= 2) {
+        $allowedTables[] = implode('.', array_slice($parts, -2));
+    }
+}
+foreach ($tablesWithSchema as $tableWithSchema) {
+    if ($tableWithSchema === '' || !in_array($tableWithSchema, $allowedTables, true)) {
+        pg_close($dbh);
+        http_response_code(400);
+        exit('Invalid table');
+    }
+}
 
 $updates = array();
 foreach ($tablesWithSchema as $tableWithSchema) {
     $updated = updated_from_table2($dbh, $tableWithSchema);
+    if ($updated === false) {
+        pg_close($dbh);
+        http_response_code(400);
+        exit('Invalid table');
+    }
     if (isset($updated[1])) {
         $updates[$updated[0]] = $updated[1];
     }

@@ -1,14 +1,20 @@
 <?php
 
-	// Takes a postgresql database handle, schema and table name.
-	// Returns all rows of given table as associative array.
+	// Reads all rows from an allowlisted table in the configuration schema.
+	// Invalid schema or table names receive HTTP 400.
 	function all_from_table($dbh, $schema, $table)
 	{
-		$tableWithSchema=$schema.'.'.$table;
+		require("./constants/configSchema.php");
+		if ($schema !== $configSchema || !in_array($table, configTableNames($dbh), true))
+		{
+			http_response_code(400);
+			exit('Invalid table');
+		}
+		$tableWithSchema=pg_escape_identifier($dbh, $schema).'.'.pg_escape_identifier($dbh, $table);
 		$result=pg_query($dbh, "SELECT * FROM $tableWithSchema ORDER BY 1");
 		if (!$result)
 		{
-			die("Error in SQL query: " . pg_last_error());
+			sqlQueryError($dbh);
 		}
 		return pg_fetch_all($result);
 	}

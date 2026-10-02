@@ -78,10 +78,10 @@ utanför webbroten (för `source`-typer med QGIS-tjänst).
   `news.php`). Åtkomsten beror på hur sidan nås utifrån, till exempel via
   nätverk eller proxy.
 - **`$childId` och `$childType` skrivs ut direkt i HTML utan
-  `htmlspecialchars()`** (t.ex. `echo "<h2>$childId</h2>"`). `?type=` avgör
-  vilken tabell som slås upp via `all_from_table()`, som bygger in
-  tabellnamnet i SQL utan validering mot tillåtna tabeller. `.qgs`-sökvägen
-  byggs av `service` från databasen och käll-id:t.
+  `htmlspecialchars()`** (t.ex. `echo "<h2>$childId</h2>"`). `?type=` måste
+  motsvara en konfigurationstabell med förväntad id-kolumn; okänd typ ger
+  404. `all_from_table()` validerar och citerar tabellidentifieraren.
+  `.qgs`-sökvägen byggs av `service` från databasen och käll-id:t.
 - `printUniqueLogins.php` använder `strftime()`, som är deprecated sedan
   PHP 8.1 och borttaget i PHP 9. Samma filtrerings- och räknelogik
   upprepas sju gånger med olika tidsintervall.

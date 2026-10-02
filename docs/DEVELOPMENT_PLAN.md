@@ -8,24 +8,13 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 - Ändra inte POST-namn, command-värden, hidden fields eller databasschema utan separat beslut.
 - `export.php` finns inte i detta repo. Exportmodulen kan bara dokumenteras, inte ändras, här.
 - Nya förbättringsidéer läggs i den här filen, inte som önskelistor i modulreferenserna.
-- Faserna körs i ordningen 2, 3, 5, 4, 6 och 7. Varje fas gås igenom i detalj med ägaren innan implementationen börjar, så upplägget kan ändras.
+- Återstående faser körs i ordningen 3, 5, 4, 6 och 7. Varje fas gås igenom i detalj med ägaren innan implementationen börjar, så upplägget kan ändras.
 - Nya och ändrade funktioner bör få parameter- och returtyper i vanligt läge (ingen bred omskrivning), men typning är en riktlinje och får vika om den försvårar förenkling eller generalisering av koden. Använd nullbara typer (`?string`) eller `mixed` där databasen kan ge `NULL`, och unionstyper som `array|false` där en funktion kan returnera `false`.
 
 ## Fas 1. Dokumentation
 
 - [ ] Lägg till en länk från README:s konstantavsnitt till `constants.md`. README behåller sin installationsanpassade beskrivning, eftersom `constants.md` är teknisk referens.
 - [ ] Dokumentera loader-filerna (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `updated/`, `restrictedLayer/`) i respektive modulreferens.
-
-## Fas 2. SQL och identifierare
-
-Värden ska alltid bindas med `pg_query_params()`. Tabell- och schemanamn kan inte bindas och ska valideras mot en tillåten uppsättning och citeras.
-
-- [ ] Parametrisera värden i `markMapsChanged`, `markMapUnchanged`, `functions/mapstate/*`, `functions/news/readDelete` och `tableNamesFromSchema`.
-- [ ] Inför en hjälpfunktion (till exempel `configTableNames($dbh)`) som läser tabellnamnen i konfigurationsschemat från databasen och cachar dem under anropet. Den används som tillåtelselista för tabell- och schemanamn; ingen genererad fil underhålls.
-- [ ] Validera och citera tabell- och schemanamn i `all_from_table`, `updated_from_table`, `updated_from_table2` och `multiselect.php` mot tillåtelselistan.
-- [ ] Samla de upprepade `die("Error in SQL query: ...")` i en gemensam hjälpfunktion.
-- [ ] Kontrollera `?type=` i `info.php` och `?table=` i `multiselect.php` mot tillåtelselistan. För `multiselect.php` räcker de tabeller som `multiselectables.php` pekar ut via `tableAliases.php`.
-- [ ] Släpp bara igenom tabeller som är objekttyper med förväntad id-kolumn; `object_identity` och `edit_cursor` är interna tabeller.
 
 ## Fas 3. Target-abstraktionen
 

@@ -4,10 +4,11 @@
 	function markMapUnchanged(&$dbh, $mapId)
 	{
 		require("./constants/configSchema.php");
-		$sql="UPDATE $configSchema.maps SET changed = 'f' WHERE map_id = '$mapId'; ";
-		$result=pg_query($dbh, $sql);
+		$table = pg_escape_identifier($dbh, $configSchema).'.'.pg_escape_identifier($dbh, 'maps');
+		$sql="UPDATE $table SET changed = 'f' WHERE map_id = $1";
+		$result=pg_query_params($dbh, $sql, array($mapId));
 		if (!$result)
 		{
-			die("Error in SQL query: " . pg_last_error());
+			sqlQueryError($dbh);
 		}
 	}

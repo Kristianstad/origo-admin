@@ -19,7 +19,7 @@
 | `$configSchema` | `configSchema.php` | Postgres-schemanamn för appens tabeller | news, mapstate, info, read_db_schemas, export, manage (flera filer), read_schema_tables |
 | `$cookieConfig` | `cookieConfig.php` | Cookieinställningar: namn, krypteringsnyckel, livslängd | authorization |
 | `$dbhConnectionString` | `dbhConnectionString.php` | Anslutningssträng (`pg_connect`-format) till Origos konfigurationsdatabas — standardanslutningen som `dbh()` faller tillbaka på utan argument | samtliga moduler (indirekt via `dbh()`) |
-| `$dbhConnectionStringForUpdated` | `dbhConnectionStringForUpdated.php` | Dedikerad anslutningssträng för updated-modulen | updated |
+| `$dbhConnectionStringForUpdated` | `dbhConnectionStringForUpdated.php` | Anslutningssträng för updated-modulen med användaren `origo_updated_readonly`, skapad i `050.postgres.sql` | updated |
 | `$forwardauthSessionConfig` | `forwardauthSessionConfig.php` | Sessionsinställningar för forward-auth: slideExtension, absoluteMax, baseLifetime | forwardauth |
 | `$iconTtl` | `iconTtl.php` | TTL-parameter (sekunder) som läggs till på lagerträdets ikon-URL:er, för cache-brytning. `'-1'` stänger av parametern helt | writeConfig (addLayersToJson) |
 | `$keywordCategorized` | `keywordCategorized.php` | Vilka tabeller som ska nyckelordskategoriseras | manage (printHeadForm; jfr `viewKeywordCategorized()`) |

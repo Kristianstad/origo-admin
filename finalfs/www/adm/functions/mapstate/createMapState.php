@@ -1,5 +1,4 @@
 <?php
-// www/adm/functions/mapstate/createMapState.php
 // Returns mapStateId – exactly as Origo frontend expects
 
 function createMapState($dbh): never
@@ -18,7 +17,7 @@ function createMapState($dbh): never
         exit;
     }
 
-    $state_json = pg_escape_literal($dbh, json_encode($input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+	$stateJson = json_encode($input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	
     $referer = $_SERVER['HTTP_REFERER'] ?? null;
 
@@ -27,10 +26,6 @@ function createMapState($dbh): never
                    parse_url($referer, PHP_URL_HOST) .
                    parse_url($referer, PHP_URL_PATH);
     }
-
-    $referer_literal = $referer === null 
-        ? 'NULL' 
-        : pg_escape_literal($dbh, $referer);
 
     // Generera UUID v4 i PHP – kompatibelt med character varying
     $new_id = sprintf(
@@ -44,9 +39,9 @@ function createMapState($dbh): never
 
     $table = getMapStatesTable();
 
-    $sql = "INSERT INTO $table (mapstate_id, state, created, mapurl) VALUES ('$new_id', $state_json, NOW(), $referer_literal) RETURNING mapstate_id";
+    $sql = "INSERT INTO $table (mapstate_id, state, created, mapurl) VALUES ($1, $2, NOW(), $3) RETURNING mapstate_id";
 
-    $result = pg_query($dbh, $sql);
+    $result = pg_query_params($dbh, $sql, array($new_id, $stateJson, $referer));
 
     if (!$result) {
         http_response_code(500);

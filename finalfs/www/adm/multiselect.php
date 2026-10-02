@@ -4,7 +4,8 @@ multiselect.php
  ├─ includeDirectory("./functions/common")
  ├─ dbh()                                    [common]
  ├─ tolkar $_GET['table'] i formatet "textareaId::tabell:aktuellaVärden"
- ├─ all_from_table($dbh, 'map_configs', $table)   [common] → hämtar alla rader
+ ├─ validerar tabell mot multiselectables.php, tableAliases.php och allowlistan
+ ├─ all_from_table($dbh, $configSchema, $table)   [common] → hämtar tillåtna rader
  ├─ toSwedish($table)                        [common] → rubrik på svenska
  ├─ includeDirectory("./js-functions/multiselect")  → klistrar in ALLA js-filer inline i <script>
  └─ renderar HTML: <select> + knappar, med inline onclick-anrop till JS-funktionerna
@@ -20,10 +21,32 @@ require_once("./functions/includeDirectory.php");
 includeDirectory("./functions/common");
 
 $dbh = dbh();
-$submitValue = explode('::', $_GET['table'] ?? '', 2);
+$tableParameter = $_GET['table'] ?? '';
+if (!is_string($tableParameter)) {
+	pg_close($dbh);
+	http_response_code(400);
+	exit('Invalid table');
+}
+$submitValue = explode('::', $tableParameter, 2);
 $textareaId = $submitValue[0] ?? '';
 $submitValue = explode(':', $submitValue[1] ?? '', 2);
 $table = $submitValue[0] ?? '';
+
+require("./constants/configSchema.php");
+require("./constants/multiselectables.php");
+require("./constants/tableAliases.php");
+$allowedTables = array();
+foreach ($multiselectables as $selectableTable) {
+	$allowedTable = $tableAliases[$selectableTable] ?? $selectableTable;
+	if (in_array($allowedTable, configTableNames($dbh), true)) {
+		$allowedTables[] = $allowedTable;
+	}
+}
+if (!in_array($table, $allowedTables, true)) {
+	pg_close($dbh);
+	http_response_code(400);
+	exit('Invalid table');
+}
 
 if (empty($submitValue[1])) {
     $currentValue = '';
@@ -33,15 +56,11 @@ if (empty($submitValue[1])) {
     $dataSortedValues = $currentValue . ',';
 }
 
-$values = all_from_table($dbh, 'map_configs', $table);
-$currentSkin = currentSkin(all_from_table($dbh, 'map_configs', 'skins'));
+$values = all_from_table($dbh, $configSchema, $table);
+$currentSkin = currentSkin(all_from_table($dbh, $configSchema, 'skins'));
 pg_close($dbh);
 
-if ($table == 'proj4defs') {
-    $idColumn = 'code';
-} else {
-    $idColumn = rtrim($table, 's') . '_id';
-}
+$idColumn = pkColumnOfTable($table);
 
 $header = mbUcfirst(toSwedish($table));
 

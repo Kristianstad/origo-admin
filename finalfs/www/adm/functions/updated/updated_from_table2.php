@@ -2,10 +2,16 @@
 
 	function updated_from_table2($dbh, $tableWithSchema)
 	{
-		$result=pg_query($dbh, "SELECT pg_xact_commit_timestamp(xmin),xmin FROM $tableWithSchema ORDER BY pg_xact_commit_timestamp(xmin) DESC NULLS LAST");
+		$table = qualifiedTableIdentifier($dbh, $tableWithSchema);
+		if ($table === false)
+		{
+			return false;
+		}
+		$result=pg_query($dbh, "SELECT pg_xact_commit_timestamp(xmin),xmin FROM $table ORDER BY pg_xact_commit_timestamp(xmin) DESC NULLS LAST");
 		if (!$result)
 		{
-			die("Error in SQL query: " . pg_last_error());
+			sqlQueryError($dbh);
 		}
-		return pg_fetch_row($result);
+		$row = pg_fetch_row($result);
+		return $row === false ? null : $row;
 	}

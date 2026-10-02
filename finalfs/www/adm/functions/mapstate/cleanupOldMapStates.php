@@ -1,18 +1,16 @@
 <?php
-// www/adm/functions/mapstate/cleanupOldMapStates.php
 
 function cleanupOldMapStates($dbh, int $days): void
 {
-    $cutoff = "NOW() - INTERVAL '$days days'";
     $table  = getMapStatesTable();
     $sql = "
         DELETE FROM $table
         WHERE 
-            (lastuse IS NOT NULL AND lastuse < $cutoff AND NOT preserve)
+            (lastuse IS NOT NULL AND lastuse < NOW() - ($1::integer * INTERVAL '1 day') AND NOT preserve)
             OR
-            (created < NOW() - INTERVAL '30 days' AND lastuse IS NULL AND NOT preserve)
+            (created < NOW() - ($2::integer * INTERVAL '1 day') AND lastuse IS NULL AND NOT preserve)
     ";
-    $result = pg_query($dbh, $sql);
+    $result = pg_query_params($dbh, $sql, array($days, 30));
     if ($result === false) {
         error_log("Cleanup av gamla map states misslyckades: " . pg_last_error($dbh));
     }
