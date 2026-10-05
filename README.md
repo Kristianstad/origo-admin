@@ -1,51 +1,39 @@
 # Origo-admin
-https://github.com/Kristianstad/origo-admin/pkgs/container/origo-admin
 
-Docker-avbild av Origo (https://github.com/origo-map). Avbilden bygger på https://github.com/Kristianstad/nginx/pkgs/container/nginx (se repositoryt för webbserverinställningar). Lyssnar internt på port 8080. Filer och kataloger i Origos konfigurationskatalog läggs till i Origos webbkatalog vid uppstart. Det finns även ett valfritt administrationsverktyg för Origo och metadata i `-adm`-taggen. (Sökvägen till administrationsverktyget är `adm/manage.php` och standardinloggningen är origo, origo. Varje skapad karta får en egen HTML-fil. Källkoden till administrationsverktyget underhålls i [Kristianstad/origo-admin](https://github.com/Kristianstad/origo-admin), branch `main`.)
+Kristianstads kommuns administrationsverktyg för [Origo](https://github.com/origo-map), levererat som en Docker-avbild. Verktyget hanterar kartor, lager, grupper, metadata, behörighetsklassning och publicering av Origo-konfiguration. Varje skapad karta får en egen HTML-fil.
 
-Testa avbilden i [Iximiuz Labs](https://labs.iximiuz.com/playgrounds):
 ```
-1. Start a Docker playground.
-2. Run the following command at the command prompt:
-   docker run -p 8080:8080 ghcr.io/kristianstad/origo-admin:2.10.0
-3. Klick Expose ports in the menu and make port 8080 exposed publicly, then click on the url.
-4. To access the admin tool add "/adm/" to the url and login with origo, origo.
+webbläsare ──► nginx (port 8080) ──┬─► Origo och publicerade kartor (/www, /www/maps)
+                                   └─► /adm (inloggning) ──► PHP-FPM ──► PostgreSQL
+                                       (allt körs inuti containern)
 ```
 
-A swedish tutorial of the management tool is available [Here](https://raw.githubusercontent.com/Kristianstad/origo-admin/refs/heads/main/finalfs/www/Origo_admin_tutorial_swedish.pdf).
+**Du behöver inte bygga något själv.** Färdigbyggda avbilder finns på GitHub Container Registry
+(`ghcr.io`) och hämtas automatiskt första gången du kör dem, se [Kom igång med Docker](#kom-igång-med-docker).
+Avbilden innehåller nginx, PHP-FPM, PostgreSQL, Origo och administrationsverktyget i en container, så det finns bara en sak att starta.
+Databasen kan i stället ligga utanför containern, se [Ställningstaganden inför installation](#ställningstaganden-inför-installation).
 
-## Docker run examples
-### If you just need Origo
-docker run --name origo -d -p 8080:8080 ghcr.io/kristianstad/origo:2.10.0
-### If you also want Kristianstad's management tool for Origo and metadata
-docker run --name origo -d -p 8080:8080 ghcr.io/kristianstad/origo-admin:2.10.0
+En svensk användarguide för administrationsverktyget finns i [Origo_admin_tutorial_swedish.pdf](finalfs/www/Origo_admin_tutorial_swedish.pdf).
 
-## Environment variables
-### Runtime variables with default value
-* VAR_LINUX_USER="nginx" (User running VAR_FINAL_COMMAND)
-* VAR_ORIGO_CONFIG_DIR="/etc/origo" (Directory containing configuration files for Origo)
-* VAR_CONFIG_DIR="/etc/nginx" (Directory containing configuration files for Nginx)
-* VAR_LOG_LEVEL="info"
-* VAR_ADMUSER="origo" (Only for management tool)
-* VAR_ADMPASSWORD="origo" (Only for management tool)
-* VAR_FINAL_COMMAND="nginx -g 'daemon off; error_log stderr \$VAR_LOG_LEVEL;'" (Command run by VAR_LINUX_USER)
+## Filer i repot
 
-### Format of runtime configuration variables (mainly used by the main tag)
-* VAR_wwwconf_&lt;param name&gt;: Parameter in <span>ww</span>w.conf.
-* VAR_phpini_&lt;param name&gt;: Parameter in /etc/php7/conf.d/50-setting.ini (overrides defaults set in php.ini).
-* Dot (.) is representated as double underscore (\_\_) in variable names.
-* VAR_ldapconf_&lt;param name&gt;: Parameter in /etc/ldap/ldap.conf.
+| Fil | Vad den gör |
+|---|---|
+| `Dockerfile` | Bygger avbilden. Här står standardvärdena för `VAR_*`-variablerna och vilka program som ingår. |
+| `finalfs/www/adm/` | Administrationsverktygets webbkod (PHP, CSS, JavaScript) och dess `constants/`. |
+| `finalfs/www/` (övrigt) | Loader-filer, demokarta, preview och plugin-filer som nås utanför `/adm`. |
+| `finalfs/initdb/` | SQL som körs när databasen skapas första gången (`050.postgres.sql`, `060.origo.sql`). |
+| `finalfs/start/` | Startskript som körs vid containerns första start (PostgreSQL, PHP, nginx-inloggning, `constants`). |
+| `.github/workflows/docker-image.yml` | GitHub Actions: bygger och publicerar den färdiga avbilden. |
+| `docs/` | Teknisk referens för utvecklare, se `docs/www/adm/OVERVIEW.md`. |
+| `AGENTS.md` | Instruktioner för utveckling och AI-agenter. |
+| `Origo_admin_tutorial_swedish.pptx` | Källa till användarguiden. |
+| `LICENSE` | Licens (BSD 2-Clause) för filerna i det här repot. |
 
-## Capabilities
-Can drop all but CHOWN, SETPCAP, SETGID and SETUID.
-
----
-
-Ovanstående är en kortfattad engelsk beskrivning av avbilden. Nedan följer en
-mer utförlig installationsguide på svenska för administrationsverktyget.
 
 ## Innehållsförteckning
 
+- [Rekommenderad installation](#rekommenderad-installation)
 - [Ställningstaganden inför installation](#ställningstaganden-inför-installation)
   - [Windows eller Linux](#windows-eller-linux)
   - [Docker eller installation helt utan Docker](#docker-eller-installation-helt-utan-docker)
@@ -54,29 +42,32 @@ mer utförlig installationsguide på svenska för administrationsverktyget.
   - [Lokala admininstallationer med gemensam lagring](#lokala-admininstallationer-med-gemensam-lagring)
 - [Installation med Docker](#installation-med-docker)
   - [Förutsättningar](#förutsättningar)
-  - [Starta publicerad avbild (Linux-exempel)](#starta-publicerad-avbild-linux-exempel)
+  - [Kom igång med Docker](#kom-igång-med-docker)
+  - [Färdigbyggd avbild](#färdigbyggd-avbild)
   - [Hostkataloger och fileshare](#hostkataloger-och-fileshare)
+  - [Så fungerar avbilden](#så-fungerar-avbilden)
   - [Kontrollera container och loggar](#kontrollera-container-och-loggar)
   - [Port och reverse proxy](#port-och-reverse-proxy)
+  - [Bygga avbilden själv](#bygga-avbilden-själv-valfritt)
 - [Installation utan Docker](#installation-utan-docker)
 - [Origo-konfiguration och kartor](#origo-konfiguration-och-kartor)
 - [Konfiguration och miljövariabler](#konfiguration-och-miljövariabler)
+  - [Variabler för avbilden](#variabler-för-avbilden)
   - [Inställningar i `constants`](#inställningar-i-constants)
 - [Backup och uppgradering](#backup-och-uppgradering)
   - [Databasschema vid ny version](#databasschema-vid-ny-version)
   - [Uppgradera administrationsverktyget från GitHub](#uppgradera-administrationsverktyget-från-github)
 - [Felsökning](#felsökning)
 - [Säkerhetschecklista före produktion](#säkerhetschecklista-före-produktion)
+- [Licens](#licens)
 
-# Installation av administrationsverktyg för Origo
+## Rekommenderad installation
 
-Detta repository innehåller Kristianstads kommuns PHP-baserade administrationsverktyg för Origo. Verktyget hanterar bland annat kartor, lager, grupper, metadata, behörighetsklassning och publicering av Origo-konfiguration.
+Den rekommenderade installationen använder den publicerade avbilden med administrationsverktyget:
 
-Den rekommenderade installationen använder den publicerade `-adm`-avbilden:
+`ghcr.io/kristianstad/origo-admin:2.10.0`
 
-`ghcr.io/kristianstad/origo:2.10.0-adm`
-
-Avbilden innehåller nginx, PHP-FPM, PostgreSQL, Origo och administrationsverktyget.
+Vill du bara ha Origo utan administrationsverktyget finns avbilden `ghcr.io/kristianstad/origo:2.10.0`.
 
 ## Ställningstaganden inför installation
 
@@ -106,7 +97,7 @@ Separat Origo kan ge oberoende uppgraderingar, skalning och tydligare separation
 
 ### Inbyggd PostgreSQL eller separat PostgreSQL (vid dockerinstallation)
 
-Inbyggd PostgreSQL är standard i `-adm`-avbilden och passar utveckling, test och mindre installationer. Det krävs altså ingen separat databas, men databas och webbapplikation delar container och livscykel. Datan kan läggas på en permanent lagringsyta som återanvänds vid containeruppgradering, men om avbilden byter Postgresql-version kommer det krävas att man gör databas-dump och återställning.
+Inbyggd PostgreSQL är standard i avbilden och passar utveckling, test och mindre installationer. Det krävs altså ingen separat databas, men databas och webbapplikation delar container och livscykel. Datan kan läggas på en permanent lagringsyta som återanvänds vid containeruppgradering, men om avbilden byter Postgresql-version kommer det krävas att man gör databas-dump och återställning.
 
 Installation av en separat PostgreSQL-databasserver kräver en hel del arbete, men om man redan har tillgång till en sådan databasserver är en separat databas ofta att föredra. Bland annat blir uppgraderingar smidigare.
 
@@ -137,10 +128,30 @@ docker --version
 
 På Windows ska Docker Desktop vara startat och använda Linux-containrar.
 
-### Starta publicerad avbild (Linux-exempel)
+### Kom igång med Docker
+
+Det finns en färdigbyggd avbild, så det räcker att starta den. Docker hämtar den automatiskt första gången.
+
+**Prova snabbt** (databas och kartor sparas bara inuti containern, så använd det bara för test):
 
 ```bash
-docker pull ghcr.io/kristianstad/origo:2.10.0-adm
+docker run --name origo-admin -d -p 8080:8080 ghcr.io/kristianstad/origo-admin:2.10.0
+```
+
+Öppna sedan <http://localhost:8080/adm/> och logga in med `origo` / `origo`.
+
+**Rekommenderad start** med kataloger på hosten, så att data överlever att containern byts ut:
+
+1. Skapa katalogerna (Windows-exempel finns under [Hostkataloger och fileshare](#hostkataloger-och-fileshare)):
+
+```bash
+mkdir -p /srv/origo-admin/pgdata /srv/origo-admin/constants /srv/origo-admin/maps
+```
+
+2. Starta containern. Byt lösenordet i `VAR_ADMPASSWORD`:
+
+```bash
+docker pull ghcr.io/kristianstad/origo-admin:2.10.0
 docker run --name origo-admin \
   --detach \
   --restart unless-stopped \
@@ -150,10 +161,68 @@ docker run --name origo-admin \
   --mount type=bind,source=/srv/origo-admin/pgdata,target=/pgdata \
   --mount type=bind,source=/srv/origo-admin/constants,target=/www/adm/constants \
   --mount type=bind,source=/srv/origo-admin/maps,target=/www/maps \
-  ghcr.io/kristianstad/origo:2.10.0-adm
+  ghcr.io/kristianstad/origo-admin:2.10.0
 ```
 
-Öppna <http://localhost:8080/adm/> och logga in med de angivna uppgifterna. Använd inte standardlösenordet `origo` i en nätåtkomlig miljö.
+3. Testa i webbläsaren:
+
+- <http://localhost:8080/adm/> – inloggningsruta. Logga in med värdena i `VAR_ADMUSER` och `VAR_ADMPASSWORD`.
+- <http://localhost:8080/> – demokartan, som visar att Origo fungerar.
+
+Första starten tar längre tid, eftersom PostgreSQL initieras och SQL-filerna körs (följ med `docker logs -f origo-admin`). Den tomma `constants`-katalogen fylls vid första starten med standardfilerna. Använd inte standardlösenordet `origo` i en nätåtkomlig miljö.
+
+**Med Docker Compose** (spara som `docker-compose.yml` och kör `docker compose up -d`):
+
+```yaml
+services:
+  origo-admin:
+    image: ghcr.io/kristianstad/origo-admin:2.10.0
+    container_name: origo-admin
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      VAR_ADMUSER: origo
+      VAR_ADMPASSWORD: byt-det-har-losenordet
+    volumes:
+      - ./pgdata:/pgdata
+      - ./constants:/www/adm/constants
+      - ./maps:/www/maps
+```
+
+**Utan egen dator:** testa avbilden i [Iximiuz Labs](https://labs.iximiuz.com/playgrounds):
+
+1. Starta en Docker playground.
+2. Kör `docker run -p 8080:8080 ghcr.io/kristianstad/origo-admin:2.10.0` i terminalen.
+3. Välj *Expose ports* i menyn, gör port 8080 publik och klicka på adressen.
+4. Lägg till `/adm/` i adressen och logga in med `origo` / `origo`.
+
+### Färdigbyggd avbild
+
+Avbilden `ghcr.io/kristianstad/origo-admin` byggs av GitHub Actions (`.github/workflows/docker-image.yml`)
+och är öppen att hämta utan inloggning. Bygget startas manuellt. Alla versioner finns på
+[paketsidan](https://github.com/Kristianstad/origo-admin/pkgs/container/origo-admin).
+
+| Tagg | Betydelse |
+|---|---|
+| `latest` | Senaste bygget som kördes från standardbranchen (`main`). Bra för att prova. |
+| `2.10.0` (och andra versionsnummer) | Bygget för det versionsnummer som angavs när bygget startades. Använd en sådan tagg i drift, så att du själv väljer när du byter version. |
+
+**Uppdatera till en ny avbild** (databas, kartor och inställningar ligger kvar, eftersom de ligger i dina egna kataloger). Ta backup först, se [Backup och uppgradering](#backup-och-uppgradering):
+
+```bash
+docker pull ghcr.io/kristianstad/origo-admin:2.10.0
+docker rm -f origo-admin
+docker run --name origo-admin ...   # samma kommando som förut, med samma kataloger
+```
+
+Med Compose: `docker compose pull && docker compose up -d`
+
+**Bra att veta:**
+
+- Bygget körs på `ubuntu-latest` utan angiven plattform, så avbilden byggs för `amd64` (vanliga Intel/AMD-datorer).
+- Dockerfile anger Alpine 3.23, PostgreSQL 18 och PHP 8.5. Byter en ny avbild PostgreSQL-huvudversion krävs databas-dump och återställning.
+- Vill du ändra något i avbilden eller bygga den själv, se [Bygga avbilden själv](#bygga-avbilden-själv-valfritt).
 
 ### Hostkataloger och fileshare
 
@@ -171,7 +240,7 @@ docker run --name origo-admin --detach --publish 8080:8080 `
   --mount type=bind,source=C:\origo-admin\pgdata,target=/pgdata `
   --mount type=bind,source=C:\origo-admin\constants,target=/www/adm/constants `
   --mount type=bind,source=C:\origo-admin\maps,target=/www/maps `
-  ghcr.io/kristianstad/origo:2.10.0-adm
+  ghcr.io/kristianstad/origo-admin:2.10.0
 ```
 
 En hostkatalog kan även vara en fileshare som monterats på hosten, till exempel
@@ -186,6 +255,17 @@ finns i avbilden. Montera i stället de avsedda underkatalogerna:
 - `/pgdata` för PostgreSQL-data
 - `/www/adm/constants` för lokala anslutnings-, cookie-, auth- och proxyinställningar
 - `/www/maps` för genererade kartkonfigurationer
+
+### Så fungerar avbilden
+
+- **Program:** `VAR_FINAL_COMMAND` startar PHP-FPM, PostgreSQL och nginx. nginx lyssnar på port 8080 i containern och är det enda som behöver publiceras. PostgreSQL lyssnar på containerns port 5432. Anslutningar från containern själv (`localhost`) litas på; anslutningar från andra adresser kräver lösenord (regler i `VAR_HBA`). Publicera därför inte port 5432 om du inte behöver nå databasen utifrån.
+- **Inloggning:** nginx skyddar `/adm` med basic auth. Användarnamn och lösenord kommer från `VAR_ADMUSER` och `VAR_ADMPASSWORD`.
+- **Första start** (när containern startas första gången):
+  - Om `/pgdata` är tom initieras PostgreSQL och SQL-filerna i `finalfs/initdb/` körs. De skapar databasen `origo`, tabellerna i schemat `map_configs` och den skrivskyddade databasanvändaren `origo_updated_readonly`.
+  - Inloggningen för `/adm` skapas från `VAR_ADMUSER` och `VAR_ADMPASSWORD`. Vill du byta lösenord, skapa en ny container med nya värden.
+  - PHP-FPM:s `www.conf`, `50-setting.ini` och `ldap.conf` skapas från `VAR_wwwconf_*`, `VAR_phpini_*` och `VAR_ldapconf_*`.
+  - Saknade konstantfiler kopieras från avbildens standardvärden till `/www/adm/constants`. Befintliga filer skrivs aldrig över.
+- **Efter första start** ändras inget av detta automatiskt: en ny avbild uppdaterar varken den befintliga databasen eller dina konstantfiler. Se [Backup och uppgradering](#backup-och-uppgradering).
 
 ### Kontrollera container och loggar
 
@@ -218,6 +298,23 @@ Om endast en lokal reverse proxy ska nå containern:
 ```bash
 --publish 127.0.0.1:8080:8080
 ```
+
+### Bygga avbilden själv (valfritt)
+
+Bara om du vill ändra något i avbilden. Hämta repot (*Code* → *Download ZIP*, eller `git clone https://github.com/Kristianstad/origo-admin`) och kör i repots rot:
+
+```bash
+docker build -t origo-admin .
+docker run --name origo-admin -d -p 8080:8080 origo-admin
+```
+
+Bygget hämtar basavbilderna `ghcr.io/kristianstad/origo` och `ghcr.io/kristianstad/secure_and_minimal` samt Composer-paketen (till exempel `adldap2/adldap2`), så det kräver internetåtkomst. Vilken Origo-version som används styrs av build-argumentet `ORIGO_VERSION` (standard anges i `Dockerfile`):
+
+```bash
+docker build --build-arg ORIGO_VERSION=2.10.0-r1 -t origo-admin .
+```
+
+Dokumentation, `README.md` och `.github/` tas inte med i avbilden (se `.dockerignore`). Starta sedan din egen avbild med samma `docker run`-kommando som ovan, men med `origo-admin` i stället för `ghcr.io/kristianstad/origo-admin:2.10.0`.
 
 ## Installation utan Docker
 
@@ -291,20 +388,26 @@ ta backup först; verktyget kör SQL direkt med den databasanslutning som anges 
 
 ## Konfiguration och miljövariabler
 
-Viktiga Docker-variabler:
+### Variabler för avbilden
 
-| Variabel | Syfte |
-|---|---|
-| `VAR_ADMUSER` | Användarnamn för adminautentisering |
-| `VAR_ADMPASSWORD` | Lösenord för adminautentisering |
-| `VAR_LINUX_USER` | Användare som kör huvudprocessen (`VAR_FINAL_COMMAND`) |
-| `VAR_ORIGO_CONFIG_DIR` | Katalog med konfigurationsfiler för Origo |
-| `VAR_CONFIG_DIR` | Katalog med konfigurationsfiler för nginx |
-| `VAR_LOG_LEVEL` | Nginx-loggnivå |
-| `VAR_FINAL_COMMAND` | Kommandot som körs som `VAR_LINUX_USER` vid uppstart |
-| `VAR_phpini_<parameter>` | Parameter i php.ini (dubbelt understreck `__` representerar en punkt i namnet) |
-| `VAR_wwwconf_<parameter>` | Parameter i PHP-FPM:s www.conf |
-| `VAR_ldapconf_<parameter>` | Parameter i /etc/ldap/ldap.conf |
+Sätts med `--env NAMN=värde` (docker run) eller under `environment:` (compose). Standardvärdena kommer från `Dockerfile` om inget annat anges.
+
+| Variabel | Standard | Betydelse |
+|---|---|---|
+| `VAR_ADMUSER` | `origo` | Användarnamn för inloggning till `/adm`. |
+| `VAR_ADMPASSWORD` | `origo` | Lösenord för inloggning till `/adm`. **Byt det.** |
+| `VAR_LINUX_USER` | `postgres` | Linuxanvändare som kör `VAR_FINAL_COMMAND`. |
+| `VAR_FINAL_COMMAND` | se `Dockerfile` | Kommandot som startar PHP-FPM, PostgreSQL och nginx. |
+| `VAR_ORIGO_CONFIG_DIR` | `/etc/origo` | Katalog med konfigurationsfiler för Origo. Filer och kataloger i den läggs till i Origos webbkatalog vid uppstart. Standardvärdet kommer från basavbilden. |
+| `VAR_CONFIG_DIR` | `/etc/nginx` | Katalog med konfigurationsfiler för nginx. Standardvärdet kommer från basavbilden. |
+| `VAR_LOG_LEVEL` | `info` | Nginx-loggnivå. Standardvärdet kommer från basavbilden. |
+| `VAR_HBA` | `local all all trust, host all all 127.0.0.1/32 trust, host all all ::1/128 trust, host all all all md5` | Regler för PostgreSQL:s `pg_hba.conf`, kommaseparerade. |
+| `VAR_param_<parameter>` | – | Inställning i PostgreSQL:s `postgresql.conf`, till exempel `VAR_param_timezone` (standard `'UTC'`). Värden skrivs med enkla citattecken. |
+| `VAR_phpini_<parameter>` | – | Parameter i `/etc/php<version>/conf.d/50-setting.ini` (PHP-versionen anges i `Dockerfile`). |
+| `VAR_wwwconf_<parameter>` | `pm=dynamic`, `pm.max_children=5`, `pm.min_spare_servers=1`, `pm.max_spare_servers=3` | Parameter i PHP-FPM:s `www.conf`. |
+| `VAR_ldapconf_<parameter>` | – | Parameter i `/etc/openldap/ldap.conf`. |
+
+I parameternamn representerar dubbelt understreck (`__`) en punkt, till exempel `VAR_wwwconf_pm__max_children` för `pm.max_children`. PHP-, PHP-FPM-, LDAP- och PostgreSQL-filerna skapas vid första start. Ändra variablerna för en befintlig installation genom att skapa en ny container med samma kataloger.
 
 Avbilden bygger på [Kristianstad/nginx](https://github.com/Kristianstad/nginx/pkgs/container/nginx), som har egna miljövariabler för webbserverinställningar. Se det repositoryt för en fullständig lista.
 
@@ -443,8 +546,8 @@ drift.
 
 Med Docker rekommenderas normalt den publicerade avbilden. Hämta den nya
 avbildsversionen med `docker pull` och skapa om containern med samma bind mounts.
-Den senaste utvecklarversionen finns som
-`ghcr.io/kristianstad/origo:main`.
+Senaste bygget finns som `ghcr.io/kristianstad/origo-admin:latest`, se
+[Färdigbyggd avbild](#färdigbyggd-avbild).
 
 Stoppa därefter den gamla containern och starta den nya avbilden med samma
 miljövariabler, portar och bind mounts. Ta inte bort hostkatalogerna.
@@ -475,6 +578,10 @@ docker logs origo-admin
 
 Kontrollera därefter port, brandvägg och URL:en `/adm/`.
 
+### Containern startar inte
+
+Läs sista raderna i `docker logs origo-admin`. Om Docker svarar att en bind mount-sökväg inte finns, skapa katalogen på hosten och starta igen. Katalogerna efter `source` i `--mount` måste redan existera. Första starten tar längre tid än senare starter (PostgreSQL initieras), så vänta tills loggen slutar ändras innan du drar slutsatsen att något är fel.
+
 ### Inloggningen fungerar inte
 
 Kontrollera `VAR_ADMUSER`, `VAR_ADMPASSWORD`, auth-konfiguration, cookies, HTTPS och reverse-proxy-sökväg.
@@ -494,4 +601,12 @@ Kontrollera lagringskatalogens rättigheter, `docker logs` och att `/pgdata` int
 - Byt standardlösenordet.
 - Använd HTTPS.
 - Begränsa åtkomsten till `/adm/`.
+- Publicera inte PostgreSQL-porten 5432 om den inte behövs.
 - Ordna med regelbundna backuper.
+- Tidigare dokumentation anger att avbilden kan köras med alla Linux-capabilities borttagna utom `CHOWN`, `SETPCAP`, `SETGID` och `SETUID`. Det har inte verifierats för administrationsavbilden; testa i så fall `--cap-drop ALL` med dessa `--cap-add` innan du använder det i drift.
+
+## Licens
+
+Filerna i det här repot är utgivna under BSD 2-Clause-licensen, se [LICENSE](LICENSE).
+
+Licensen gäller bara filerna i repot. Den byggda avbilden innehåller även bland annat Origo, nginx, PHP, PostgreSQL och Composer-paket, som har sina egna licenser.

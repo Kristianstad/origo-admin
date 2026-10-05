@@ -53,6 +53,8 @@ Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. 
 - [ ] Förtydliga meddelandet när ett databasfel visas i `manage.php`; felets detaljer visas fortfarande för administratören.
 - [ ] CORS: ny konstant `constants/allowedOrigins.php` och en hjälpfunktion i `functions/common` (till exempel `sendCorsHeaders()`) som skickar `Access-Control-Allow-Origin` och `Vary: Origin` för tillåtna ursprung. Den levererade filen innehåller `'*'` så att dagens beteende bevaras; README beskriver hur listan begränsas. `mapstate.php` använder hjälpfunktionen och svarar 403 på POST från ett ursprung som inte är tillåtet. Hjälpfunktionen kan senare användas av `updated.php`, `restrictedLayer.php` och `news.php` om de behöver anropas från en separat Origo.
 - [ ] `mapstate`: begränsa storleken på request-bodyn i `createMapState()` och använd `random_bytes()` för UUID.
+- [ ] Avbildsbygget: `.github/workflows/docker-image.yml` skickar build-argumentet `APP_VERSION`, men `Dockerfile` deklarerar bara `ORIGO_VERSION`. Taggen styrs därför av workflow-inmatningen medan basavbildens version styrs av Dockerfile-standardvärdet. Gör versionen entydig, till exempel genom att låta workflowet skicka `ORIGO_VERSION`.
+- [ ] Startskripten: `finalfs/start/stage3/200.php` kontrollerar `/etc/ldap/ldap.conf`, men `createLdapConf` skriver `/etc/openldap/ldap.conf`. Kontrollera att filerna är samma fil i basavbilden och samordna sökvägarna.
 
 
 ## Fas 7. CSRF
