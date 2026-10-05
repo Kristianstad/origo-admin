@@ -30,6 +30,10 @@ ett publikt API. SQL körs med den anslutning som anges i
 8. Vid lyckad körning visas ett skinat lyckat-resultat och en **Stäng**-knapp
    som stänger iframe-vyn.
 
+I `manage.php` visas formuläret och resultatet i `topFrame`. Höjden anpassas
+automatiskt när innehållet växer eller minskar; iframe-handtaget för manuell
+höjdändring är avstängt för den här vyn.
+
 ## Säkerhet och drift
 
 - Säkerhetskopiera databasen innan SQL körs.

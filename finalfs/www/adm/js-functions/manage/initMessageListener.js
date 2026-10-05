@@ -15,7 +15,8 @@ function initMessageListener() {
 			} else if (action === 'resize') {
 				const topframe = document.getElementById('topFrame');
 				if (topframe) {
-					resizeIframe(topframe);
+                    const autoResize = topFrame === 'read_json' || topFrame === 'sql_import';
+                    resizeIframe(topframe, autoResize);
 				}
 			} else {
 				console.warn('Ignored postMessage missing valid targetId');

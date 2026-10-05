@@ -41,6 +41,10 @@ GET till `read_json.php` visar importformuläret. POST-formuläret använder:
 Rå JSON-regex används inte längre. Källor, resolutionslistor och
 `tileGridOptions` läses från den avkodade PHP-arrayen.
 
+I `manage.php` visas formuläret och resultatet i `topFrame`. Höjden anpassas
+automatiskt när innehållet växer eller minskar; iframe-handtaget för manuell
+höjdändring är avstängt för den här vyn.
+
 ## Funktioner
 
 | Fil | Funktion | Ansvar |

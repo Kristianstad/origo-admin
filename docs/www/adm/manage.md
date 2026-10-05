@@ -344,17 +344,19 @@ konfigurationstabeller (via `configTables()` och dynamiskt genererad SQL).
 | Fil | Funktion | Beskrivning |
 |---|---|---|
 | `formChangeButton.js` | `formChangeButton()` | Lägger till en CSS-klass (`change`) på ett formulärs "Uppdatera"-knapp så fort något fält i formuläret ändras (utom dolda fält), för att visuellt signalera osparade ändringar |
-| `initMessageListener.js` | `initMessageListener()` | Sätter upp en global `postMessage`-lyssnare för hela sidan. Validerar avsändarens origin (måste matcha `window.location.origin`) och att datan har rätt form innan den hanteras. Hanterar tre fall: `action:'close'` utan `targetId` (stäng topFrame, t.ex. från help.php), `action:'resize'` (justera topFrame-höjd), och `targetId`+`value` (fyll i ett textarea-fält med värde från multiselect-verktyget, samt uppdatera den tillhörande multiselect-knappens `value`-attribut så nästa öppning av multiselect visar rätt förval) |
+| `initMessageListener.js` | `initMessageListener()` | Sätter upp en global `postMessage`-lyssnare för hela sidan. Validerar avsändarens origin (måste matcha `window.location.origin`) och att datan har rätt form innan den hanteras. Hanterar tre fall: `action:'close'` utan `targetId` (stäng topFrame, t.ex. från help.php), `action:'resize'` (justera topFrame-höjd; `read_json` och `sql_import` kan även krympa), och `targetId`+`value` (fyll i ett textarea-fält med värde från multiselect-verktyget, samt uppdatera den tillhörande multiselect-knappens `value`-attribut så nästa öppning av multiselect visar rätt förval) |
 | `preservePageScroll.js` | `preservePageScroll()` | Initieras i `<head>` och sparar scrollpositionen vid formulärinskick via en delegerad `submit`-lyssnare. Om en positiv position väntar döljs dokumentet tills `DOMContentLoaded`, då sidan scrollas till positionen och visas; formulär riktade mot en annan browsing context sparar inte positionen |
-| `resizeIframe.js` | `resizeIframe(iframe)` | Anpassar en iframes höjd efter dess faktiska innehåll, genom att tillfälligt sätta höjden till `1px` och sedan mäta `scrollHeight` i nästa animationsframe |
+| `resizeIframe.js` | `resizeIframe(iframe, autoResize=false)` | Anpassar iframens höjd efter innehållet. Standardläget växer bara och behåller det manuella resize-handtaget; `autoResize=true` följer både ökning och minskning och döljer handtaget |
 | `toggleTopFrame.js` | `toggleTopFrame(type)` | Visar/döljer den delade toppmonterade iframen (`#topFrame`). Håller reda på vilken typ av innehåll som visas (global variabel `topFrame`, deklarerad i `manage.php`s inline-script) – klick på samma typ igen döljer den, klick på en annan typ byter innehåll och scrollar upp |
 | `updateSelect.js` | `updateSelect(id, array)` | Fyller om en `<select>`-listas alternativ med ett nytt innehåll. Specialhantering för element vars id slutar på `Categories`: värdet sätts till det råa (understreck-separerade) kategorinamnet men visningstexten har understreck ersatta med mellanslag |
 
 ## Kommunikationsmönster: iframe ↔ huvudsida
 
-`manage.php` bygger på ett återkommande mönster där verktyg som körs i
-en iframe (`help.php`, `multiselect.php`, och potentiellt andra) pratar
-med huvudsidan via `postMessage`:
+`manage.php` bygger på ett återkommande mönster där verktyg som körs i en
+iframe pratar med huvudsidan via `postMessage`. Help, info och multiselect
+behåller manuell höjdreglering och växer automatiskt vid innehållsändringar.
+`read_json` och `sql_import` följer innehållets höjd både uppåt och nedåt och
+har inget manuellt resize-handtag.
 
 ## Checklista: lägga till en ny entitetstyp
 
