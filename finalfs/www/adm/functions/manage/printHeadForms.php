@@ -54,7 +54,7 @@
 				}
 				$i++;
 			}
-			$tableType=rtrim($tableName, 's');
+			$tableType=tableType($tableName);
 			if ($focusTable == $tableName)
 			{
 				$focusClass='h3Focus';

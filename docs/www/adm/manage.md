@@ -44,19 +44,21 @@ typ", i två varianter:
 - **Full target:** `[$type => $config]`, t.ex.
   `['layer' => ['layer_id' => 'vagar#1', 'title' => 'Vägar', ...]]`
   – typen och hela dess konfigurationsrad från databasen. Skapas av
-  `makeFullTarget()` (om du redan har `$config`) eller `makeTargetFull()`
+  `makeFullTarget()` (om du redan har `$config`) eller `toFullTarget()`
   (om du bara har ett basic target och en databaskoppling/configTables,
   och behöver slå upp konfigurationen åt dig).
 
-Skillnaden mellan en "full" och "basic" target känns igen på om värdet
-är en array (`is_array(current($target))`) – vilket är precis vad
-`isFullTarget()` kontrollerar.
+Ett target är en array med exakt ett nyckel/värde-par och en icke-tom
+strängnyckel. `isTarget()` kontrollerar formen, `isBasicTarget()` känner
+igen ett strängvärde och `isFullTarget()` känner igen en konfigurations-array.
+Target-id måste vara en icke-tom sträng; `'0'` är giltigt.
 
 Detta enhetliga format gör att funktioner som `sqlForUpdate()`,
 `sqlForOperation()`, `printChildSelect()` m.fl. kan ta emot "vilket
 objekt som helst" utan att bry sig om exakt vilken av de många typerna
-(map/layer/group/source/...) det handlar om – de läser bara ut typen
-via `array_key_first()`/`key()`-mönster och agerar generiskt. Detta är
+(map/layer/group/source/...) det handlar om – de läser typ, id och
+konfiguration via target-helpers i stället för att indexera target-arrayen
+direkt. Detta är
 kärnan i hur manage-modulen kan hantera alla entitetstyper med samma
 kodväg istället för att skriva om samma logik för varje typ.
 
@@ -76,7 +78,7 @@ skriver tillbaka som en ny Postgres-array
 
 Target-API:t används också av parent-traverseringen och renderingshjälparna:
 `usedInMaps()`, `findParents()` och `findAllParents()` normaliserar inkommande
-targets med `makeTargetBasic()` och läser typ med `targetType()`, medan
+targets med `toBasicTarget()` och läser typ med `targetType()`, medan
 `printChildSelect()`, `printInfoButton()`, `printDeleteButton()` och
 add/remove-operationerna använder `targetType()`, `targetId()`,
 `targetConfig()` och `targetConfigParam()` i stället för att läsa targetens
@@ -193,7 +195,9 @@ inline-knappar (t.ex. databasens `printReadDbSchemasButton` och gruppens
 preview), valfri visning av Kopiera/Radera samt sektioner efter formuläret
 (kontrollens och gruppens add/remove-operationer).
 Funktionsnamnen och deras publika argument är oförändrade eftersom
-`manage.php` fortfarande använder dynamisk dispatch.
+`manage.php` fortfarande använder dynamisk dispatch. Före anropet kontrolleras
+att target-tabellen finns i den laddade konfigurationen och att motsvarande
+`print<Typ>Form()` finns; annars avvisas targeten via `invalidTarget()`.
 
 **Instanser av mönstret (sorterad alfabetiskt efter filnamn):**
 
@@ -289,7 +293,6 @@ betydande typspecifik villkorslogik:
 | `historyStateForTarget.php` | `historyStateForTarget($dbh, $target): array` | Läser `edit_cursor`/`edits` för given target och räknar från grunden ut `['undo', 'redo', 'current_edit_id', 'edits', 'index']`. Används av `printHistoryButtons()` för att avgöra vilka knappar som ska visas |
 | `idPosts.php` | `idPosts($post): array` | Filtrerar `$post` till fält vars namn slutar på `Id`, med undantag för operationernas `from/to`-fält för map, group, classe och infogroup |
 | `isArrayColumn.php` | `isArrayColumn($column): bool` | Kontrollerar om en given kolumn är en Postgres-array-kolumn, genom att slå upp den mot listan i `constants/arrayColumns.php`. Avslutar programmet (`die()`) om `$column` inte är en icke-tom sträng |
-| `makeTargetFull.php` | `makeTargetFull($target, $configTablesOrDbh): array` | Tar en basic (eller full) target och returnerar en full target, genom att slå upp konfigurationen via `targetConfig()` om den saknas. Avslutar programmet om indata inte är en giltig target |
 | `markMapsChanged.php` | `markMapsChanged(&$dbh, $mapIds): void` | Sätter `maps.changed = 't'` för samtliga angivna kartor i en enda batch-SQL (flera `UPDATE`-satser konkatenerade med `; `). Detta är motparten till `markMapUnchanged()` i writeConfig-modulen – manage-modulen flaggar en karta som "ändrad, behöver publiceras om" varje gång något som påverkar den redigeras, och writeConfig-modulen nollställer flaggan efter lyckad publicering |
 | `objectHistoryKey.php` | `objectHistoryKey($target): string` | Bygger den stabila historiknyckeln `<typ>:<id>` (`target_key`) för ett objekt, utifrån `targetType()`/`targetId()`. Se "Historik: Ångra/Gör om" ovan |
 | `postButton.php` | `postButton($post): string\|null` | Hittar namnet på den POST-parameter vars namn slutar på `Button` – det är detta namn (`<typ>Button`) som `manage.php` sedan bryter isär för att få fram `$type` |
@@ -317,10 +320,8 @@ betydande typspecifik villkorslogik:
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |
 | `sqlForOperation.php` | `sqlForOperation($operation, $child, $parent): array` | Bygger en parameteriserad UPDATE-sats som lägger till/tar bort ett barn-id ur förälderns array-kolumn; returnerar SQL och parametrar |
 | `sqlForUpdate.php` | `sqlForUpdate($fullTarget, $updatePosts): array` | Bygger en parameteriserad fullständig UPDATE-sats för en target baserat på postat formulärdata; returnerar SQL och parametrar |
-| `tableConfigs.php` | `tableConfigs($table, $configTablesOrDbh)` | Hämtar konfigurationen för en tabell antingen från en databaskoppling (färsk fråga) eller från en redan inläst `configTables`-array (cachat) – avgörs via `is_resource()`/`instanceof PgSql\Connection` |
-| `targetConfig.php` | `targetConfig($target, $configTablesOrDbh=null)` | Slår upp/returnerar hela konfigurationen för en target, oavsett om den redan är "full" eller bara "basic" |
 | `typeHelps.php` | `typeHelps($type, $helps): array` | Filtrerar den globala listan av hjälptext-id:n (`help_id`, format `<typ>:<fält>`) till de som gäller en specifik typ, och returnerar bara fältdelen. Detta är mekaniken bakom `in_array($fältnamn, $helps)`-kontrollerna i varje `print*Form`-funktion – `$helps` som skickas till de funktionerna är redan filtrerat via denna funktion i `manage.php`s entry point |
-| `updatedFullTarget.php` | `updatedFullTarget($fullTarget, $updatePosts): array` | Bygger en ny full target där varje kolumns värde ersätts med motsvarande `update<Kolumn>`-fält från `$updatePosts` (eller tom sträng om inget postades för den kolumnen). Array-kolumner (enligt `isArrayColumn()`/`constants/arrayColumns.php`) omsluts automatiskt med Postgres-array-syntax `{...}`. Detta är steget som förvandlar "vad användaren skrev i formuläret" till "vad som ska stå i databasen", och används av `sqlForUpdate()` innan `appendUpdatedColumnsToSql()` bygger själva SQL-strängen |
+| `updatedFullTarget.php` | `updatedFullTarget($fullTarget, $updatePosts): array` | Bygger en ny full target där postade `update<Kolumn>`-fält ersätter befintliga värden. Fält som saknas i POST behåller tidigare värde; ett postat tomt värde kan rensa fältet. Array-kolumner (enligt `isArrayColumn()`/`constants/arrayColumns.php`) omsluts automatiskt med Postgres-array-syntax `{...}`. Används av `sqlForUpdate()` innan `appendUpdatedColumnsToSql()` bygger SQL-strängen |
 | `updatedFromTable.php` | `updatedFromTable($dbh, $tableWithSchema): array\|false\|null` | Kontrollerar och citerar `schema.tabell`, hämtar senaste `pg_xact_commit_timestamp` och returnerar bara tidsstämpeln. `false` betyder att tabellen saknas; `null` att den saknar rader. Används av `printTableForm.php` |
 | `updatePosts.php` | `updatePosts($post): array` | Filtrerar `$post` till fält vars namn börjar med `update` – detta är alla postade formulärfältvärden redo att skrivas till databasen |
 | `validateUpdate.php` | `validateUpdate($updatePosts, $configTables, &$updateValid)` | Validerar **endast** fält som är markerade som "multiselectable" (`constants/multiselectables.php`) – kontrollerar att varje kommaseparerat värde som postats faktiskt existerar som ett giltigt id i motsvarande tabell. Sätter `$updateValid` (skickad by reference) och visar ett JS `alert()` vid fel. **Notera:** fält som inte är multiselectable valideras alltså inte alls av denna funktion – se begränsningar nedan |
@@ -429,11 +430,9 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   platshållare och separata parametrar. `manage.php` kör dem med
   `pg_query_params()` i en explicit transaktion. `markMapsChanged()` bygger
   fortfarande en sammanslagen SQL-sträng med kart-id:n.
-- Target-funktionerna `makeBasicTarget`, `makeFullTarget`, `makeTargetFull` och
-  `isArrayColumn` avslutar programmet med `die()` vid ogiltiga argument, och
-  `tableConfigs()` avslutar med `exit(1)` utan meddelande. Anropen är avsedda
-  för interna fel; funktionerna kan inte återanvändas där ett ogiltigt
-  anrop ska hanteras mjukt.
+- Target-funktioner avslutar med det gemensamma `invalidTarget()`-felet när
+  target-form eller id är ogiltigt. `tableConfigs()` avslutar fortfarande med
+  `exit(1)` utan meddelande för en saknad tabell i en cachad config-array.
 - `hasStringKeys()` används av `printSelectOptions()` för att avgöra om
   `$optionValues` är associativ.
 - `isArrayColumn()` läser `constants/arrayColumns.php` med ett
@@ -490,8 +489,5 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   kontroll av innehåll utöver kolumntypen. Kolumner av typen `json` (till
   exempel `style_config`, `options` och `clusteroptions`) valideras av
   PostgreSQL, som avvisar ogiltig JSON med ett databasfel.
-- **`updatedFullTarget()` sätter fält som inte postats till tom sträng**, inte
-  till tidigare värde. `sqlForUpdate()` skriver därför över alla kolumner i
-  tabellraden vid varje uppdatering. Ett fält som ett formulär inte postar
-  (till exempel ett nytt fält som inte kopplats in i formuläret) töms vid
-  vanlig uppdatering.
+- `updatedFullTarget()` bevarar lagrade värden för fält som saknas i POST.
+  Ett fält som skickas med tom sträng kan fortfarande rensas.

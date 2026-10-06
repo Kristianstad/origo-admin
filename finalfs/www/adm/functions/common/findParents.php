@@ -5,11 +5,11 @@
 	{
 		if (isTarget($target))
 		{
-			$target=makeTargetBasic($target);
+			$target=toBasicTarget($target);
 		}
 		else
 		{
-			die("findParents(\$potentialParents, $target) failed! Child not a target.");
+			invalidTarget(__FUNCTION__);
 		}
 		$targetType=targetType($target);
 		$targetId=targetId($target);
@@ -19,9 +19,10 @@
 		$parents=array();
 		foreach (current($potentialParents) as $potentialParent)
 		{
-			if (in_array($targetType.'s', $arrayColumns))
+			$targetTable=typeTableName($targetType);
+			if (in_array($targetTable, $arrayColumns))
 			{
-				if (in_array($targetId, pgArrayToPhp($potentialParent[$targetType.'s'])))
+				if (in_array($targetId, pgArrayToPhp($potentialParent[$targetTable])))
 				{
 					$parents[]=$potentialParent[$parentIdColumn];
 				}

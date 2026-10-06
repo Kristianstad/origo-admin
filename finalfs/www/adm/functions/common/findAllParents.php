@@ -3,14 +3,11 @@
 	// Takes a database handle and a target, and returns an array of all direct parents.
 	function findAllParents(&$dbh, $target)
 	{
-		if (isTarget($target))
+		if (!isTarget($target))
 		{
-			$target=makeTargetBasic($target);
+			invalidTarget(__FUNCTION__);
 		}
-		else
-		{
-			die("findAllParents(\$dbh, $target) failed! Child not a target.");
-		}
+		$target = toBasicTarget($target);
 		
 		require("./constants/configSchema.php");
 		$targetType=targetType($target);
@@ -31,7 +28,7 @@
 			}
 			if ($targetType == 'layer')
 			{
-				$allParents['layers']['exports']=findParents(array('layers'=>allFromTable($dbh, $configSchema, 'layers')), makeTargetBasic(array('export'=>targetId($target))));
+				$allParents['layers']['exports']=findParents(array('layers'=>allFromTable($dbh, $configSchema, 'layers')), toBasicTarget(array('export'=>targetId($target))));
 			}
 			if ($targetType == 'contact' || $targetType == 'keyword')
 			{

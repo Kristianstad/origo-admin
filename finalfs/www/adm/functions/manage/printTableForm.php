@@ -6,7 +6,7 @@
 	{
 		if (!isFullTarget($table))
 		{
-			die("printTableForm($table, $selectables, $inheritPosts, $helps=array()) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$sizePosts=sizePosts($inheritPosts);
 		echo '<div><div class="printXFormDiv"><form method="post">';
@@ -26,11 +26,11 @@
 		printTextarea($table, 'info', 'textareaLarge', 'Info:', in_array('info', $helps), $sizePosts);
 		printHiddenInputs($inheritPosts);
 		echo '<div class="buttonDiv">';
-		$tableForHistory=makeTargetBasic($table);
+		$tableForHistory=toBasicTarget($table);
 		printHistoryButtons($tableForHistory);
 		printUpdateButton('table', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('table');
-		$table=makeTargetBasic($table);
+		$table=toBasicTarget($table);
 		printInfoButton($table);
 		$deleteConfirmStr="Är du säker att du vill radera all metadata för tabellen ".targetId($table)."?";
 		printDeleteButton($table, $deleteConfirmStr, $inheritPosts);

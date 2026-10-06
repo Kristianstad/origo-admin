@@ -2,7 +2,7 @@
 
 	function printRemoveOperation($targetToRemove, $tableToRemoveFrom, $buttontext, $inheritPosts)
 	{
-		$tableToRemoveFromType=rtrim(key($tableToRemoveFrom), 's');
+		$tableToRemoveFromType=tableType(key($tableToRemoveFrom));
 		$str=ucfirst($tableToRemoveFromType);
 		$parents=findParents($tableToRemoveFrom, $targetToRemove);
 		if (!empty($parents))

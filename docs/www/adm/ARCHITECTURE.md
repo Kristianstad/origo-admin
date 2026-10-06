@@ -223,7 +223,8 @@ och info-vyn) kan hantera alla entitetstyper (map/layer/group/source/...)
 generiskt utan att skriva om samma logik för varje typ. `manage.php` och
 `info.php` delar därför basic/full target-kontraktet, medan
 `writeConfig.php` medvetet behåller kartans konfigurationsrad som en lokal
-JSON-arbetsstruktur. Funktionerna listas i `common.md` och `manage.md`; den
+JSON-arbetsstruktur. Target-konverterarna och uppslagsfunktionerna ligger i
+`functions/common/`; de listas i `common.md` och `manage.md`. Den
 fullständiga beskrivningen finns i `manage.md`.
 
 ## Historik: ångra/gör om (manage-modulen)

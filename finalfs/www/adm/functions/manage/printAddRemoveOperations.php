@@ -5,7 +5,7 @@ function printAddRemoveOperations($target, $operationTables, $inheritPosts, $lab
 	require('./constants/exclusiveOperationGroups.php');
 	foreach ($operationTables as $table => $parents)
 	{
-		$parentType=rtrim($table, 's');
+		$parentType=tableType($table);
 		$parentTypeSwe=toSwedish($parentType);
 		$addLabel=isset($labels['add'][$table]) ? $labels['add'][$table] : 'Lägg till i '.$parentTypeSwe;
 		$removeLabel=isset($labels['remove'][$table]) ? $labels['remove'][$table] : 'Ta bort från '.$parentTypeSwe;

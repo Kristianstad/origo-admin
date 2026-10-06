@@ -6,7 +6,7 @@
 	{
 		if (!isFullTarget($update))
 		{
-			die("printUpdateForm($update, $inheritPosts, $helps=array()) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$sizePosts=sizePosts($inheritPosts);
 		echo '<div><div class="printXFormDiv"><form method="post">';
@@ -20,7 +20,7 @@
 		echo '<div class="buttonDiv">';
 		printUpdateButton('update', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('update');
-		$update=makeTargetBasic($update);
+		$update=toBasicTarget($update);
 		printInfoButton($update);
 		$deleteConfirmStr="Är du säker att du vill radera uppdateringsrutinen ".targetId($update)."? Referenser till uppdateringsrutinen hanteras separat.";
 		printDeleteButton($update, $deleteConfirmStr, $inheritPosts);

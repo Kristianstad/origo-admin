@@ -2,20 +2,9 @@
 
 	function targetIdColumn($target)
 	{
-		if (isTarget($target))
+		if (!isTarget($target))
 		{
-			$targetTable=targetTable($target);
-			if ($targetTable == 'proj4defs')
-			{
-				return 'code';
-			}
-			else
-			{
-				return targetType($target).'_id';
-			}
+			invalidTarget(__FUNCTION__);
 		}
-		else
-		{
-			die("targetIdColumn($target) failed!");
-		}
+		return pkColumnOfTable(targetTable($target));
 	}

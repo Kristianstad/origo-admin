@@ -8,7 +8,7 @@
 	{
 		if (!isFullTarget($layer))
 		{
-			die("printLayerForm($layer, $selectables, $operationTables, $inheritPosts, $helps=array()) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$sizePosts=sizePosts($inheritPosts);
 		echo '<div><div class="printXFormDiv"><form method="post">';
@@ -199,11 +199,11 @@
 		printHiddenInputs($inheritPosts);
 		echo '<hr class="dashedHr">';
 		echo '<div class="buttonDiv">';
-		$layerForHistory=makeTargetBasic($layer);
+		$layerForHistory=toBasicTarget($layer);
 		printHistoryButtons($layerForHistory);
 		printUpdateButton('layer', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('layer');
-		$layer=makeTargetBasic($layer);
+		$layer=toBasicTarget($layer);
 		printInfoButton($layer);
 		printConfigPreviewButton('preview', null, targetId($layer));
 		$deleteConfirmStr="Är du säker att du vill radera lagret ".targetId($layer)."? Referenser till lagret hanteras separat.";

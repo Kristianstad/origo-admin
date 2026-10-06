@@ -4,7 +4,7 @@ function objectHistoryKey($target)
 {
 	if (!isTarget($target))
 	{
-		die("objectHistoryKey($target) failed!");
+		invalidTarget(__FUNCTION__);
 	}
 	return targetType($target) . ':' . targetId($target);
 }

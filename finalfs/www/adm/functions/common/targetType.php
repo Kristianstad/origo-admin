@@ -5,10 +5,10 @@
 	{
 		if (isTarget($target))
 		{
-			return key($target);
+			return array_key_first($target);
 		}
 		else
 		{
-			die("targetType($target) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 	}

@@ -8,22 +8,8 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 - Ändra inte POST-namn, command-värden, hidden fields eller databasschema utan separat beslut.
 - `export.php` finns inte i detta repo. Exportmodulen kan bara dokumenteras, inte ändras, här.
 - Nya förbättringsidéer läggs i den här filen, inte som önskelistor i modulreferenserna.
-- Återstående faser körs i ordningen 3, 5, 4, 6 och 7. Varje fas gås igenom i detalj med ägaren innan implementationen börjar, så upplägget kan ändras.
+- Återstående faser körs i ordningen 5, 4, 6 och 7. Varje fas gås igenom i detalj med ägaren innan implementationen börjar, så upplägget kan ändras.
 - Nya och ändrade funktioner bör få parameter- och returtyper i vanligt läge (ingen bred omskrivning), men typning är en riktlinje och får vika om den försvårar förenkling eller generalisering av koden. Använd nullbara typer (`?string`) eller `mixed` där databasen kan ge `NULL`, och unionstyper som `array|false` där en funktion kan returnera `false`.
-
-## Fas 3. Target-abstraktionen
-
-Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. Ett separat typregister behövs inte.
-
-- [ ] Låt `tableType()` ta bort exakt ett avslutande `s` och använd den för tabellnamn i `pkColumnOfTable`, `printParents`, `printAddOperation`, `printAddRemoveOperations`, `printRemoveOperation`, `printChildSelect`, `printHeadForm` och `printHeadForms`. I `printUpdateSelect()` ska fältnamnet användas som det är; det är inte ett tabellnamn och ska inte trimmas.
-- [ ] Låt `targetIdColumn()` anropa `pkColumnOfTable()` i stället för att upprepa `proj4defs`-undantaget. `multiselect.php` använder redan hjälpfunktionen efter Fas 2.
-- [ ] Ersätt `$type.'s'` i `sqlForOperation` och `findParents` med `typeTableName()`.
-- [ ] Kontrollera dispatchen `'print'.ucfirst($type).'Form'` i `manage.php` med `function_exists()` efter att typen validerats mot tillåtelselistan.
-- [ ] Byt namn på konverterarna: `makeTargetBasic` → `toBasicTarget` och `makeTargetFull` → `toFullTarget` (23 anrop). Flytta `makeTargetFull`, `targetConfig` och `tableConfigs` till `functions/common/`.
-- [ ] Stärk kontraktet: `isTarget` kräver exakt en post, `targetId` validerar, id `"0"` accepteras, `array_key_first()` ersätter `key()`/`current()`.
-- [ ] Ersätt upprepad target-konstruktion och direkta `current($fullTarget)`-läsningar i `manage.php` med target-helpers. Behåll typunika renderingsgrenar för formulär och barnurval; de hanterar olika arbetsflöden.
-- [ ] Låt `updatedFullTarget()` behålla tidigare värde för fält som saknas i POST i stället för att tömma dem.
-- [ ] Samla `die()` vid ogiltig target i en gemensam helper.
 
 ## Fas 4. `manage.php` delas upp
 

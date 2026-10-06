@@ -13,7 +13,7 @@ manage.php
  │    ├─ sizePosts($post)          [manage] → sparade textarea-dimensioner (UI-state)
  │    ├─ categoryPosts($post)      [manage] → vilken nyckelordskategori som valts per fält
  │    ├─ focusTable($idPosts)      [manage] → vilken tabell som är "i fokus"
- │    ├─ dbh(), configTables($dbh) [common] → ALLA konfigtabeller i minnet
+ │    ├─ dbh(), configTables($dbh) [common] → tillåtna objekttabeller i minnet
  │    ├─ viewKeywordCategorized($view)  [manage] → vilka tabeller kategoriseras via nyckelord i denna vy
  │    └─ bygger $categoriesByTable[<table>] för varje kategoriserad tabell
  │
@@ -55,9 +55,9 @@ manage.php
       ├─ OM group(s)   → loop genom $groupIdsArray (nästlade grupper) → printGroupForm()
       │                  + printChildSelect() för layers/groups (rekursivt genom hierarkin)
       └─ OM övrigt <item> vald (idPosts icke-tom):
-           ├─ makeTargetFull(makeBasicTarget(...))  [manage] → normaliserad datastruktur
-           ├─ targetType()                           [manage] → vilken typ är detta?
-           └─ $formFunction = 'print'.ucfirst($childType).'Form'; $formFunction(...)  ← DYNAMISKT FUNKTIONSANROP (variabel-funktion, ej eval)
+           ├─ toFullTarget(makeBasicTarget(...))  [common] → normaliserad datastruktur
+           ├─ targetType()                           [common] → vilken typ är detta?
+           └─ tillåten tabell + function_exists() → DYNAMISKT print<Typ>Form-anrop
                 (layer/source/table/searchtable har specialhantering före detta;
                 control/plugin och "allt annat" går via samma mönster)
 */
@@ -189,7 +189,7 @@ if (isset($postButton)) {
             $child = makeBasicTarget($type, $id);
             $allParents = findAllParents($dbh, $child);
             if (empty(assocArrayValues($allParents))) {
-                $historyBeforeConfig = targetConfig(makeTargetFull($child, $configTables));
+                $historyBeforeConfig = targetConfig(toFullTarget($child, $configTables));
                 $sqlStatements[] = deleteIdSql($id, $typeTableName);
                 unset($post[$type . 'Id'], $idPosts[$type . 'Id']);
             } else {
@@ -253,7 +253,7 @@ if (isset($postButton)) {
             // Makes sure posted configuration fields are valid before continueing database update, or else aborts and gives an alert
             validateUpdate($updatePosts, $configTables, $updateValid);
             if ($updateValid) {
-                $fullTarget = makeTargetFull($target, $configTables);
+                $fullTarget = toFullTarget($target, $configTables);
                 $config = targetConfig($fullTarget);
                 if ($command == 'update') {
                     $historyBeforeConfig = $config;
@@ -335,7 +335,7 @@ if (isset($postButton)) {
                 }
 
                 if (isset($operation)) {
-                    $operationParent = makeTargetFull(makeBasicTarget($parentKey, $parentPkColumnValue), $configTables);
+                    $operationParent = toFullTarget(makeBasicTarget($parentKey, $parentPkColumnValue), $configTables);
                     $sqlStatements[] = sqlForOperation($operation, $target, $operationParent);
                     unset($operation, $parentPkColumnValue, $operationParent);
                 }
@@ -364,7 +364,7 @@ if (isset($postButton)) {
             $historyConfigTables = configTables($dbh);
             $newObjectId = ($command == 'copy') ? $copyId : $post[$type . 'IdNew'];
             $newObjectTarget = makeBasicTarget($type, $newObjectId);
-            $newObjectConfig = targetConfig(makeTargetFull($newObjectTarget, $historyConfigTables));
+            $newObjectConfig = targetConfig(toFullTarget($newObjectTarget, $historyConfigTables));
             $allOk = recordHistoryEdit($dbh, $newObjectTarget, $command, $newObjectConfig, $newObjectConfig);
             unset($newObjectId, $newObjectTarget, $newObjectConfig);
         }
@@ -405,7 +405,7 @@ if (isset($postButton)) {
                 unset($usedInMapsNew, $usedInMaps);
             }
             if ($command == 'update' && isset($historyBeforeConfig)) {
-                $historyAfterConfig = targetConfig(makeTargetFull($changedTarget, $configTables));
+                $historyAfterConfig = targetConfig(toFullTarget($changedTarget, $configTables));
                 recordHistoryEdit($dbh, $changedTarget, 'update', $historyBeforeConfig, $historyAfterConfig);
                 unset($historyAfterConfig);
             }
@@ -572,9 +572,9 @@ if (isset($post['mapId'])) {
         $map = makeFullTarget('map', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $map = makeFullTarget('map', arrayColumnSearch($post['mapId'], 'map_id', $configTables['maps']));
+        $map = toFullTarget(makeBasicTarget('map', $post['mapId']), $configTables);
     }
-    if (!empty(current($map))) {
+    if (!empty(targetConfig($map))) {
         // Map selectable items (footers, tilegrids) are exposed as $selectables (array)
         $selectables = array(
             'footers' => array_column($configTables['footers'], 'footer_id'),
@@ -619,9 +619,9 @@ elseif (isset($post['databaseId'])) {
         $database = makeFullTarget('database', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $database = makeFullTarget('database', arrayColumnSearch($post['databaseId'], 'database_id', $configTables['databases']));
+        $database = toFullTarget(makeBasicTarget('database', $post['databaseId']), $configTables);
     }
-    if (!empty(current($database))) {
+    if (!empty(targetConfig($database))) {
         // Print the form for the selected database
         printDatabaseForm($database, $inheritPosts, typeHelps("database", $helps));
 
@@ -651,9 +651,9 @@ if (isset($post['schemaId'])) {
         $schema = makeFullTarget('schema', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $schema = makeFullTarget('schema', arrayColumnSearch($post['schemaId'], 'schema_id', $configTables['schemas']));
+        $schema = toFullTarget(makeBasicTarget('schema', $post['schemaId']), $configTables);
     }
-    if (!empty(current($schema))) {
+    if (!empty(targetConfig($schema))) {
         // Schema selectable items (contacts, origins, updates) are exposed as $selectables (array)
         $selectables = array(
             'contacts' => array_combine(array_column($configTables['contacts'], 'contact_id'), array_column($configTables['contacts'], 'name')),
@@ -687,9 +687,9 @@ if (isset($post['classeId'])) {
         $classe = makeFullTarget('classe', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $classe = makeFullTarget('classe', arrayColumnSearch($post['classeId'], 'classe_id', $configTables['classes']));
+        $classe = toFullTarget(makeBasicTarget('classe', $post['classeId']), $configTables);
     }
-    if (!empty(current($classe))) {
+    if (!empty(targetConfig($classe))) {
         $operationTables = array();
         foreach (array('infogroups', 'layers', 'tables') as $operationTable) {
             if (isset($configTables[$operationTable])) {
@@ -716,10 +716,10 @@ foreach ($infogroupIdsArray as $infogroupId) {
         $infogroup = makeFullTarget('infogroup', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $infogroup = makeFullTarget('infogroup', arrayColumnSearch($infogroupId, 'infogroup_id', $configTables['infogroups']));
+        $infogroup = toFullTarget(makeBasicTarget('infogroup', $infogroupId), $configTables);
     }
     $inheritPosts['infogroupId'] = $infogroupId;
-    if (!empty(current($infogroup))) {
+    if (!empty(targetConfig($infogroup))) {
         $operationTables = array();
         foreach (array('classes', 'infogroups', 'layers', 'tables') as $operationTable) {
             if (isset($configTables[$operationTable])) {
@@ -762,11 +762,11 @@ foreach ($groupIdsArray as $groupId) {
         $group = makeFullTarget('group', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $group = makeFullTarget('group', arrayColumnSearch($groupId, 'group_id', $configTables['groups']));
+        $group = toFullTarget(makeBasicTarget('group', $groupId), $configTables);
     }
 
     $inheritPosts['groupId'] = $groupId;
-    if (!empty(current($group))) {
+    if (!empty(targetConfig($group))) {
         // If there is multiple parents to the selected group (ie parents of parents), use the loop to append them to $parent
         if (count($tmpGroupIds) > 0) {
             $parent = "$parent," . array_shift($tmpGroupIds);
@@ -797,10 +797,23 @@ if (!empty($idPosts)) {
     $inheritPosts['_viewDepth']++;
 
     // Expose selected <item> target as $childFullTarget (array)
-    $childFullTarget = makeTargetFull(makeBasicTarget(substr(key($idPosts), 0, -2), current($idPosts)), $configTables);
+    $childIdKey = array_key_first($idPosts);
+    if (!is_string($childIdKey) || !str_ends_with($childIdKey, 'Id')) {
+        invalidTarget('manage');
+    }
+    $childType = substr($childIdKey, 0, -2);
+    $childTable = typeTableName($childType);
+    if (!array_key_exists($childTable, $configTables)) {
+        invalidTarget('manage');
+    }
+    $childFullTarget = toFullTarget(makeBasicTarget($childType, $idPosts[$childIdKey]), $configTables);
 
     // Expose the type of the selected <item> as $childType (string)
     $childType = targetType($childFullTarget);
+    $formFunction = 'print' . ucfirst($childType) . 'Form';
+    if (!function_exists($formFunction)) {
+        invalidTarget('manage');
+    }
 
     // If a failed update occured then show those values.
     if (isset($failedUpdate) && $failedUpdate['type'] == $childType) {
@@ -918,7 +931,6 @@ if (!empty($idPosts)) {
     //  Else, if a control or plugin is selected
     elseif ($childType == 'control' || $childType == 'plugin') {
         // Print the form for the selected control/plugin
-        $formFunction = 'print' . ucfirst($childType) . 'Form';
         $formFunction($childFullTarget, array("maps" => $configTables["maps"]), $inheritPosts, $typeHelps);
         unset($formFunction);
     }
@@ -926,7 +938,6 @@ if (!empty($idPosts)) {
     // Else, if <item> of other type is selected
     else {
         // Print the form for the selected <item> based on its type
-        $formFunction = 'print' . ucfirst($childType) . 'Form';
         $formFunction($childFullTarget, $inheritPosts, $typeHelps);
         unset($formFunction);
     }

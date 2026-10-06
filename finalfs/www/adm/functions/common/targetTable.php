@@ -4,10 +4,10 @@
 	{
 		if (isTarget($target))
 		{
-			return typeTableName(targetType($target));
+			return typeTableName(array_key_first($target));
 		}
 		else
 		{
-			die("targetTable($target) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 	}

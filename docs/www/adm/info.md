@@ -50,7 +50,7 @@ manage-vyn använder samma target-kontrakt för objektidentitet.
   en given tabell
 - `findAllParents($dbh, $child)` – hittar (rekursivt) alla objekt som
   refererar till ett givet objekt
-- `makeTargetBasic($target)`, `makeBasicTarget()`, `makeFullTarget()`,
+- `toBasicTarget($target)`, `makeBasicTarget()`, `makeFullTarget()`,
   `targetType()`, `targetId()`, `targetTable()`, `targetIdColumn()` och
   `targetConfigParam()` – bygger och läser objekt-targets
 - `assocArrayValues($array)` – (används i `printParents`) kontrollerar om

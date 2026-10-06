@@ -18,7 +18,7 @@
 						{
 							$parentTableSv=toSwedish($parentTable);
 							$parentOptionSv=toSwedish($parentOption);
-							$parentType=rtrim($parentTable, 's');
+							$parentType=tableType($parentTable);
 							$first=true;
 							$headerString="$parentTableSv ($parentOptionSv): ";
 							echo "<b>$headerString</b><span style='display:inline-flex;width:0'><span style='min-width:calc(100vw - 20em)'>";

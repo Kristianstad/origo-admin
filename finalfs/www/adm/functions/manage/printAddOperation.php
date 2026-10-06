@@ -2,7 +2,7 @@
 
 	function printAddOperation($target, $addToTable, $buttontext, $inheritPosts)
 	{
-		$addToTableType=rtrim(key($addToTable), 's');
+		$addToTableType=tableType(key($addToTable));
 		$str=ucfirst($addToTableType);
 		echo '<form class="addForm" method="post">';
 		echo '<select class="addSelect" name="to'.$str.'Id">';

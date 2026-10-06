@@ -3,14 +3,11 @@
 	// Takes a database handle and a target, and returns an array of maps that uses this target.
 	function usedInMaps(&$dbh, $target, $checkedTargets=array(), $usedInMaps=array())
 	{
-		if (isTarget($target))
+		if (!isTarget($target))
 		{
-			$target=makeTargetBasic($target);
+			invalidTarget(__FUNCTION__);
 		}
-		else
-		{
-			die("usedInMaps(\$dbh, $target) failed! Child not a target.");
-		}
+		$target = toBasicTarget($target);
 		if (in_array($target, $checkedTargets))
 		{
 			return $usedInMaps;
@@ -39,7 +36,7 @@
 				{
 					foreach ($parentIds as $parentId)
 					{
-						$usedInMaps=usedInMaps($dbh, makeTargetBasic(array(tableType($parentsTable)=>$parentId)), $checkedTargets, $usedInMaps);
+						$usedInMaps=usedInMaps($dbh, toBasicTarget(array(tableType($parentsTable)=>$parentId)), $checkedTargets, $usedInMaps);
 					}
 				}
 			}

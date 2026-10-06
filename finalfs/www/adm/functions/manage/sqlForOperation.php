@@ -7,9 +7,9 @@
 		require("./constants/configSchema.php");
 		if (!isTarget($child) || isFullTarget($child) || !isFullTarget($parent))
 		{
-			die("sqlForOperation($operation, $child, $parent) failed!");
+			invalidTarget(__FUNCTION__);
 		}
-		$parentColumn=targetType($child).'s';
+		$parentColumn=typeTableName(targetType($child));
 		$parentConfig=targetConfig($parent);
 		$parentColumnArray=pgArrayToPhp($parentConfig[$parentColumn]);
 		$parentTable=targetTable($parent);

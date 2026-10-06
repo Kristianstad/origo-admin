@@ -13,7 +13,7 @@
 		if (!empty($targetColumnValue))
 		{
 			$groupIdsArray=array();
-			$columnType=rtrim($column, 's');
+			$columnType=tableType($column);
 			$sName=$columnType.'Id';
 			$columnArr=explode(',', $targetColumnValue);
 			if (($targetType == 'group' && ($column == 'groups' || $column == 'layers')) || ($targetType == 'infogroup' && $column == 'infogroups'))

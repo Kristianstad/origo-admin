@@ -9,6 +9,6 @@
 		}
 		else
 		{
-			return rtrim($tableName, 's').'_id';
+			return tableType($tableName).'_id';
 		}
 	}

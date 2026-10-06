@@ -24,13 +24,13 @@
 | `includeFileConstant($name)` | `includeFileConstant.php` | Läser en fil-konstant skriven av `defineFileConstant()` | restrictedLayer |
 | `initUserLdap($dbh)` | `initUserLdap.php` | Initierar användarinfo via LDAP (`$authMethod==='ldap'`). **Bieffekt:** skriver och stänger sessionen | news, authorization, export, restrictedLayer |
 | `insertIdSql($id, $tableName)` | `insertIdSql.php` | Bygger en parameteriserad `INSERT`-sats som skapar en ny rad med angivet id som primärnyckel, övriga kolumner tomma; returnerar SQL och parametrar | manage (postButton-kommandona `create`/`copy`) |
+| `invalidTarget($functionName): never` | `invalidTarget.php` | Avslutar med ett gemensamt felmeddelande när target-form eller target-id är ogiltigt | target-hjälpare, manage |
 | `isBasicTarget($target)` | `isBasicTarget.php` | Kontrollerar om en target är "basic" (värdet är en sträng/id) snarare än "full" (värdet är en config-array). Bygger på `isTarget()` | manage (target-infrastruktur) |
 | `isFullTarget($target)` | `isFullTarget.php` | Kontrollerar om en target är "full" (värdet är en config-array) snarare än "basic" | manage, target-infrastruktur |
 | `isIdUniqueInTable($id, $tablePkColumn, $table)` | `isIdUniqueInTable.php` | Kontrollerar att ett id inte redan finns bland värdena i tabellens primärnyckelkolumn | manage (validering vid skapande) |
-| `isTarget($target)` | `isTarget.php` | Kontrollerar om en variabel har formen av ett giltigt "target" (se manage.md) | manage |
-| `makeBasicTarget($type, $id)` | `makeBasicTarget.php` | Skapar en basic target `[$type => $id]` | info, manage, target-infrastruktur |
+| `isTarget($target)` | `isTarget.php` | Kontrollerar att target är en array med exakt en icke-tom strängnyckel (se manage.md) | manage |
+| `makeBasicTarget($type, $id)` | `makeBasicTarget.php` | Skapar en basic target `[$type => $id]` från icke-tomma strängar; id-värdet `'0'` är tillåtet | info, manage, target-infrastruktur |
 | `makeFullTarget($type, $config)` | `makeFullTarget.php` | Skapar en full target `[$type => $config]` från en konfigurationsrad | info, manage, target-infrastruktur |
-| `makeTargetBasic($target)` | `makeTargetBasic.php` | Konverterar en full target till en basic target | manage (används flitigt i samtliga print*Form) |
 | `mbUcfirst($str)` | `mbUcfirst.php` | Multibyte-säker `ucfirst()` (via `mb_strtoupper()`/`mb_substr()`, kräver `mbstring`-tillägget) – PHP:s vanliga `ucfirst()` är byte-baserad och versaliserar bara ASCII a-z, vilket missar svenska ord som börjar på å/ä/ö | printHeadForms, multiselect (används runt `toSwedish()`-resultat, där ett svenskt ord kan börja på å/ä/ö) |
 | `pgArrayToPhp($pgArray)` | `pgArrayToPhp.php` | Konverterar Postgres arraysyntax (`{a,b,c}`) till PHP-array | news, export, writeConfig |
 | `pkColumnOfTable($table)` | `pkColumnOfTable.php` | Returnerar primärnyckelns kolumnnamn för en tabell | info, writeTablesForAllLayers, target-infrastruktur (targetId, targetIdColumn via targetTable), validateUpdate |
@@ -38,18 +38,21 @@
 | `readAndCloseSession()` | `readAndCloseSession.php` | Läser in `$_SESSION` och stänger sessionen | news, export |
 | `setTargetConfigParam(&$fullTarget, $configParam, $value)` | `setTargetConfigParam.php` | Ändrar ett konfigurationsvärde i en full target in-memory | manage, target-infrastruktur |
 | `sqlQueryError($dbh)` | `sqlQueryError.php` | Avslutar vid SQL-fel med PostgreSQLs felmeddelande | allFromTable, configTableNames, markMapsChanged, markMapUnchanged, schemaNamesFromDb, tableNamesFromSchema, updated-funktioner |
+| `tableConfigs($table, $configTablesOrDbh)` | `tableConfigs.php` | Hämtar rader för en konfigurationstabell ur en databaskoppling eller en redan laddad tabellarray | manage (target-uppslag) |
 | `tableNamesFromSchema($dbh, $schema)` | `tableNamesFromSchema.php` | Listar bastabellnamn i ett databasschema; binder schemanamnet som SQL-värde | read_schema_tables |
 | `tableType($table)` | `tableType.php` | Returnerar typen för tabellnamnet genom att ta bort ett avslutande `s` (`layers` → `layer`) | manage, target-infrastruktur |
-| `tablesFromQgsXml($qgsXml, $layerName=null, $tables=[], $subtree=null)` | `tablesFromQgsXml.php` | Läser PostGIS-tabeller ur ett QGIS-projekts XML-lagerträd; används av manage och writeTablesForAllLayers | manage, writeTablesForAllLayers |
+| `tablesFromQgsXml($qgsXml, $layerName=null, $tables=[], $subtree=null)` | `tablesFromQgsXml.php` | Läser PostGIS-tabeller ur en QGIS-projekts XML-lagerträd; används av manage och writeTablesForAllLayers | manage, writeTablesForAllLayers |
+| `targetConfig($target, $configTablesOrDbh=null)` | `targetConfig.php` | Returnerar konfigurationsraden för en full target eller slår upp den för en basic target | manage (target-uppslag) |
 | `targetConfigParam($fullTarget, $configParam)` | `targetConfigParam.php` | Läser ett konfigurationsvärde från en full target | info, manage, target-infrastruktur |
-| `targetId($target)` | `targetId.php` | Returnerar targetens id-värde, oavsett om targeten är basic eller full | info, manage, target-infrastruktur |
+| `targetId($target)` | `targetId.php` | Validerar och returnerar id-värdet som en icke-tom sträng; `'0'` är giltigt | info, manage, target-infrastruktur |
 | `targetIdColumn($target)` | `targetIdColumn.php` | Returnerar targetens primärnyckelkolumn, inklusive specialfallet `proj4defs` → `code` | info, manage, target-infrastruktur |
 | `targetTable($target)` | `targetTable.php` | Returnerar konfigurations-tabellen för targetens typ | info, manage, target-infrastruktur |
 | `targetType($target)` | `targetType.php` | Returnerar typen (nyckeln) för ett target | manage |
 | `typeTableName($type)` | `typeTableName.php` | Returnerar tabellnamnet för en typ genom att lägga till `s` | manage, target-infrastruktur |
+| `toBasicTarget($target)` | `toBasicTarget.php` | Konverterar en full target till en basic target | manage, parent-traversering |
+| `toFullTarget($target, $configTablesOrDbh)` | `toFullTarget.php` | Konverterar en basic target till en full target genom att slå upp dess konfigurationsrad; en redan full target behålls | manage |
 | `toSwedish($string)` | `toSwedish.php` | Översätter interna typ-/kolumnnamn till svenska för visning | info, multiselect, printCopyButton, printDeleteButton, printAddOperation, printRemoveOperation, printHeadForm/Forms, validateUpdate |
 | `usedInMaps($dbh, $target, $checkedTargets=[], $usedInMaps=[])` | `usedInMaps.php` | Rekursivt: hittar alla kartor (`map`-target) som ett givet target ytterst ingår i, via `findAllParents()`. Håller reda på redan besökta targets för att undvika oändlig rekursion vid cirkulära referenser | manage (avgör vilka kartor som ska markeras `changed` vid en ändring) |
 | `includeDirectory($path)` | *(i `adm/functions/`, ej i `common/` — placerad sist, utanför den alfabetiska listan, eftersom den fysiskt hör hemma på en annan plats)* | Laddar alla `.php`-filer i angiven mapp med `require_once` | samtliga moduler |
 
-> `updatedFromTable()` och `targetConfig()` ligger i `functions/manage/`;
-> se manage.md.
+> `updatedFromTable()` ligger i `functions/manage/`; se manage.md.

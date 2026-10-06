@@ -6,7 +6,7 @@
 	{
 		if (!isFullTarget($source))
 		{
-			die("printSourceForm($source, $selectables, $inheritPosts, $helps=array()) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$sizePosts=sizePosts($inheritPosts);
 		echo '<div><div class="printXFormDiv"><form method="post">';
@@ -61,11 +61,11 @@
 		printTextarea($source, 'info', 'textareaLarge', 'Info:', in_array('info', $helps), $sizePosts);
 		printHiddenInputs($inheritPosts);
 		echo '<div class="buttonDiv">';
-		$sourceForHistory=makeTargetBasic($source);
+		$sourceForHistory=toBasicTarget($source);
 		printHistoryButtons($sourceForHistory);
 		printUpdateButton('source', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('source');
-		$source=makeTargetBasic($source);
+		$source=toBasicTarget($source);
 		printInfoButton($source);
 		$deleteConfirmStr="Är du säker att du vill radera källan ".targetId($source)."? Referenser till källan hanteras separat.";
 		printDeleteButton($source, $deleteConfirmStr, $inheritPosts);

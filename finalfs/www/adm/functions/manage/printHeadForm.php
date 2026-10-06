@@ -10,7 +10,7 @@
 					<div class="headFormDiv2">
 		HERE;
 		$sId='';
-		$type=rtrim($tableName, 's');
+		$type=tableType($tableName);
 		$sName=$type.'Id';
 		$selected=null;
 		if (isset($inheritPosts[$type.'Id']))

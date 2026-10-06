@@ -2,15 +2,23 @@
 
 	function targetId($target)
 	{
-		if (isFullTarget($target))
+		if (!isTarget($target))
 		{
-			$targetTable=targetTable($target);
-			$targetPkColumn=pkColumnOfTable($targetTable);
-			$targetId=current($target)[$targetPkColumn];
+			invalidTarget(__FUNCTION__);
+		}
+		$type = array_key_first($target);
+		$value = $target[$type];
+		if (is_array($value))
+		{
+			$id = $value[pkColumnOfTable(typeTableName($type))] ?? null;
 		}
 		else
 		{
-			$targetId=current($target);
+			$id = $value;
 		}
-		return $targetId;
+		if (!is_string($id) || $id === '')
+		{
+			invalidTarget(__FUNCTION__);
+		}
+		return $id;
 	}

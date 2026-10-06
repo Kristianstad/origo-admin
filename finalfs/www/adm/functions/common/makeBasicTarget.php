@@ -4,12 +4,12 @@
 	// The basic target array has the type as only key and the id as value
 	function makeBasicTarget($type, $id)
 	{
-		if (is_string($type) && !empty($type) && is_string($id) && !empty($id))
+		if (is_string($type) && $type !== '' && is_string($id) && $id !== '')
 		{
 			return array($type=>$id);
 		}
 		else
 		{
-			die("makeBasicTarget($type, $id) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 	}

@@ -7,14 +7,14 @@
 	{
 		if (!isFullTarget($fullTarget))
 		{
-			die("printUpdateSelect($fullTarget, $configParamValues, $class, $label, $options=null) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$targetId=targetId($fullTarget);
 		$targetType=targetType($fullTarget);
 		$configParam=key($configParamValues);
 		$ucConfigParam=ucfirst($configParam);
 		$sName='update'.$ucConfigParam;
-		$selected=current($fullTarget)[rtrim(key($configParamValues), 's')];
+		$selected=targetConfigParam($fullTarget, $configParam);
 		echo <<<HERE
 			<span class="optionSpan">
 				<label title="{$targetType}:{$configParam}" for='{$targetId}{$ucConfigParam}'>{$label}</label>

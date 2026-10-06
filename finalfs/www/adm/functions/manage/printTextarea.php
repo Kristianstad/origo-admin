@@ -8,7 +8,7 @@
 	{
 		if (!isFullTarget($fullTarget))
 		{
-			die("printTextarea($fullTarget, $configParam, $class, $label, $help=false, $readonly=false) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		require("./constants/multiselectables.php");
 		$configParamValue=targetConfigParam($fullTarget, $configParam);

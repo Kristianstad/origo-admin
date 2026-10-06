@@ -6,7 +6,7 @@
 	{
 		if (!isFullTarget($map))
 		{
-			die("printMapForm($map, $selectables, $inheritPosts, $helps=array()) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$sizePosts=sizePosts($inheritPosts);
 		echo '<div><div class="printXFormDiv"><form method="post">';
@@ -45,14 +45,14 @@
 		printHiddenInputs($inheritPosts);
 		echo '<hr class="dashedHr">';
 		echo '<div class="buttonDiv">';
-		$mapForHistory=makeTargetBasic($map);
+		$mapForHistory=toBasicTarget($map);
 		printHistoryButtons($mapForHistory);
 		printUpdateButton('map', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('map');
 		$id=targetId($map);
 		$url=targetConfigParam($map, 'url');
 		$changed=targetConfigParam($map, 'changed');
-		$map=makeTargetBasic($map);
+		$map=toBasicTarget($map);
 		printInfoButton($map);
 		printConfigPreviewButton($id);
 		printWriteConfigButton($id, $changed);

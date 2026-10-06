@@ -21,6 +21,6 @@
 		}
 		else
 		{
-			die("sqlForUpdate($fullTarget, $updatePosts) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 	}

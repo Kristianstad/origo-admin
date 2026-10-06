@@ -6,10 +6,10 @@
 	{
 		if (isFullTarget($fullTarget))
 		{
-			$fullTarget[key($fullTarget)][$configParam]=$value;
+			$fullTarget[array_key_first($fullTarget)][$configParam]=$value;
 		}
 		else
 		{
-			die("setTargetConfigParam(&$fullTarget, $configParam, $value) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 	}

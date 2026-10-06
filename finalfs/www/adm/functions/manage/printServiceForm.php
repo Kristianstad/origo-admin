@@ -6,7 +6,7 @@
 	{
 		if (!isFullTarget($service))
 		{
-			die("printServiceForm($service, $inheritPosts, $helps=array()) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 		$sizePosts=sizePosts($inheritPosts);
 		echo '<div><div class="printXFormDiv"><form method="post">';
@@ -35,11 +35,11 @@
 		printTextarea($service, 'info', 'textareaLarge', 'Info:', in_array('info', $helps), $sizePosts);
 		printHiddenInputs($inheritPosts);
 		echo '<div class="buttonDiv">';
-		$serviceForHistory=makeTargetBasic($service);
+		$serviceForHistory=toBasicTarget($service);
 		printHistoryButtons($serviceForHistory);
 		printUpdateButton('service', $inheritPosts['_formChanged'] ?? false);
 		printCopyButton('service');
-		$service=makeTargetBasic($service);
+		$service=toBasicTarget($service);
 		printInfoButton($service);
 		$deleteConfirmStr="Är du säker att du vill radera tjänsten ".targetId($service)."? Referenser till tjänsten hanteras separat.";
 		printDeleteButton($service, $deleteConfirmStr, $inheritPosts);

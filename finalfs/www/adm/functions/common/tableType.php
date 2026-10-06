@@ -1,7 +1,7 @@
 <?php
 
-	// Takes a table name (string) and returns the type (string) of the items stored in the table
+	// Removes exactly one trailing 's' from a table name to get its item type.
 	function tableType($table)
 	{
-		return rtrim($table,'s');
+		return $table !== '' && substr($table, -1) === 's' ? substr($table, 0, -1) : $table;
 	}

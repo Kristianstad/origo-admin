@@ -4,7 +4,7 @@ function printSimpleEntityForm($target, $type, $fields, $inheritPosts, $helps=ar
 {
 	if (!isFullTarget($target))
 	{
-		die("print".ucfirst($type)."Form failed!");
+		invalidTarget('print'.ucfirst($type).'Form');
 	}
 	$sizePosts=sizePosts($inheritPosts);
 	echo '<div><div class="printXFormDiv"><form method="post">';
@@ -27,7 +27,7 @@ function printSimpleEntityForm($target, $type, $fields, $inheritPosts, $helps=ar
 		echo '<hr class="dashedHr">';
 	}
 	echo '<div class="buttonDiv">';
-	$basicTarget=makeTargetBasic($target);
+	$basicTarget=toBasicTarget($target);
 	if (isset($extras['leadingButtons']))
 	{
 		$extras['leadingButtons']($basicTarget);

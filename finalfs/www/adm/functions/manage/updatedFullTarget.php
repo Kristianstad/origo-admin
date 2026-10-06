@@ -7,14 +7,12 @@
 			$config=targetConfig($fullTarget);
 			foreach ($config as $column=>$value)
 			{
-				if (isset($updatePosts['update'.ucfirst($column)]))
+				$updateKey = 'update'.ucfirst($column);
+				if (!array_key_exists($updateKey, $updatePosts))
 				{
-					$newValue=$updatePosts['update'.ucfirst($column)];
+					continue;
 				}
-				else
-				{
-					$newValue='';
-				}
+				$newValue = $updatePosts[$updateKey];
 				if (isArrayColumn($column))
 				{
 					$newValue='{'.$newValue.'}';
@@ -25,6 +23,6 @@
 		}
 		else
 		{
-			die("updatedFullTarget($fullTarget, $updatePosts) failed!");
+			invalidTarget(__FUNCTION__);
 		}
 	}
