@@ -29,6 +29,7 @@ En svensk användarguide för administrationsverktyget finns i [Origo_admin_tuto
 | `AGENTS.md` | Instruktioner för utveckling och AI-agenter. |
 | `Origo_admin_tutorial_swedish.pptx` | Källa till användarguiden. |
 | `LICENSE` | Licens (BSD 2-Clause) för filerna i det här repot. |
+| `.gitattributes` | Ser till att textfiler alltid har Unix-radslut (LF), även på Windows. |
 
 
 ## Innehållsförteckning

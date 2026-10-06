@@ -50,6 +50,7 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 - Bevara korrekt escaping och samma-origin-kontroller för `postMessage`. Följ befintlig formulärstruktur; HTML-formulär får inte nästlas.
 - Föredra `json_encode()` för JSON och återanvänd befintliga helpers. Läs `ARCHITECTURE.md` och modulreferensen för lokala include-, target- och POST-mönster.
 - Behandla användartext som UTF-8 och använd multibyte-medvetna funktioner för teckenbaserad textbearbetning. Se `common.md` för gemensamma helpers.
+- Textfiler har alltid Unix-radslut (LF), även i arbetskatalogen på Windows; det styrs av `.gitattributes`. Startskripten i `finalfs/start/` körs på Alpine och fungerar inte med CRLF. Ändra inte radslut i befintliga filer annat än via `.gitattributes`.
 - Förutsättningen är att administratörer är betrodda och att den som installerar verktyget begränsar åtkomsten till `/adm`. Administratörsskriven HTML (till exempel hjälptexter och nyheter) skrivs därför ut utan escaping, och anslutningssträngar lagras i klartext. Data från andra källor (frågeparametrar, publika endpoints, importerad data) ska ändå escapas och valideras.
 
 ## Historik och schemaändringar

@@ -1,6 +1,7 @@
 # Version control
 .git
 .gitignore
+.gitattributes
 
 # Editor / OS files
 .vscode

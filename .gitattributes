@@ -1,0 +1,6 @@
+# Textfiler har alltid LF, även i arbetskatalogen på Windows. Startskripten körs på Alpine.
+* text=auto eol=lf
+
+*.pdf binary
+*.pptx binary
+*.png binary
