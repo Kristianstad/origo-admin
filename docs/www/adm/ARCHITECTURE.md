@@ -33,8 +33,9 @@ point som behöver den nya mappen.
 
 ## Strukturregler
 
-1. **En funktion per fil.** Varje hjälpfunktion ligger i en egen fil med
-   samma namn som funktionen (`printHeadForm()` i `printHeadForm.php`),
+1. **En funktion per fil.** PHP-hjälpfunktioner namnges i camelCase och
+  ligger var och en i en egen fil med samma namn som funktionen
+  (`printHeadForm()` i `printHeadForm.php`),
    i `functions/<huvudfil>/` eller i `functions/common/` om flera
    huvudfiler använder den. Filen definierar bara den funktionen; en
    hjälpfunktion definieras inte inuti en annan funktion.
@@ -197,7 +198,7 @@ citeras med `pg_escape_identifier()` innan de sätts in i SQL.
 
 `configTableNames($dbh)` cachar bastabellerna i `$configSchema` som har den
 förväntade id-kolumnen. `object_identity` och `edit_cursor` är interna
-historiktabeller och ingår inte. `all_from_table()` accepterar bara dessa
+historiktabeller och ingår inte. `allFromTable()` accepterar bara dessa
 tabeller i konfigurationsschemat. `info.php` kontrollerar typen mot samma
 lista; `multiselect.php` begränsar tabellerna ytterligare till
 `multiselectables.php`, efter aliasöversättning.

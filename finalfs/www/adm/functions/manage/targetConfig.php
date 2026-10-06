@@ -10,7 +10,7 @@
 			}
 			elseif (isset($configTablesOrDbh))
 			{
-				$config=array_column_search(targetId($target), targetIdColumn($target), tableConfigs(targetTable($target), $configTablesOrDbh));
+				$config=arrayColumnSearch(targetId($target), targetIdColumn($target), tableConfigs(targetTable($target), $configTablesOrDbh));
 			}
 			else
 			{

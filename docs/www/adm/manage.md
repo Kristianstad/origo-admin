@@ -228,7 +228,7 @@ betydande typspecifik villkorslogik:
 |---|---|---|
 | `printLayerForm.php` | layer | **Den mest komplexa print*Form-funktionen i hela modulen.** Djupt kaskaderande synlighetslogik (nästlade `<span style="display:none">`-block) beroende på lagertyp (WFS/WMS/GROUP/GEOJSON), stilkonfiguration, ikon-inställningar. Använder genomgående ett mönster där dolda fält "bevaras" via `printHiddenInputs()` när motsvarande synliga fält döljs, så att värdet inte går förlorat vid nästa uppdatering trots att fältet inte visas |
 | `printMapForm.php` | map | Störst antal fält av alla enkla formulär (30+), unika knappar: `printWriteConfigButton`, `printExportJsonButton`, `printUrlButton` – detta är alltså formuläret som triggar hela writeConfig-publiceringen |
-| `printTableForm.php` | table | Gör ett **extra, eget databasanrop** (`dbh($dbhConnectionString)` + `updated_from_table()`) mitt i renderingen för att visa senaste ändringsdatum – enda formuläret som pratar med en annan databas än konfigurationsdatabasen under rendering |
+| `printTableForm.php` | table | Gör ett **extra, eget databasanrop** (`dbh($dbhConnectionString)` + `updatedFromTable()`) mitt i renderingen för att visa senaste ändringsdatum – enda formuläret som pratar med en annan databas än konfigurationsdatabasen under rendering |
 | `printServiceForm.php` | service | Villkorlig visning baserat på tjänstetyp, med `printHiddenInputs()`-bevarande mönster likt layer/source |
 | `printSourceForm.php` | source | Villkorlig visning baserat på tjänstetyp (`File`/`OpenStreetMap` döljer flera fält) |
 
@@ -269,8 +269,8 @@ betydande typspecifik villkorslogik:
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `dbh()`, `configTables($dbh)`
-- `pkColumnOfTable()`, `array_column_search()`, `pgArrayToPhp()`,
-  `assoc_array_values()`, `findAllParents()`
+- `pkColumnOfTable()`, `arrayColumnSearch()`, `pgArrayToPhp()`,
+  `assocArrayValues()`, `findAllParents()`
 
 ## Filer och funktioner (target-hantering och POST-tolkning)
 
@@ -300,7 +300,7 @@ betydande typspecifik villkorslogik:
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
 | `printDeleteButton.php` | `printDeleteButton($target, $deleteConfirmStr, $inheritPosts)` | Raderaknapp med `onclick`-bekräftelse; skickar delete-kommandot via det omgivande entitetsformuläret, utan att skapa ett eget formulär. Visas bara när `_viewDepth` i `inheritPosts` är `1` |
 | `printExportJsonButton.php` | `printExportJsonButton($mapId)` | Typknapp som laddar ner kartans JSON-konfiguration via `writeConfig.php?getJson=y&download=y` i den dolda iframen (`hiddenFrame`) så sidan inte navigerar bort; inget nästlat formulär |
-| `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + normalt ett textfält och en knapp för att skapa nytt. Skapadelen döljs för `edits`. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `all_from_table()` redan läser raderna sorterade på `edit_id` |
+| `printHeadForm.php` | `printHeadForm($tableConfig, $inheritPosts)` | Skriver ut en enskild kolumn i toppradens urvalsformulär: en dropdown för att välja befintligt objekt (med ev. nyckelordskategorisering) + normalt ett textfält och en knapp för att skapa nytt. Skapadelen döljs för `edits`. Dropdownens värde är alltid tabellens id-kolumn, men för `contact`/`origin` visas `name` som etikett och för `edit` visas `target_key` (objektet ändringen gäller) istället för det annars intetsägande `edit_id`:t – ordningen hålls kronologisk (via `preserveOrder` i `printSelectOptions()`) eftersom `allFromTable()` redan läser raderna sorterade på `edit_id` |
 | `printHeadForms.php` | `printHeadForms($view, $configTables, $focusTable, $inheritPosts)` | Skriver ut hela toppraden av urvalsformulär, en `printHeadForm()`-kolumn per tabell som ingår i vald `$view` (styrt av `constants/views.php`). Placerar `$focusTable` först och ger den fokus-styling |
 | `printHelpButton.php` | `printHelpButton($type, $configParam=null, $buttonText='?', $buttonClass='smallHelpButton')` | Liten "?"-knapp bredvid ett fält, öppnar/togglar hjälptext för just det fältet (`help.php?id=<type>[:<configParam>]`) i topFrame |
 | `printHiddenInputs.php` | `printHiddenInputs($inheritPosts)` | Skriver ut ett dolt `<input>` per nyckel/värde i `$inheritPosts`, för att bevara navigeringskontext genom formulärinskick |
@@ -321,7 +321,7 @@ betydande typspecifik villkorslogik:
 | `targetConfig.php` | `targetConfig($target, $configTablesOrDbh=null)` | Slår upp/returnerar hela konfigurationen för en target, oavsett om den redan är "full" eller bara "basic" |
 | `typeHelps.php` | `typeHelps($type, $helps): array` | Filtrerar den globala listan av hjälptext-id:n (`help_id`, format `<typ>:<fält>`) till de som gäller en specifik typ, och returnerar bara fältdelen. Detta är mekaniken bakom `in_array($fältnamn, $helps)`-kontrollerna i varje `print*Form`-funktion – `$helps` som skickas till de funktionerna är redan filtrerat via denna funktion i `manage.php`s entry point |
 | `updatedFullTarget.php` | `updatedFullTarget($fullTarget, $updatePosts): array` | Bygger en ny full target där varje kolumns värde ersätts med motsvarande `update<Kolumn>`-fält från `$updatePosts` (eller tom sträng om inget postades för den kolumnen). Array-kolumner (enligt `isArrayColumn()`/`constants/arrayColumns.php`) omsluts automatiskt med Postgres-array-syntax `{...}`. Detta är steget som förvandlar "vad användaren skrev i formuläret" till "vad som ska stå i databasen", och används av `sqlForUpdate()` innan `appendUpdatedColumnsToSql()` bygger själva SQL-strängen |
-| `updated_from_table.php` | `updated_from_table($dbh, $tableWithSchema): array\|false\|null` | Kontrollerar och citerar `schema.tabell`, hämtar senaste `pg_xact_commit_timestamp` och returnerar bara tidsstämpeln. `false` betyder att tabellen saknas; `null` att den saknar rader. Används av `printTableForm.php` |
+| `updatedFromTable.php` | `updatedFromTable($dbh, $tableWithSchema): array\|false\|null` | Kontrollerar och citerar `schema.tabell`, hämtar senaste `pg_xact_commit_timestamp` och returnerar bara tidsstämpeln. `false` betyder att tabellen saknas; `null` att den saknar rader. Används av `printTableForm.php` |
 | `updatePosts.php` | `updatePosts($post): array` | Filtrerar `$post` till fält vars namn börjar med `update` – detta är alla postade formulärfältvärden redo att skrivas till databasen |
 | `validateUpdate.php` | `validateUpdate($updatePosts, $configTables, &$updateValid)` | Validerar **endast** fält som är markerade som "multiselectable" (`constants/multiselectables.php`) – kontrollerar att varje kommaseparerat värde som postats faktiskt existerar som ett giltigt id i motsvarande tabell. Sätter `$updateValid` (skickad by reference) och visar ett JS `alert()` vid fel. **Notera:** fält som inte är multiselectable valideras alltså inte alls av denna funktion – se begränsningar nedan |
 | `viewKeywordCategorized.php` | `viewKeywordCategorized($view): array` | Filtrerar den globala listan av "tabeller som ska nyckelordskategoriseras" (`constants/keywordCategorized.php`) till bara de tabeller som är relevanta för vald `$view` (`constants/views.php`). Specialfallet `$view == 'Allt'` (eller tom) returnerar hela listan okategoriserat av vy |
@@ -402,7 +402,7 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
 - `array_filter($_POST, ...)` behåller värdet `"0"` men filtrerar bort tomma
   strängar, så legitima nollvärden (till exempel opacitet eller skala) går
   inte förlorade.
-- Raderingsskyddet (`findAllParents` + `assoc_array_values`) återanvänder
+- Raderingsskyddet (`findAllParents` + `assocArrayValues`) återanvänder
   samma mönster som "Används av" i `info.php`.
 - Den QGIS-baserade autoifyllnaden vid update läser `.qgs`-filer, liksom
   `writeTablesForAllLayers.php` och `info.php`. Ett ändrat QGIS-format
@@ -472,9 +472,9 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   `printConfigPreviewButton()`, `printExportJsonButton()` och
   `printUrlButton()` skriver inga formulär. Bekräftelserna använder
   knappens `onclick` och Avbryt stoppar åtgärden.
-- `printTableForm.php` anropar `updated_from_table()` (i `functions/manage/`,
+- `printTableForm.php` anropar `updatedFromTable()` (i `functions/manage/`,
   returnerar bara tidsstämpeln). `updated.php` använder
-  `updated_from_table2()`, som också returnerar `xmin` som
+  `updatedFromTable2()`, som också returnerar `xmin` som
   sorteringsnyckel när flera tabeller jämförs.
 - `printLayerForm.php` och `printServiceForm.php` bevarar värdet för
   villkorligt dolda fält med `printHiddenInputs()`, så att data inte går

@@ -19,12 +19,12 @@
 		$mapSources = array_unique($mapSources);
 		foreach ($mapSources as $sourceId)
 		{
-			$source = array_column_search(trim(explode('@', $sourceId, 2)[0]), 'source_id', $sources);
+			$source = arrayColumnSearch(trim(explode('@', $sourceId, 2)[0]), 'source_id', $sources);
 			if (!empty($source))
 			{
-				$type = array_column_search($source['service'], 'service_id', $services, 'type');
-				$url = array_column_search($source['service'], 'service_id', $services, 'base_url');
-				$restricted = array_column_search($source['service'], 'service_id', $services, 'restricted');
+				$type = arrayColumnSearch($source['service'], 'service_id', $services, 'type');
+				$url = arrayColumnSearch($source['service'], 'service_id', $services, 'base_url');
+				$restricted = arrayColumnSearch($source['service'], 'service_id', $services, 'restricted');
 				$sourceProject = trim(explode('#', $source['source_id'], 2)[0]);
 				if (strpos($sourceId, '@wfs') !== false)
 				{
@@ -60,7 +60,7 @@
 				}
 				if (!empty($source['tilegrid']))
 				{
-					$tilegrid = array_column_search($source['tilegrid'], 'tilegrid_id', $tilegrids);
+					$tilegrid = arrayColumnSearch($source['tilegrid'], 'tilegrid_id', $tilegrids);
 					$tileGridJson = array();
 					if (!empty($tilegrid['tilesize']))
 					{

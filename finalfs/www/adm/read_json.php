@@ -57,7 +57,7 @@ if (empty($post['json'])) {
 	$helpStyles=topFormHelpButton('read_json:styles');
 	$helpServices=topFormHelpButton('read_json:services');
 	$dbh=dbh();
-	$currentSkin=currentSkin(all_from_table($dbh, $configSchema, 'skins'));
+	$currentSkin=currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 	pg_close($dbh);
 
     echo <<<HTML
@@ -353,7 +353,7 @@ if (importRequested($post, 'layers'))
 	$allLayers=flattenGroupLayers($jsonLayers);
 	foreach ($allLayers as $layer)
 	{
-		$layer['name']=renamedup($layer['name'] ?? '', $uniqueLayers);
+		$layer['name']=renameDup($layer['name'] ?? '', $uniqueLayers);
 		if (importRequested($post, 'styles'))
 		{
 			$styleResult=extractLayerStyleConfig($jsonStyles[$layer['style'] ?? ''] ?? array());
@@ -545,7 +545,7 @@ catch (Throwable $exception)
 }
 
 $dbh=dbh();
-$currentSkin=currentSkin(all_from_table($dbh, $configSchema, 'skins'));
+$currentSkin=currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 pg_close($dbh);
 
 echo <<<HTML

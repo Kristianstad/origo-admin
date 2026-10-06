@@ -73,8 +73,8 @@ forwardauth-modulen).
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `authorization_filter.php` | `authorization_filter($layerNames): array` | Filtrerar en lista lagernamn till de som är antingen obegränsade eller där användaren är behörig. Returnerar array av lager-arrayer (inte bara namn) |
-| `authorization_names_filter.php` | `authorization_names_filter($layerNames): array` | Wrapper runt `authorization_filter()` som returnerar enbart lagernamnen |
+| `authorizationFilter.php` | `authorizationFilter($layerNames): array` | Filtrerar en lista lagernamn till de som är antingen obegränsade eller där användaren är behörig. Returnerar array av lager-arrayer (inte bara namn) |
+| `authorizationNamesFilter.php` | `authorizationNamesFilter($layerNames): array` | Wrapper runt `authorizationFilter()` som returnerar enbart lagernamnen |
 | `fetchWithStatus.php` | `fetchWithStatus($url, $context, $maxAttempts = 2): array` | Hämtar en URL, läser ut HTTP-statuskoden, gör om anropet vid 5xx-fel (max `$maxAttempts` försök, 150ms paus mellan försök). Returnerar `['content' => ..., 'status' => ...]` |
 | `finishError500.php` | `finishError500($cause)` | Avslutar requesten med HTTP 500 och texten "Rättigheter saknas!". `$cause` tas emot men används inte |
 | `userAuthorized.php` | `userAuthorized($user, $restrictedLayer): bool` | Avgör om en given användare är behörig till ett specifikt skyddat lager, baserat på `authorized_users` (id-matchning) eller `authorized_groups` (någon gemensam grupp) |

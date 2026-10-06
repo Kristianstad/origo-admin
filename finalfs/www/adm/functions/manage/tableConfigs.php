@@ -6,7 +6,7 @@
 		if (is_resource($configTablesOrDbh) || $configTablesOrDbh instanceof \PgSql\Connection)
 		{
 			require("./constants/configSchema.php");
-			return all_from_table($configTablesOrDbh, $configSchema, $table);
+			return allFromTable($configTablesOrDbh, $configSchema, $table);
 		}
 		elseif (is_array($configTablesOrDbh) && !empty($configTablesOrDbh[$table]))
 		{

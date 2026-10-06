@@ -6,8 +6,8 @@ info.php
  ├─ dbh()                                          [common]
  ├─ validerar ?type= mot objekttabeller med förväntad id-kolumn (404 om ogiltig)
  ├─ toSwedish($childType)                          [common] → svensk översättning av typnamnet
- ├─ all_from_table($dbh, $configSchema, ...)        [common] → hämtar rader från validerad typ
- ├─ array_column_search(...)                        [common] → hittar EN rad baserat på kolumnvärde
+ ├─ allFromTable($dbh, $configSchema, ...)        [common] → hämtar rader från validerad typ
+ ├─ arrayColumnSearch(...)                        [common] → hittar EN rad baserat på kolumnvärde
  ├─ makeBasicTarget()/makeFullTarget()               [common] → bygger basic/full target för objektet
  ├─ targetTable()/targetIdColumn()                   [common] → läser targetens tabell och id-kolumn
  ├─ targetConfigParam()                              [common] → läser targetens fält
@@ -15,7 +15,7 @@ info.php
  ├─ (om $childType == 'aduser') printUniqueLogins(...)  [info] → inloggningsstatistik
  ├─ findAllParents($dbh, $child)                     [common] → hittar alla objekt som refererar till detta target
  └─ printParents($allParents)                        [info] → skriver ut länkad lista av föräldrar
-     └─ använder internt: assoc_array_values, toSwedish  [common]
+     └─ använder internt: assocArrayValues, toSwedish  [common]
 */
 
 // Tell browsers to not cache response
@@ -44,7 +44,7 @@ if (!in_array($childTable, configTableNames($dbh), true)) {
 	exit('Object type not found');
 }
 $childTypeSv = toSwedish($childType);
-$currentSkin = currentSkin(all_from_table($dbh, $configSchema, 'skins'));
+$currentSkin = currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 
 // === Början av sidan ===
 echo <<<HTML
@@ -77,8 +77,8 @@ if (!empty($childId)) {
 
 	$child = makeBasicTarget($childType, $childId);
 	$childId = targetId($child);
-	$allOfChildType = all_from_table($dbh, $configSchema, targetTable($child));
-	$childFullTarget = makeFullTarget($childType, array_column_search($childId, targetIdColumn($child), $allOfChildType));
+	$allOfChildType = allFromTable($dbh, $configSchema, targetTable($child));
+	$childFullTarget = makeFullTarget($childType, arrayColumnSearch($childId, targetIdColumn($child), $allOfChildType));
 	if (!empty(targetConfigParam($childFullTarget, 'name'))) {
 		echo "<b>Namn: </b>" . targetConfigParam($childFullTarget, 'name') . "</br>";
 	}
@@ -90,9 +90,9 @@ if (!empty($childId)) {
 	}
 
 	if ($childType == 'source') {
-		$services = all_from_table($dbh, $configSchema, 'services');
+		$services = allFromTable($dbh, $configSchema, 'services');
 		$serviceTarget = makeBasicTarget('service', targetConfigParam($childFullTarget, 'service'));
-		$serviceConfig = array_column_search(targetId($serviceTarget), targetIdColumn($serviceTarget), $services);
+		$serviceConfig = arrayColumnSearch(targetId($serviceTarget), targetIdColumn($serviceTarget), $services);
 		$serviceFullTarget = makeFullTarget('service', $serviceConfig);
 		$serviceType = targetConfigParam($serviceFullTarget, 'type');
 		if (strtolower($serviceType) == 'qgis') {

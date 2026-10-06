@@ -10,7 +10,7 @@
 			$mapGroups = pgArrayToPhp($mapGroups);
 			foreach ($mapGroups as $group)
 			{
-				$group = array_column_search($group, 'group_id', $groups);
+				$group = arrayColumnSearch($group, 'group_id', $groups);
 				$groupName = trim(explode('#', $group['group_id'], 2)[0]);
 				$mapLayers = array_merge($mapLayers, array($groupName => pgArrayToPhp($group['layers'])));
 				if ($groupName !== 'none')

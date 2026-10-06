@@ -1,6 +1,6 @@
 <?php
 
-	// Uses writeConfig functions: array_move
+	// Uses writeConfig functions: arrayMove
 
 	function indexweightedLayersList($layersList, array &$context)
 	{
@@ -13,13 +13,13 @@
 			foreach ($layersList as $key=>$listItem)
 			{
 				$layerId=explode('>', $listItem)[1];
-				$layer=array_column_search($layerId, 'layer_id', $layers);
+				$layer=arrayColumnSearch($layerId, 'layer_id', $layers);
 				if (isset($layer['indexweight']) && !isset($layerweights[$layerId]))
 				{
 					$layerweights[$layerId]=$layer['indexweight'];
 					$from=$key;
 					$to=$key-$layer['indexweight'];
-					array_move($layersList, $from, $to);
+					arrayMove($layersList, $from, $to);
 					$whileDo=true;
 					break;
 				}

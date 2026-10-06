@@ -24,7 +24,7 @@ eventuella fel (QGS-fil som inte kan läsas, SQL-fel).
 
 ## Beror på
 **Common-funktioner:**
-- `dbh()`, `all_from_table()`, `array_column_search()`, `pkColumnOfTable()`
+- `dbh()`, `allFromTable()`, `arrayColumnSearch()`, `pkColumnOfTable()`
 
 **Common-funktion:**
 - `tablesFromQgsXml($qgsXml, $layerName)` – ligger i

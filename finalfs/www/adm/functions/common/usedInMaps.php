@@ -30,7 +30,7 @@
 			$targetParents=findAllParents($dbh, $target);
 			foreach ($targetParents as $parentsTable=>$options)
 			{
-				$parentIds=assoc_array_values($options);
+				$parentIds=assocArrayValues($options);
 				if ($parentsTable=='maps')
 				{
 					$usedInMaps=array_merge($usedInMaps, $parentIds);

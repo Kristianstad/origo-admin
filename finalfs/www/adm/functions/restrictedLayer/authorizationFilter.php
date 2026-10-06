@@ -1,6 +1,6 @@
 <?php
 
-	function authorization_filter($layerNames)
+	function authorizationFilter($layerNames)
 	{
 		if (!is_array($layerNames))
 		{

@@ -57,9 +57,9 @@ höjdändring är avstängt för den här vyn.
 | `functions/read_json/extractLayerStyleConfig.php` | `extractLayerStyleConfig(array $layerStyle)` | Extraherar ikon, extended ikon, filter och style-config |
 | `functions/read_json/flattenGroupLayers.php` | `flattenGroupLayers(array $jsonLayers)` | Plattar ut GROUP-lager för import |
 | `functions/read_json/recursiveGroups.php` | `recursiveGroups($dbh, array $groupsArr, string $importId, array $groupsLayers)` | Läser `$configSchema` från constants och skriver grupphierarkin rekursivt |
-| `functions/read_json/renamedup.php` | `renamedup(string $name, array &$uniqueLayers)` | Undviker namnkrockar med explicit namnlista |
+| `functions/read_json/renameDup.php` | `renameDup(string $name, array &$uniqueLayers)` | Undviker namnkrockar med explicit namnlista |
 
-`recursiveGroups()` och `renamedup()` får sina beroenden via parametrar i
+`recursiveGroups()` och `renameDup()` får sina beroenden via parametrar i
 stället för `GLOBAL`. `ensureSessionWritable()` används för att skapa eller
 återöppna sessionen med applikationens cookie-inställningar.
 

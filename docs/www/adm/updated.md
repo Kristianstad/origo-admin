@@ -50,14 +50,14 @@ tillåts av containerns loopback-HBA-regler.
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `updated_from_table2.php` | `updated_from_table2($dbh, $tableWithSchema): array\|false\|null` | Kontrollerar tabellen mot `information_schema`, citerar identifierarna och returnerar `[tidsstämpel, xmin]`, `null` utan rader eller `false` om tabellen saknas |
+| `updatedFromTable2.php` | `updatedFromTable2($dbh, $tableWithSchema): array\|false\|null` | Kontrollerar tabellen mot `information_schema`, citerar identifierarna och returnerar `[tidsstämpel, xmin]`, `null` utan rader eller `false` om tabellen saknas |
 
 ## Begränsningar och risker
 - `$tableWithSchema` kommer från `$_GET['table']` (kommaseparerad), men
   varje namn måste vara registrerat i `map_configs.tables` och finnas som
   bastabell innan det används. `qualifiedTableIdentifier()` citerar
   schema- och tabellnamn.
-- `updated_from_table2()` returnerar tidsstämpel och `xmin` för den senast
-  ändrade raden. `updated_from_table()` i `functions/manage/` returnerar
+- `updatedFromTable2()` returnerar tidsstämpel och `xmin` för den senast
+  ändrade raden. `updatedFromTable()` i `functions/manage/` returnerar
   bara tidsstämpeln och används av manage för tabellformuläret.
 - SQL-fel avslutar skriptet med `die()`.

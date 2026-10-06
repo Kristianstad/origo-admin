@@ -35,9 +35,9 @@ inte avsett att visas för en användare.
 - `dbh($connectionString = null)` – ansluter till standarddatabasen utan
   argument, annars till databasen i anslutningssträngen (här en extern
   databas).
-- `all_from_table($dbh, $schema, $table)` – hämtar alla rader ur
+- `allFromTable($dbh, $schema, $table)` – hämtar alla rader ur
   `databases`-tabellen
-- `array_column_search($value, $column, $rows)` – slår upp raden för
+- `arrayColumnSearch($value, $column, $rows)` – slår upp raden för
   angivet `database_id`
 
 **Konstanter:**

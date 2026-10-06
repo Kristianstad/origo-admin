@@ -5,7 +5,7 @@
 		$groups =& $context['groups'];
 		foreach ($groupIds as $groupId)
 		{
-			$group = array_column_search($groupId, 'group_id', $groups);
+			$group = arrayColumnSearch($groupId, 'group_id', $groups);
 			$groupGroups=pgArrayToPhp($group['groups']);
 			
 			if (!empty($groupGroups))

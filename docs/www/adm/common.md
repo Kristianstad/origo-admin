@@ -9,11 +9,11 @@
 
 | Funktion | Fil | Beskrivning | Används av |
 |---|---|---|---|
-| `all_from_table($dbh, $schema, $table)` | `all_from_table.php` | Hämtar alla rader från en tillåten objekttabell i konfigurationsschemat; citerar schema- och tabellnamn | info, multiselect, read_db_schemas, export, writeTablesForAllLayers |
-| `array_column_search($value, $column, $rows)` | `array_column_search.php` | Hittar första raden där given kolumn matchar värdet | info, read_db_schemas, export, writeConfig, manage, writeTablesForAllLayers |
-| `assoc_array_values($array)` | `assoc_array_values.php` | Kontrollerar/hämtar faktiska värden i nästlad associativ array | info, manage |
+| `allFromTable($dbh, $schema, $table)` | `allFromTable.php` | Hämtar alla rader från en tillåten objekttabell i konfigurationsschemat; citerar schema- och tabellnamn | info, multiselect, read_db_schemas, export, writeTablesForAllLayers |
+| `arrayColumnSearch($value, $column, $rows)` | `arrayColumnSearch.php` | Hittar första raden där given kolumn matchar värdet | info, read_db_schemas, export, writeConfig, manage, writeTablesForAllLayers |
+| `assocArrayValues($array)` | `assocArrayValues.php` | Kontrollerar/hämtar faktiska värden i nästlad associativ array | info, manage |
 | `clearAuthSession()` | `clearAuthSession.php` | Nollställer `$_SESSION['user']`, sätter en ny `login_time_stamp` och stänger sessionen. Anropas av `initUserLdap()` när ingen giltig användare kan slås upp | authorization (indirekt via initUserLdap) |
-| `configTableNames($dbh)` | `configTableNames.php` | Cacherar bastabeller i konfigurationsschemat som har förväntad id-kolumn; utesluter `object_identity` och `edit_cursor` | all_from_table, configTables, info, multiselect, updated |
+| `configTableNames($dbh)` | `configTableNames.php` | Cacherar bastabeller i konfigurationsschemat som har förväntad id-kolumn; utesluter `object_identity` och `edit_cursor` | allFromTable, configTables, info, multiselect, updated |
 | `configTables($dbh)` | `configTables.php` | Hämtar konfigurationen från tillåtna objekttabeller i ett svep, avsedd att packas upp med `extract()` | writeConfig, manage, read_json |
 | `dbh($connectionString=null)` | `dbh.php` | Öppnar PostgreSQL-anslutning. Utan argument: standarddatabasen. Med anslutningssträng: godtycklig extern databas | news, mapstate, info, authorization, read_db_schemas, export, writeConfig, manage, read_schema_tables, updated, help, writeTablesForAllLayers |
 | `defineFileConstant($name, $value)` | `defineFileConstant.php` | Skriver en PHP-konstant till fil, läsbar via `includeFileConstant()`. Källan till `RESTRICTEDLAYERS`-konstanten | writeConfig |
@@ -34,10 +34,10 @@
 | `mbUcfirst($str)` | `mbUcfirst.php` | Multibyte-säker `ucfirst()` (via `mb_strtoupper()`/`mb_substr()`, kräver `mbstring`-tillägget) – PHP:s vanliga `ucfirst()` är byte-baserad och versaliserar bara ASCII a-z, vilket missar svenska ord som börjar på å/ä/ö | printHeadForms, multiselect (används runt `toSwedish()`-resultat, där ett svenskt ord kan börja på å/ä/ö) |
 | `pgArrayToPhp($pgArray)` | `pgArrayToPhp.php` | Konverterar Postgres arraysyntax (`{a,b,c}`) till PHP-array | news, export, writeConfig |
 | `pkColumnOfTable($table)` | `pkColumnOfTable.php` | Returnerar primärnyckelns kolumnnamn för en tabell | info, writeTablesForAllLayers, target-infrastruktur (targetId, targetIdColumn via targetTable), validateUpdate |
-| `qualifiedTableIdentifier($dbh, $tableWithSchema)` | `qualifiedTableIdentifier.php` | Kontrollerar att `schema.tabell` är en bastabell i den anslutna databasen och returnerar citerade identifierare; annars `false` | manage (updated_from_table), updated |
+| `qualifiedTableIdentifier($dbh, $tableWithSchema)` | `qualifiedTableIdentifier.php` | Kontrollerar att `schema.tabell` är en bastabell i den anslutna databasen och returnerar citerade identifierare; annars `false` | manage (updatedFromTable), updated |
 | `readAndCloseSession()` | `readAndCloseSession.php` | Läser in `$_SESSION` och stänger sessionen | news, export |
 | `setTargetConfigParam(&$fullTarget, $configParam, $value)` | `setTargetConfigParam.php` | Ändrar ett konfigurationsvärde i en full target in-memory | manage, target-infrastruktur |
-| `sqlQueryError($dbh)` | `sqlQueryError.php` | Avslutar vid SQL-fel med PostgreSQLs felmeddelande | all_from_table, configTableNames, markMapsChanged, markMapUnchanged, schemaNamesFromDb, tableNamesFromSchema, updated-funktioner |
+| `sqlQueryError($dbh)` | `sqlQueryError.php` | Avslutar vid SQL-fel med PostgreSQLs felmeddelande | allFromTable, configTableNames, markMapsChanged, markMapUnchanged, schemaNamesFromDb, tableNamesFromSchema, updated-funktioner |
 | `tableNamesFromSchema($dbh, $schema)` | `tableNamesFromSchema.php` | Listar bastabellnamn i ett databasschema; binder schemanamnet som SQL-värde | read_schema_tables |
 | `tableType($table)` | `tableType.php` | Returnerar typen för tabellnamnet genom att ta bort ett avslutande `s` (`layers` → `layer`) | manage, target-infrastruktur |
 | `tablesFromQgsXml($qgsXml, $layerName=null, $tables=[], $subtree=null)` | `tablesFromQgsXml.php` | Läser PostGIS-tabeller ur ett QGIS-projekts XML-lagerträd; används av manage och writeTablesForAllLayers | manage, writeTablesForAllLayers |
@@ -51,5 +51,5 @@
 | `usedInMaps($dbh, $target, $checkedTargets=[], $usedInMaps=[])` | `usedInMaps.php` | Rekursivt: hittar alla kartor (`map`-target) som ett givet target ytterst ingår i, via `findAllParents()`. Håller reda på redan besökta targets för att undvika oändlig rekursion vid cirkulära referenser | manage (avgör vilka kartor som ska markeras `changed` vid en ändring) |
 | `includeDirectory($path)` | *(i `adm/functions/`, ej i `common/` — placerad sist, utanför den alfabetiska listan, eftersom den fysiskt hör hemma på en annan plats)* | Laddar alla `.php`-filer i angiven mapp med `require_once` | samtliga moduler |
 
-> `updated_from_table()` och `targetConfig()` ligger i `functions/manage/`;
+> `updatedFromTable()` och `targetConfig()` ligger i `functions/manage/`;
 > se manage.md.

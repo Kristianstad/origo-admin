@@ -11,7 +11,7 @@
 		$controlsJson = array();
 		foreach ($mapControls as $control)
 		{
-			$control = array_column_search($control, 'control_id', $controls);
+			$control = arrayColumnSearch($control, 'control_id', $controls);
 			$controlName = trim(explode('#', $control['control_id'], 2)[0]);
 			$controlJson = array('name' => $controlName);
 			if (!empty($control['options']) && $control['options'] !== 'null')

@@ -55,7 +55,7 @@
 		}
 		elseif ($type == 'edit')
 		{
-			// Rows are already read in chronological order (all_from_table() orders by edit_id,
+			// Rows are already read in chronological order (allFromTable() orders by edit_id,
 			// the first column), so target_key can be shown without re-sorting alphabetically.
 			$optionLabels=array_merge(array(""),array_column(current($tableConfig), 'target_key'));
 			$optionValues=array_combine($optionValues, $optionLabels);

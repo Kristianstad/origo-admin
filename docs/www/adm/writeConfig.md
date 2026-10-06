@@ -35,7 +35,7 @@ Anropas av knappen `printWriteConfigButton()` i `manage.php`.
   `controls`, `proj4defs`, `tilegrids`, `footers`, m.fl.) i ett svep.
   `writeConfig.php` extraherar dem sedan till lokala variabler med
   `extract()`.
-- `pgArrayToPhp()`, `array_column_search()`
+- `pgArrayToPhp()`, `arrayColumnSearch()`
 - `defineFileConstant($name, $value)` – skriver en PHP-konstant till en fil
   på disk (källan till `RESTRICTEDLAYERS` och andra
   `includeFileConstant()`-lästa konstanter)
@@ -68,7 +68,7 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 | `addPlugins.php` | `addPlugins($mapPlugins=null, &$mapCssFiles=array(), &$mapJsFiles=array(), &$mapCss='', &$mapJs='', &$mapOnload='', array &$context=array())` | Samlar JS/CSS (inline och som filer) samt onload-kod för aktiverade pluginer; konfigurationstillstånd skickas i `$context` |
 | `addSourcesToJson.php` | `addSourcesToJson(array &$context): array` | Bygger en PHP-array för datakällor (`source`), inklusive URL, tile grid-inställningar och query-parametrar från konfigurationstillståndet |
 | `addStylesToJson.php` | `addStylesToJson(array &$context): array` | Bygger en PHP-array för lagerstilar. Om `style_config` saknas i databasen byggs en enkel standardstil (label/ikon/filter) |
-| `array_move.php` | `array_move(&$a, $oldpos, $newpos)` | Generisk hjälpfunktion: flyttar ett element i en array från ett index till ett annat |
+| `arrayMove.php` | `arrayMove(&$a, $oldpos, $newpos)` | Generisk hjälpfunktion: flyttar ett element i en array från ett index till ett annat |
 | `compressBrotli.php` | `compressBrotli(string $data): ?string` | Komprimerar med Brotli om PHP-tillägget finns, annars `null` |
 | `compressGzip.php` | `compressGzip(string $data): ?string` | Komprimerar med gzip (nivå 9) |
 | `createSymlinkIfNotExists.php` | `createSymlinkIfNotExists(string $target, string $link): bool` | Skapar eller ersätter en symlänk; befintliga filer och kataloger på länkmålet tas bort |
@@ -77,7 +77,7 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 | `getArrayValuesRecursively.php` | `getArrayValuesRecursively(array $array): array` | Plattar ut en nästlad array till en enkel lista med alla "löv"-värden |
 | `groupDepth.php` | `groupDepth($groupIds, $layerIds=array(), array &$context=array())` | Rekursivt: bygger en nästlad struktur över lager och undergrupper, med lagernamn prefixade av gruppsökvägen (`grupp>lager`); använder kontextarrayen för delat konfigurationstillstånd |
 | `indexweightedLayersList.php` | `indexweightedLayersList($layersList, array &$context)` | Sorterar lagerlistan efter `indexweight` och använder kontextarrayen för delat konfigurationstillstånd |
-| `json_format.php` | `json_format($json): string` | Formaterar en JSON-sträng med indrag för läsbarhet (egen handskriven parser, äldre ursprung enligt kodkommentar – "Nicejson", 2008) |
+| `jsonFormat.php` | `jsonFormat($json): string` | Formaterar en JSON-sträng med indrag för läsbarhet (egen handskriven parser, äldre ursprung enligt kodkommentar – "Nicejson", 2008) |
 | `markMapUnchanged.php` | `markMapUnchanged(&$dbh, $mapId)` | Sätter `maps.changed = 'f'` efter lyckad publicering |
 | `pgArrayToText.php` | `pgArrayToText($pgArray): string` | Konverterar Postgres arraysyntax (`{a,b,c}`) till kommaseparerad text utan klamrar – enklare variant av `pgArrayToPhp()` som ger en sträng istället för en PHP-array |
 | `pgBoolToText.php` | `pgBoolToText($pgBool)` | Konverterar Postgres bool-representation (`'t'`/`'f'`) till JS-litteralerna `"true"`/`"false"`. Returnerar värdet oförändrat om det inte är `'t'`/`'f'` |
@@ -135,7 +135,7 @@ inte verifieras i det här repot.
   inte flerradiga deklarationer, kommentarer som innehåller `{`/`}`,
   template literals eller andra syntaxfall fullt ut. Värdelistor delas av
   `splitValues()`.
-- `json_format()` är en handskriven JSON-formaterare från 2008 (enligt
+- `jsonFormat()` är en handskriven JSON-formaterare från 2008 (enligt
   kodkommentar). Genvägen `json_encode($json, JSON_PRETTY_PRINT)` används
   bara om indata inte redan är en sträng; `writeConfig.php` skickar en
   färdig JSON-sträng, så den manuella tecken-för-tecken-parsningen körs

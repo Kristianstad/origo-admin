@@ -33,7 +33,7 @@ som id-kolumn istället för det generella mönstret `<singularis>_id`.
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `dbh()` – databasanslutning
-- `all_from_table($dbh, $schema, $table)` – hämtar alla rader från en
+- `allFromTable($dbh, $schema, $table)` – hämtar alla rader från en
   tillåten tabell och citerar identifierarna
 - `configTableNames($dbh)` – databasbaserad allowlist över objekttabeller
 - `pkColumnOfTable($table)` – hittar id-kolumnen, inklusive `proj4defs.code`
@@ -70,7 +70,7 @@ veta om filerna någonsin laddas separat.
 
 - `$table` från `$_GET['table']` måste finnas i `multiselectables.php`
   efter aliasöversättning och i databasens allowlist över objekttabeller.
-  Ogiltig parameter ger HTTP 400; `all_from_table()` citerar identifierarna.
+  Ogiltig parameter ger HTTP 400; `allFromTable()` citerar identifierarna.
 - `table`-parametern kodar tre värden i en sträng med två separatorer:
   `explode('::', ..., 2)` följt av `explode(':', ..., 2)`.
 - All utskrift av användarstyrd data (`$textareaId`, `$currentValue`,

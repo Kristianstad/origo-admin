@@ -188,7 +188,7 @@ if (isset($postButton)) {
         if (!isIdUniqueInTable($id, $typeTablePkColumn, $typeTable)) {
             $child = makeBasicTarget($type, $id);
             $allParents = findAllParents($dbh, $child);
-            if (empty(assoc_array_values($allParents))) {
+            if (empty(assocArrayValues($allParents))) {
                 $historyBeforeConfig = targetConfig(makeTargetFull($child, $configTables));
                 $sqlStatements[] = deleteIdSql($id, $typeTableName);
                 unset($post[$type . 'Id'], $idPosts[$type . 'Id']);
@@ -263,12 +263,12 @@ if (isset($postButton)) {
                 if ($type == 'layer' || $type == 'source') {
                     if ($type == 'layer') {
                         $layerName = explode('#', $id)[0];
-                        $sourceConfig = array_column_search($config['source'], 'source_id', $configTables['sources']);
+                        $sourceConfig = arrayColumnSearch($config['source'], 'source_id', $configTables['sources']);
                     } else {
                         $layerName = null;
                         $sourceConfig = $config;
                     }
-                    $serviceType = array_column_search($sourceConfig['service'], 'service_id', $configTables['services'])['type'];
+                    $serviceType = arrayColumnSearch($sourceConfig['service'], 'service_id', $configTables['services'])['type'];
                     if (strtolower($serviceType) == 'qgis') {
                         $qgsXml = simplexml_load_file('/services/' . $sourceConfig['service'] . '/' . explode('#', $sourceConfig['source_id'])[0] . '.qgs');
                         if (!empty($qgsXml)) {
@@ -572,7 +572,7 @@ if (isset($post['mapId'])) {
         $map = makeFullTarget('map', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $map = makeFullTarget('map', array_column_search($post['mapId'], 'map_id', $configTables['maps']));
+        $map = makeFullTarget('map', arrayColumnSearch($post['mapId'], 'map_id', $configTables['maps']));
     }
     if (!empty(current($map))) {
         // Map selectable items (footers, tilegrids) are exposed as $selectables (array)
@@ -619,7 +619,7 @@ elseif (isset($post['databaseId'])) {
         $database = makeFullTarget('database', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $database = makeFullTarget('database', array_column_search($post['databaseId'], 'database_id', $configTables['databases']));
+        $database = makeFullTarget('database', arrayColumnSearch($post['databaseId'], 'database_id', $configTables['databases']));
     }
     if (!empty(current($database))) {
         // Print the form for the selected database
@@ -651,7 +651,7 @@ if (isset($post['schemaId'])) {
         $schema = makeFullTarget('schema', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $schema = makeFullTarget('schema', array_column_search($post['schemaId'], 'schema_id', $configTables['schemas']));
+        $schema = makeFullTarget('schema', arrayColumnSearch($post['schemaId'], 'schema_id', $configTables['schemas']));
     }
     if (!empty(current($schema))) {
         // Schema selectable items (contacts, origins, updates) are exposed as $selectables (array)
@@ -687,7 +687,7 @@ if (isset($post['classeId'])) {
         $classe = makeFullTarget('classe', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $classe = makeFullTarget('classe', array_column_search($post['classeId'], 'classe_id', $configTables['classes']));
+        $classe = makeFullTarget('classe', arrayColumnSearch($post['classeId'], 'classe_id', $configTables['classes']));
     }
     if (!empty(current($classe))) {
         $operationTables = array();
@@ -716,7 +716,7 @@ foreach ($infogroupIdsArray as $infogroupId) {
         $infogroup = makeFullTarget('infogroup', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $infogroup = makeFullTarget('infogroup', array_column_search($infogroupId, 'infogroup_id', $configTables['infogroups']));
+        $infogroup = makeFullTarget('infogroup', arrayColumnSearch($infogroupId, 'infogroup_id', $configTables['infogroups']));
     }
     $inheritPosts['infogroupId'] = $infogroupId;
     if (!empty(current($infogroup))) {
@@ -762,7 +762,7 @@ foreach ($groupIdsArray as $groupId) {
         $group = makeFullTarget('group', $failedUpdate['values']);
         $inheritPosts['_formChanged'] = true;
     } else {
-        $group = makeFullTarget('group', array_column_search($groupId, 'group_id', $configTables['groups']));
+        $group = makeFullTarget('group', arrayColumnSearch($groupId, 'group_id', $configTables['groups']));
     }
 
     $inheritPosts['groupId'] = $groupId;
@@ -816,11 +816,11 @@ if (!empty($idPosts)) {
         // If the selected layer has a source set, then append the 'service_id' of that source to $childFullTarget and also append the service's 'restricted' as 'service_restricted'.
         $layerSourceId = targetConfigParam($childFullTarget, 'source');
         if (!empty($layerSourceId)) {
-            $layerSource = array_column_search($layerSourceId, 'source_id', $configTables['sources']);
+            $layerSource = arrayColumnSearch($layerSourceId, 'source_id', $configTables['sources']);
             $layerServiceId = $layerSource['service'];
             if (!empty($layerServiceId)) {
                 setTargetConfigParam($childFullTarget, 'service_id', $layerServiceId);
-                $layerService = array_column_search($layerServiceId, 'service_id', $configTables['services']);
+                $layerService = arrayColumnSearch($layerServiceId, 'service_id', $configTables['services']);
                 setTargetConfigParam($childFullTarget, 'service_restricted', $layerService['restricted']);
                 $layerServiceFormats = pgArrayToPhp($layerService['formats']);
                 unset($layerService);
@@ -856,7 +856,7 @@ if (!empty($idPosts)) {
         // If the selected source has a service set, then append the type of that service to $childFullTarget as 'service_type'.
         $sourceServiceId = targetConfigParam($childFullTarget, 'service');
         if (!empty($sourceServiceId)) {
-            $sourceService = array_column_search($sourceServiceId, 'service_id', $configTables['services']);
+            $sourceService = arrayColumnSearch($sourceServiceId, 'service_id', $configTables['services']);
             setTargetConfigParam($childFullTarget, 'service_type', $sourceService['type']);
             unset($sourceService);
         }
@@ -888,7 +888,7 @@ if (!empty($idPosts)) {
         $databaseId = substr($tableId, 0, strpos($tableId, '.'));
 
         // The connection string for $databaseId is exposed as $connectionString (string)
-        $connectionString = array_column_search($databaseId, 'database_id', $configTables['databases'])['connectionstring'];
+        $connectionString = arrayColumnSearch($databaseId, 'database_id', $configTables['databases'])['connectionstring'];
 
         // Print the form for the selected table
         $operationTables = array();

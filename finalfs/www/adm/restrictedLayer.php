@@ -15,8 +15,8 @@ restrictedLayer.php
  │    └─ fetchWithStatus($call, ...)  [restrictedLayer] → hämtar och returnerar svaret oförändrat
  │
  └─ OM begränsat:
-      ├─ authorization_names_filter($callLayers)  [restrictedLayer]
-      │    └─ authorization_filter($layerNames)    [restrictedLayer]
+      ├─ authorizationNamesFilter($callLayers)  [restrictedLayer]
+      │    └─ authorizationFilter($layerNames)    [restrictedLayer]
       │         └─ userAuthorized($_SESSION['user'], $restrictedLayer)  [restrictedLayer]
       ├─ OM alla begärda lager är godkända → fetchWithStatus(...) som ovan
       ├─ OM GetLegendGraphic → returnerar en "lås"-bild istället för riktig legend
@@ -110,7 +110,7 @@ restrictedLayer.php
 		else
 		{
 			header('Restricted: 1');
-			if (empty(array_diff($callLayers, authorization_names_filter($callLayers))))
+			if (empty(array_diff($callLayers, authorizationNamesFilter($callLayers))))
 			{
 				$opts=array('http'=>array('protocol_version'=>1.1, 'method'=>"GET",'header'=>$headers, 'ignore_errors'=>true));
 				$context=stream_context_create($opts);

@@ -2,7 +2,7 @@
 /*
 addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
  ├─ för varje lager i listan:
- │    ├─ slår upp lagrets fullständiga data (array_column_search)
+ │    ├─ slår upp lagrets fullständiga data (arrayColumnSearch)
  │    ├─ bygger $layersMeta[] (används för SEO-strukturerad data i writeConfig.php)
  │    ├─ sätter en rad standardvärden (type, style_layer, queryable, visible, legend)
  │    ├─ bygger lagrets grundläggande JSON-fält (name, title, type, group, format, etc.)
@@ -57,16 +57,16 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
 				$group='root';
 				$layerId=$listItem[0];
 			}
-			$layer = array_column_search($layerId, 'layer_id', $layers);
+			$layer = arrayColumnSearch($layerId, 'layer_id', $layers);
 			$layersMeta[]=array('title'=>trim(json_encode(trim($layer['title'], " \t\n\r\0\x0B\""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '"'), 'abstract'=>trim(json_encode(trim($layer['abstract'], " \t\n\r\0\x0B\""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '"'), 'keywords'=>trim(json_encode(str_replace(array("'", "\""), '', trim($layer['keywords'], " \t\n\r\0\x0B\"{}")), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '"'));
 			if ($layer['type'] !== 'GROUP')
 			{
-				$source = array_column_search($layer['source'], 'source_id', $sources);
+				$source = arrayColumnSearch($layer['source'], 'source_id', $sources);
 				if ($layer['type'] == 'WFS')
 				{
 					$layer['source'] = $layer['source'].'@wfs';
 				}
-				$service = array_column_search($source['service'], 'service_id', $services);
+				$service = arrayColumnSearch($source['service'], 'service_id', $services);
 				if ($layer['attributes'] == '[]' || $layer['attributes'] == '{}' || $layer['attributes'] == '""' || $layer['attributes'] == 'null')
 				{
 					$layer['attributes'] = '';
@@ -119,7 +119,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
 			if (!empty($layer['style_layer']))
 			{
 				$styleLayerName = trim(explode('#', $layer['style_layer'], 2)[0]);
-				$styleLayer = array_column_search($layer['style_layer'], 'layer_id', $layers);
+				$styleLayer = arrayColumnSearch($layer['style_layer'], 'layer_id', $layers);
 				if ($group == 'background')
 				{
 					$layer['style_layer'] = $layer['style_layer'].'-bg';
@@ -221,7 +221,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
 				$beskr='';
 				foreach (pgArrayToPhp($layer['tables']) as $tableId)
 				{
-					$table = array_column_search($tableId, 'table_id', $tables);
+					$table = arrayColumnSearch($tableId, 'table_id', $tables);
 					if (!empty($table['abstract']))
 					{
 						if (empty($beskr))
@@ -248,7 +248,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
 			{
 				if ($map['show_meta'] == 't')
 				{
-					$layerContact = array_column_search($layer['contact'], 'contact_id', $contacts);
+					$layerContact = arrayColumnSearch($layer['contact'], 'contact_id', $contacts);
 					if (!empty($layerContact['web']))
 					{
 						$contactStr="<a href='".$layerContact['web']."' target='_blank'>".$layerContact['name']."</a>";
@@ -265,7 +265,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
 					{
 						$contactStr='';
 					}
-					$layerOrigin = array_column_search($layer['origin'], 'origin_id', $origins);
+					$layerOrigin = arrayColumnSearch($layer['origin'], 'origin_id', $origins);
 					if (!empty($layerOrigin['web']))
 					{
 						$originStr="<a href='".$layerOrigin['web']."' target='_blank'>".$layerOrigin['name']."</a>";
@@ -356,8 +356,8 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
 				{
 					if ($styleLayer['type'] !== 'GROUP')
 					{
-						$styleSource = array_column_search($styleLayer['source'], 'source_id', $sources);
-						$styleService = array_column_search($styleSource['service'], 'service_id', $services);
+						$styleSource = arrayColumnSearch($styleLayer['source'], 'source_id', $sources);
+						$styleService = arrayColumnSearch($styleSource['service'], 'service_id', $services);
 						if (empty($styleLayer['type']))
 						{
 							$styleLayer['type'] = 'WMS';

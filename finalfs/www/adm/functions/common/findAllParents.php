@@ -19,28 +19,28 @@
 		{
  			if ($targetType == 'group' || $targetType == 'layer' || $targetType == 'control' || $targetType == 'keyword' || $targetType == 'plugin')
 			{
-				$allParents['maps']['maps']=findParents(array('maps'=>all_from_table($dbh, $configSchema, 'maps')), $target);
+				$allParents['maps']['maps']=findParents(array('maps'=>allFromTable($dbh, $configSchema, 'maps')), $target);
 			}	
 			if ($targetType == 'group' || $targetType == 'layer' || $targetType == 'keyword')
 			{
-				$allParents['groups']['groups']=findParents(array('groups'=>all_from_table($dbh, $configSchema, 'groups')), $target);
+				$allParents['groups']['groups']=findParents(array('groups'=>allFromTable($dbh, $configSchema, 'groups')), $target);
 			}
 			if ($targetType == 'layer' || $targetType == 'source' || $targetType == 'contact' || $targetType == 'export' || $targetType == 'update' || $targetType == 'origin' || $targetType == 'table' || $targetType == 'keyword')
 			{
-				$allParents['layers']['layers']=findParents(array('layers'=>all_from_table($dbh, $configSchema, 'layers')), $target);
+				$allParents['layers']['layers']=findParents(array('layers'=>allFromTable($dbh, $configSchema, 'layers')), $target);
 			}
 			if ($targetType == 'layer')
 			{
-				$allParents['layers']['exports']=findParents(array('layers'=>all_from_table($dbh, $configSchema, 'layers')), makeTargetBasic(array('export'=>targetId($target))));
+				$allParents['layers']['exports']=findParents(array('layers'=>allFromTable($dbh, $configSchema, 'layers')), makeTargetBasic(array('export'=>targetId($target))));
 			}
 			if ($targetType == 'contact' || $targetType == 'keyword')
 			{
-				$allParents['schemas']['schemas']=findParents(array('schemas'=>all_from_table($dbh, $configSchema, 'schemas')), $target);
-				$allParents['tables']['tables']=findParents(array('tables'=>all_from_table($dbh, $configSchema, 'tables')), $target);
+				$allParents['schemas']['schemas']=findParents(array('schemas'=>allFromTable($dbh, $configSchema, 'schemas')), $target);
+				$allParents['tables']['tables']=findParents(array('tables'=>allFromTable($dbh, $configSchema, 'tables')), $target);
 			}
 			if ($targetType == 'contact' || $targetType == 'service' || $targetType == 'tilegrid' || $targetType == 'table')
 			{
-				$allParents['sources']['sources']=findParents(array('sources'=>all_from_table($dbh, $configSchema, 'sources')), $target);
+				$allParents['sources']['sources']=findParents(array('sources'=>allFromTable($dbh, $configSchema, 'sources')), $target);
 			}
 		}
 		return $allParents;

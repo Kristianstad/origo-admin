@@ -60,7 +60,7 @@ e-post från FME Server, inte via detta HTTP-svar.
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `readAndCloseSession()`, `dbh()`, `initUserLdap($dbh)` – standardstart
-- `all_from_table()`, `array_column_search()`, `pgArrayToPhp()` – hämtar
+- `allFromTable()`, `arrayColumnSearch()`, `pgArrayToPhp()` – hämtar
   och slår upp maps/groups/layers/sources/services
 
 **Konstanter:**

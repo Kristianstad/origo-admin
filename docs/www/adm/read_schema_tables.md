@@ -22,7 +22,7 @@ Lyckade anrop ger ett tomt svar; felkoder beskrivs under "Svar och fel".
 **Common-funktioner:**
 - `dbh($connectionString)` – ansluter både till konfigurationsdatabasen
   och till den externa databasen (samma mönster som read_db_schemas)
-- `all_from_table()`, `array_column_search()` – slår upp anslutningssträng
+- `allFromTable()`, `arrayColumnSearch()` – slår upp anslutningssträng
 - `tableNamesFromSchema($dbh, $schema)` – listar tabellnamn i ett givet
   schema, dokumenterad i common.md
 

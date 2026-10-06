@@ -22,10 +22,10 @@ if ($database === '' || $schema === '') {
 $dbh_config = dbh();
 require("./constants/configSchema.php");
 
-$connectionString = array_column_search(
+$connectionString = arrayColumnSearch(
     $database,
     'database_id',
-    all_from_table($dbh_config, $configSchema, 'databases')
+    allFromTable($dbh_config, $configSchema, 'databases')
 )['connectionstring'] ?? null;
 
 if (!$connectionString) {

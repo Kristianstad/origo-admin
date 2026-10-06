@@ -1,6 +1,6 @@
 <?php
 
-function renamedup(string $name, array &$uniqueLayers): string
+function renameDup(string $name, array &$uniqueLayers): string
 {
 	$count=0;
 	do

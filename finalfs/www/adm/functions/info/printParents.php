@@ -2,7 +2,7 @@
 
 	function printParents($allParents)
 	{
-		if (empty(assoc_array_values($allParents)))
+		if (empty(assocArrayValues($allParents)))
 		{
 			return false;
 		}

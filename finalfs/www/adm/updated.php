@@ -21,7 +21,7 @@ if (!is_string($tablesWithSchema) || trim($tablesWithSchema) === '') {
 $tablesWithSchema = array_map('trim', explode(',', $tablesWithSchema));
 
 require("./constants/configSchema.php");
-$registeredTableIds = array_column(all_from_table($dbh, $configSchema, 'tables'), 'table_id');
+$registeredTableIds = array_column(allFromTable($dbh, $configSchema, 'tables'), 'table_id');
 $allowedTables = array();
 foreach ($registeredTableIds as $registeredTableId) {
     $parts = explode('.', $registeredTableId);
@@ -39,7 +39,7 @@ foreach ($tablesWithSchema as $tableWithSchema) {
 
 $updates = array();
 foreach ($tablesWithSchema as $tableWithSchema) {
-    $updated = updated_from_table2($dbh, $tableWithSchema);
+    $updated = updatedFromTable2($dbh, $tableWithSchema);
     if ($updated === false) {
         pg_close($dbh);
         http_response_code(400);

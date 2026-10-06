@@ -5,7 +5,7 @@ read_db_schemas.php
  ├─ includeDirectory("./functions/read_db_schemas")
  ├─ läser $_GET['database'], sedan unset($_GET) direkt (se notering nedan)
  ├─ dbh()                                    [common] → ansluter till KONFIGURATIONS-databasen
- ├─ all_from_table(...) + array_column_search(...)  [common] → slår upp anslutningssträng för $database
+ ├─ allFromTable(...) + arrayColumnSearch(...)  [common] → slår upp anslutningssträng för $database
  ├─ dbh($connectionString)                   [common] → ansluter till DEN EXTERNA databasen
  ├─ schemaNamesFromDb($dbh)                  [read_db_schemas] → listar scheman i den externa databasen
  └─ för varje schema: INSERT ... ON CONFLICT DO NOTHING i konfigurationsdatabasens schemas-tabell
@@ -33,10 +33,10 @@ if ($database === '') {
 $dbh_config = dbh();
 require "./constants/configSchema.php";
 
-$connectionString = array_column_search(
+$connectionString = arrayColumnSearch(
     $database,
     'database_id',
-    all_from_table($dbh_config, $configSchema, 'databases')
+    allFromTable($dbh_config, $configSchema, 'databases')
 )['connectionstring'] ?? null;
 
 if ($connectionString === null) {

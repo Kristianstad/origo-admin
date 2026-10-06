@@ -5,7 +5,7 @@ multiselect.php
  ├─ dbh()                                    [common]
  ├─ tolkar $_GET['table'] i formatet "textareaId::tabell:aktuellaVärden"
  ├─ validerar tabell mot multiselectables.php, tableAliases.php och allowlistan
- ├─ all_from_table($dbh, $configSchema, $table)   [common] → hämtar tillåtna rader
+ ├─ allFromTable($dbh, $configSchema, $table)   [common] → hämtar tillåtna rader
  ├─ toSwedish($table)                        [common] → rubrik på svenska
  ├─ includeDirectory("./js-functions/multiselect")  → klistrar in ALLA js-filer inline i <script>
  └─ renderar HTML: <select> + knappar, med inline onclick-anrop till JS-funktionerna
@@ -56,8 +56,8 @@ if (empty($submitValue[1])) {
     $dataSortedValues = $currentValue . ',';
 }
 
-$values = all_from_table($dbh, $configSchema, $table);
-$currentSkin = currentSkin(all_from_table($dbh, $configSchema, 'skins'));
+$values = allFromTable($dbh, $configSchema, $table);
+$currentSkin = currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 pg_close($dbh);
 
 $idColumn = pkColumnOfTable($table);

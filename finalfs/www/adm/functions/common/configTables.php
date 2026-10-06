@@ -8,7 +8,7 @@
 		$configTables=array();
 		foreach (configTableNames($dbh) as $table)
 		{
-			$configTables[$table]=all_from_table($dbh, $configSchema, $table);
+			$configTables[$table]=allFromTable($dbh, $configSchema, $table);
 		}
 		return $configTables;
 	}

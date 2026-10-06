@@ -10,7 +10,7 @@
 		}
 		foreach ($mapPlugins as $plugin)
 		{
-			$plugin = array_column_search($plugin, 'plugin_id', $plugins);
+			$plugin = arrayColumnSearch($plugin, 'plugin_id', $plugins);
 			if (!empty($plugin['js']))
 			{
 				$mapJs=$mapJs.$plugin['js'];

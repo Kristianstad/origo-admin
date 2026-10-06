@@ -4,7 +4,7 @@
 	// Searches the specified column of the array for the given search. Returns an empty array if no match is found.
 	// If a match is found and no return key was given, then it returns the the first matching value.
 	// If a return key was given then it is assumed that the matching value is an array and returns the value of its return key (match[returnkey]).
-	function array_column_search($search, $column, $array, $return=false)
+	function arrayColumnSearch($search, $column, $array, $return=false)
 	{
 		$columnValues = array_column($array, $column);
 		$key = array_search($search, $columnValues);

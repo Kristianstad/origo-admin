@@ -16,7 +16,7 @@ writeConfig.php
  │    ├─ addGroupsToJson()        [writeConfig] → grupphierarki
  │    └─ addLayersToJson()        [writeConfig] → lagerlistan + metadata som PHP-array
  ├─ serialiserar och validerar konfigurationen med json_encode()/json_decode()
- ├─ formaterar den snyggt med json_format()  [writeConfig]
+ ├─ formaterar den snyggt med jsonFormat()  [writeConfig]
  └─ två huvudlägen beroende på $_GET['getJson']/$_GET['getHtml']:
       ├─ getJson=y  → returnera bara JSON-konfigurationen (nedladdningsbar)
       └─ annars     → generera fullständig HTML-sida:
@@ -75,7 +75,7 @@ $dbh = dbh();
 $configTables = configTables($dbh);
 extract($configTables);
 
-$map = array_column_search($mapId, 'map_id', $maps);
+$map = arrayColumnSearch($mapId, 'map_id', $maps);
 $writeConfigContext = array(
 	'map' => &$map,
 	'controls' => &$controls,
@@ -117,7 +117,7 @@ if (!empty($map['controls'])) {
 
 $pageSettings = array();
 if (!empty($map['footer'])) {
-	$footer = array_column_search($map['footer'], 'footer_id', $footers);
+	$footer = arrayColumnSearch($map['footer'], 'footer_id', $footers);
 	$footerJson = array(
 		'img' => $footer['img'],
 		'url' => $footer['url']
@@ -148,8 +148,8 @@ $mapJson = array(
 	'constrainResolution' => $map['constrainresolution'] === 't',
 	'resolutions' => array_map($toJsonNumber, pgArrayToPhp($map['resolutions']))
 );
-if (!empty(array_column_search($map['projectioncode'], 'code', $proj4defs)['projectionextent'])) {
-	$mapProjectionExtent = pgBoxToText(array_column_search($map['projectioncode'], 'code', $proj4defs)['projectionextent']);
+if (!empty(arrayColumnSearch($map['projectioncode'], 'code', $proj4defs)['projectionextent'])) {
+	$mapProjectionExtent = pgBoxToText(arrayColumnSearch($map['projectioncode'], 'code', $proj4defs)['projectionextent']);
 	$mapJson['projectionExtent'] = array_map($toJsonNumber, explode(',', $mapProjectionExtent));
 } else {
 	if ($map['projectioncode'] != 'EPSG:3857' && $map['projectioncode'] != 'EPSG:4326') {
@@ -165,7 +165,7 @@ if (!empty($map['palette'])) {
 	$mapJson['palette'] = json_decode($map['palette'], true);
 }
 if (!empty($map['tilegrid'])) {
-	$tilegrid = array_column_search($map['tilegrid'], 'tilegrid_id', $tilegrids);
+	$tilegrid = arrayColumnSearch($map['tilegrid'], 'tilegrid_id', $tilegrids);
 	$mapJson['tileGridOptions'] = array('tileSize' => $toJsonNumber($tilegrid['tilesize']));
 }
 $configJson = array_merge($configJson, $mapJson);
@@ -175,7 +175,7 @@ unset($mapJson, $toJsonNumber);
 $mapProj4defs = pgArrayToPhp($map['proj4defs']);
 $proj4DefsJson = array();
 foreach ($mapProj4defs as $proj4def) {
-	$proj4def = array_column_search($proj4def, 'code', $proj4defs);
+	$proj4def = arrayColumnSearch($proj4def, 'code', $proj4defs);
 	$proj4defJson = array(
 		'code' => $proj4def['code'],
 		'projection' => $proj4def['projection']
@@ -241,7 +241,7 @@ if (json_decode($json) === null) {
 }
 
 $json = json_encode(json_decode($json), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-$jsonPretty = json_format($json);
+$jsonPretty = jsonFormat($json);
 
 if (isset($_GET['getJson']) && $_GET['getJson'] == 'y') {
 	if (isset($_GET['download']) && $_GET['download'] == 'y') {
@@ -439,7 +439,7 @@ HERE;
 		</script>
 
 HERE;
-			$structuredDataJson = json_format($structuredDataJson);
+			$structuredDataJson = jsonFormat($structuredDataJson);
 			$structuredDataFile = "$configDir/structured-data$mapNumber.json";
 			file_put_contents($structuredDataFile, $structuredDataJson);
 
@@ -470,8 +470,8 @@ HERE;
 		$restrictedLayers = array();
 		foreach ($layers as $layer) {
 			if ($layer['type'] !== 'GROUP') {
-				$layerServiceId = array_column_search($layer['source'], 'source_id', $sources)['service'];
-				$layerServiceRestricted = array_column_search($layerServiceId, 'service_id', $services)['restricted'];
+				$layerServiceId = arrayColumnSearch($layer['source'], 'source_id', $sources)['service'];
+				$layerServiceRestricted = arrayColumnSearch($layerServiceId, 'service_id', $services)['restricted'];
 				if ($layerServiceRestricted == 't') {
 					$restrictedLayers[] = array(
 						'name' => explode('#', $layer['layer_id'])[0],

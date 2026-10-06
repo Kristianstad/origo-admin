@@ -11,9 +11,9 @@ includeDirectory("./functions/common");
 require "./constants/configSchema.php";
 
 $dbh = dbh();
-$layers   = all_from_table($dbh, $configSchema, 'layers');
-$sources  = all_from_table($dbh, $configSchema, 'sources');
-$services = all_from_table($dbh, $configSchema, 'services');
+$layers   = allFromTable($dbh, $configSchema, 'layers');
+$sources  = allFromTable($dbh, $configSchema, 'sources');
+$services = allFromTable($dbh, $configSchema, 'services');
 
 $updated = 0;
 $errors  = [];
@@ -24,12 +24,12 @@ foreach ($layers as $layer) {
         $layerName = explode('#', $layerId)[0];
         $sourceId  = $layer['source'];
 
-        $source = array_column_search($sourceId, pkColumnOfTable('sources'), $sources);
+        $source = arrayColumnSearch($sourceId, pkColumnOfTable('sources'), $sources);
         if (empty($source)) {
             continue;
         }
 
-        $service = array_column_search($source['service'], 'service_id', $services);
+        $service = arrayColumnSearch($source['service'], 'service_id', $services);
         if (empty($service)) {
             continue;
         }

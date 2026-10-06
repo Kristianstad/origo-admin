@@ -7,13 +7,13 @@ includeDirectory("./functions/common");
 require("./constants/configSchema.php");
 
 $dbh = dbh();
-$currentSkin = currentSkin(all_from_table($dbh, $configSchema, 'skins'));
+$currentSkin = currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 $content = '';
 
 if (isset($_GET['id'])) {
-    $helps = all_from_table($dbh, $configSchema, 'helps');
+    $helps = allFromTable($dbh, $configSchema, 'helps');
 
-    $help = array_column_search($_GET['id'], 'help_id', $helps);
+    $help = arrayColumnSearch($_GET['id'], 'help_id', $helps);
     if (isset($help['abstract'])) {
         $content = $help['abstract'];
     }

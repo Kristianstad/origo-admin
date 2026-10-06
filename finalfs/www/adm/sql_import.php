@@ -9,7 +9,7 @@ includeDirectory("./functions/sql_import");
 require("./constants/configSchema.php");
 
 $dbh=dbh();
-$currentSkin=currentSkin(all_from_table($dbh, $configSchema, 'skins'));
+$currentSkin=currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 pg_close($dbh);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST')

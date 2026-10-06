@@ -43,8 +43,8 @@ manage-vyn använder samma target-kontrakt för objektidentitet.
 **Common-funktioner** (`adm/functions/common/`):
 - `dbh()` – databasanslutning
 - `toSwedish($string)` – översätter interna typnamn till svenska för visning
-- `all_from_table($dbh, $schema, $table)` – hämtar alla rader från en tabell
-- `array_column_search($value, $column, $rows)` – hittar första raden där
+- `allFromTable($dbh, $schema, $table)` – hämtar alla rader från en tabell
+- `arrayColumnSearch($value, $column, $rows)` – hittar första raden där
   `$column` matchar `$value`
 - `pkColumnOfTable($table)` – returnerar namnet på primärnyckelkolumnen för
   en given tabell
@@ -53,7 +53,7 @@ manage-vyn använder samma target-kontrakt för objektidentitet.
 - `makeTargetBasic($target)`, `makeBasicTarget()`, `makeFullTarget()`,
   `targetType()`, `targetId()`, `targetTable()`, `targetIdColumn()` och
   `targetConfigParam()` – bygger och läser objekt-targets
-- `assoc_array_values($array)` – (används i `printParents`) kontrollerar om
+- `assocArrayValues($array)` – (används i `printParents`) kontrollerar om
   en nästlad array har några faktiska värden
 
 **Konstanter:**
@@ -80,7 +80,7 @@ utanför webbroten (för `source`-typer med QGIS-tjänst).
 - **`$childId` och `$childType` skrivs ut direkt i HTML utan
   `htmlspecialchars()`** (t.ex. `echo "<h2>$childId</h2>"`). `?type=` måste
   motsvara en konfigurationstabell med förväntad id-kolumn; okänd typ ger
-  404. `all_from_table()` validerar och citerar tabellidentifieraren.
+  404. `allFromTable()` validerar och citerar tabellidentifieraren.
   `.qgs`-sökvägen byggs av `service` från databasen och käll-id:t.
 - `printUniqueLogins.php` använder `strftime()`, som är deprecated sedan
   PHP 8.1 och borttaget i PHP 9. Samma filtrerings- och räknelogik

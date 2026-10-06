@@ -20,7 +20,7 @@ kopplad till ett formulärfält i `manage.php` (`printHelpButton()`).
 | `id` | (valfri) Id för en specifik hjälptext i `helps`-tabellen. Om utelämnad visas generella hjälplänkar |
 
 ## Beror på
-**Common-funktioner:** `dbh()`, `all_from_table()`, `array_column_search()`
+**Common-funktioner:** `dbh()`, `allFromTable()`, `arrayColumnSearch()`
 (endast när `id` anges – annars inkluderas inte ens `functions/common/`)
 
 **Konstanter:** `constants/configSchema.php` → `$configSchema`

@@ -1,6 +1,6 @@
 <?php
 
-	function updated_from_table2($dbh, $tableWithSchema)
+	function updatedFromTable2($dbh, $tableWithSchema)
 	{
 		$table = qualifiedTableIdentifier($dbh, $tableWithSchema);
 		if ($table === false)

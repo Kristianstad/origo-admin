@@ -44,7 +44,7 @@ Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. 
 
 ## Fas 6. Övrigt
 
-- [ ] `writeConfig.php`: ta bort `extract($configTables)` och ersätt `json_format` med `json_encode()` med pretty print.
+- [ ] `writeConfig.php`: ta bort `extract($configTables)` och ersätt `jsonFormat` med `json_encode()` med pretty print.
 - [ ] `info`: ersätt `strftime()` (borttagen i PHP 9) och dela upp `printUniqueLogins`.
 - [ ] Läs tillåtna domäner och fallback-URL i forwardauth från en ny konstant `constants/forwardauthReturnConfig.php` (`allowedDomains`, `defaultUrl`), i stil med `azureConfig.php`. `isSafeReturnTo()` och fallbacken i `azure-callback.php` använder den i stället för `kristianstad.se` och `https://kartor.kristianstad.se`.
 - [ ] CI: kör `php -l` över `finalfs/www/adm` och lägg till ett smoke-test mot PostgreSQL för import, CRUD och ångra/gör om.
@@ -71,7 +71,7 @@ Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. 
 - **forwardauth:** rätta docblock i `getOnPremisesSamAccountName`; ta bort eller styr utkommenterade debugblock.
 - **authorization:** ta bort det dolda `call`-fältet i `displayLogin()` om ingen avsändare hittas (inget i repot skickar parametern och `login()` läser den inte); bryt ut dubblerad logik för nyhets-iframens URL; läs in `adldap2` först när LDAP används.
 - **multiselect:** använd `$configSchema` i stället för hårdkodat schema; flytta inline-`onclick` till en namngiven funktion.
-- **restrictedLayer:** lägg till `isset()`-kontroller för frågeparametrar; använd eller ta bort `$cause` i `finishError500`; överväg tydligare filnamn för `authorization_filter`.
+- **restrictedLayer:** lägg till `isset()`-kontroller för frågeparametrar; använd eller ta bort `$cause` i `finishError500`; överväg tydligare filnamn för `authorizationFilter`.
 - **grouplayerfix:** rätta `$DEFAULT_QGIS_SERVER_PATH`/`_URL` och operatorprioritet i `getCachedProjectSettings`; ta bort dubblerade kodblock; harmonisera retry med `fetchWithStatus`; samla curl-inställningar.
 - **read_json:** smoke-testa mot en riktig PostgreSQL med specialtecken i titlar, URL:er och beskrivningar samt rollback efter databasfel.
 - **read_db_schemas:** utred syftet med `unset($_GET)`.
