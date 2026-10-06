@@ -15,13 +15,13 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 
 Typ, tabell och id-kolumn följer av tre regler som ska finnas på ett ställe. Ett separat typregister behövs inte.
 
-- [ ] Låt `tableType()` ta bort exakt ett avslutande `s` (i dag tar `rtrim` bort alla), och ersätt alla `rtrim($x, 's')` med `tableType()`: `pkColumnOfTable`, `printParents`, `printAddRemoveOperations`, `printChildSelect`, `printHeadForm`, `printHeadForms` och `multiselect.php`.
-- [ ] Låt `targetIdColumn()` och `multiselect.php` anropa `pkColumnOfTable()` i stället för att upprepa `proj4defs`-undantaget.
+- [ ] Låt `tableType()` ta bort exakt ett avslutande `s` och använd den för tabellnamn i `pkColumnOfTable`, `printParents`, `printAddOperation`, `printAddRemoveOperations`, `printRemoveOperation`, `printChildSelect`, `printHeadForm` och `printHeadForms`. I `printUpdateSelect()` ska fältnamnet användas som det är; det är inte ett tabellnamn och ska inte trimmas.
+- [ ] Låt `targetIdColumn()` anropa `pkColumnOfTable()` i stället för att upprepa `proj4defs`-undantaget. `multiselect.php` använder redan hjälpfunktionen efter Fas 2.
 - [ ] Ersätt `$type.'s'` i `sqlForOperation` och `findParents` med `typeTableName()`.
 - [ ] Kontrollera dispatchen `'print'.ucfirst($type).'Form'` i `manage.php` med `function_exists()` efter att typen validerats mot tillåtelselistan.
 - [ ] Byt namn på konverterarna: `makeTargetBasic` → `toBasicTarget` och `makeTargetFull` → `toFullTarget` (23 anrop). Flytta `makeTargetFull`, `targetConfig` och `tableConfigs` till `functions/common/`.
 - [ ] Stärk kontraktet: `isTarget` kräver exakt en post, `targetId` validerar, id `"0"` accepteras, `array_key_first()` ersätter `key()`/`current()`.
-- [ ] Ersätt de manuella view-grenarna i `manage.php` och direkta `current($fullTarget)`-läsningar med target-helpers.
+- [ ] Ersätt upprepad target-konstruktion och direkta `current($fullTarget)`-läsningar i `manage.php` med target-helpers. Behåll typunika renderingsgrenar för formulär och barnurval; de hanterar olika arbetsflöden.
 - [ ] Låt `updatedFullTarget()` behålla tidigare värde för fält som saknas i POST i stället för att tömma dem.
 - [ ] Samla `die()` vid ogiltig target i en gemensam helper.
 
