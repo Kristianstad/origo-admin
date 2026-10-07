@@ -91,7 +91,7 @@
 					'updateAdgroups' => targetConfigParam($layer, 'adgroups')
 				));
 			}
-			printUpdateSelect($layer, array('swiper'=>array("f", "t", "under")), 'miniSelect', 'Swiper-lager:', in_array('swiper', $helps));
+			printUpdateSelect($layer, array('swiper'=>array_merge(booleanSelectOptions(), array('under'=>'under'))), 'miniSelect', 'Swiper-lager:', in_array('swiper', $helps));
 			if (!empty(targetConfigParam($layer, 'type')) && targetConfigParam($layer, 'type') == 'WMS')
 			{
 				printTextarea($layer, 'format', 'textareaMedium', 'Format:', in_array('format', $helps), $sizePosts);

@@ -12,7 +12,7 @@
 | `allFromTable($dbh, $schema, $table)` | `allFromTable.php` | Hämtar alla rader från en tillåten objekttabell i konfigurationsschemat; citerar schema- och tabellnamn | info, multiselect, read_db_schemas, export, writeTablesForAllLayers |
 | `arrayColumnSearch($value, $column, $rows)` | `arrayColumnSearch.php` | Hittar första raden där given kolumn matchar värdet | info, read_db_schemas, export, writeConfig, manage, writeTablesForAllLayers |
 | `assocArrayValues($array)` | `assocArrayValues.php` | Kontrollerar/hämtar faktiska värden i nästlad associativ array | info, manage |
-| `booleanSelectOptions(): array` | `booleanSelectOptions.php` | Returnerar select-alternativen `f => Falskt` och `t => Sant` | manage |
+| `booleanSelectOptions(): array` | `booleanSelectOptions.php` | Returnerar select-alternativen `f => ☐ Nej` och `t => ☑ Ja` | manage |
 | `clearAuthSession()` | `clearAuthSession.php` | Nollställer `$_SESSION['user']`, sätter en ny `login_time_stamp` och stänger sessionen. Anropas av `initUserLdap()` när ingen giltig användare kan slås upp | authorization (indirekt via initUserLdap) |
 | `configTableNames($dbh)` | `configTableNames.php` | Cacherar bastabeller i konfigurationsschemat som har förväntad id-kolumn; utesluter `object_identity` och `edit_cursor` | allFromTable, configTables, info, multiselect, updated |
 | `configTables($dbh)` | `configTables.php` | Hämtar konfigurationen från tillåtna objekttabeller i ett svep, avsedd att packas upp med `extract()` | writeConfig, manage, read_json |

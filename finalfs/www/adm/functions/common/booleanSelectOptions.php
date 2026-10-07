@@ -2,5 +2,5 @@
 
 function booleanSelectOptions(): array
 {
-	return array('f' => 'Falskt', 't' => 'Sant');
+	return array('f' => '&#x2610; Nej', 't' => '&#x2611; Ja');
 }
