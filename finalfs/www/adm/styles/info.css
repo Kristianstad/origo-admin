@@ -1,5 +1,5 @@
 		html		{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
-		body		{ height:100%; line-height:1.4; font-family:var(--skin-font, 'Roboto', sans-serif); font-size:clamp(7px, 0.9vw, 12px); background-color:var(--skin-bg, #cfd8dc); color:var(--skin-text, #212121); margin:0 }
+		body		{ height:100%; line-height:1.4 }
 		div			{ float:left }
 		.backArrow		{ display:inline-block; font-size:1.25em; font-weight:900; line-height:1; -webkit-text-stroke:0.07em currentColor; transform:translateY(-3px) scaleX(0.65) }
 		.adminArrow		{ display:inline-block; transform:translateY(-1px) }
@@ -9,8 +9,3 @@
 		select		{ font-family:inherit; font-size:inherit; padding:0.1em; position:relative; box-sizing:border-box; background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
 		font		{ font-family:var(--skin-font, 'Roboto', sans-serif)!important; font-size:clamp(7px, 0.9vw, 12px)!important }
 		a			{ color:var(--skin-text, #212121) }
-		::-webkit-scrollbar { width: 6px }
-		::-webkit-scrollbar-track { background: var(--skin-bg, #cfd8dc); border-radius: 3px }
-		::-webkit-scrollbar-thumb { background: var(--skin-primary, #455a64); border-radius: 3px }
-		::-moz-selection { color:var(--skin-surface, #FFFFFF); background:var(--skin-accent, #00bcd4) }
-		::selection		{ color:var(--skin-surface, #FFFFFF); background: var(--skin-accent, #00bcd4) }

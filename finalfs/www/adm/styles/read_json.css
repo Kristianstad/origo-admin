@@ -1,5 +1,5 @@
 		html			{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
-		body			{ line-height:2; font-family:var(--skin-font, 'Roboto', sans-serif); font-size:clamp(7px, 0.9vw, 12px); background-color:var(--skin-bg, #cfd8dc); color:var(--skin-text, #212121); margin:0; padding:0.1em 0.5em 0.5em 0.5em }
+		body			{ line-height:2; padding:0.1em 0.5em 0.5em 0.5em }
 		label			{ vertical-align:middle; margin-right:-0.2em; margin-left:0.4em }
 		textarea		{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em 0.5em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
 		.textareaXLarge	{ width:66.5em }
@@ -16,8 +16,3 @@
 		.smallHelpButton { margin-left:0.1em; margin-right:0.1em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }
 		.importHelpTooltip { position:absolute; z-index:1000; width:min(36em, calc(100vw - 1em)); max-height:70vh; overflow:auto; box-sizing:border-box; padding:0.5em; line-height:1.4; background:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121); border:0.0625em solid var(--skin-border, #BDBDBD); border-radius:var(--skin-radius, 0.25em); box-shadow:0 0.2em 0.5em var(--skin-shadow, #c1c1c1) }
 		.importSuccessMessage { color:var(--skin-primary, #455a64); padding:0.4em 0.6em; margin-bottom:0.5em }
-		::-webkit-scrollbar { width: 6px }
-		::-webkit-scrollbar-track { background: var(--skin-bg, #cfd8dc); border-radius: 3px }
-		::-webkit-scrollbar-thumb { background: var(--skin-primary, #455a64); border-radius: 3px }
-		::-moz-selection { color:var(--skin-surface, #FFFFFF); background:var(--skin-accent, #00bcd4) }
-		::selection		{ color:var(--skin-surface, #FFFFFF); background: var(--skin-accent, #00bcd4) }

@@ -41,7 +41,7 @@
 | `readAndCloseSession()` | `readAndCloseSession.php` | Läser in `$_SESSION` och stänger sessionen | news, export |
 | `renderCloseButton(string $class=''): string` | `renderCloseButton.php` | Renderar den gemensamma Stäng-knappen; anropar `closeTopFrame()` från `js-functions/common/` | help, info, multiselect, read_json, sql_import |
 | `renderIconButton(array $button, string $icon, ?string $caption=null, string $iconClass=''): string` | `renderIconButton.php` | Renderar en escaped ikonknapp; formulär och POST-värden ägs av anroparen | manage (historik och add/remove) |
-| `renderUtilityHead(array $skin, string $styleName): void` | `renderUtilityHead.php` | Skriver skinvariabler, sidans stylesheet följd av `styles/common.css`, samt gemensamma utility-skript. Tillåtna stilmallar är help, info, multiselect, read_json och sql_import | help, info, multiselect, read_json, sql_import |
+| `renderUtilityHead(array $skin, string $styleName): void` | `renderUtilityHead.php` | Skriver skinvariabler, `styles/common.css` följd av sidans stylesheet, samt gemensamma utility-skript. Tillåtna stilmallar är help, info, multiselect, read_json och sql_import | help, info, multiselect, read_json, sql_import |
 | `setTargetConfigParam(&$fullTarget, $configParam, $value)` | `setTargetConfigParam.php` | Ändrar ett konfigurationsvärde i en full target in-memory | manage, target-infrastruktur |
 | `sqlQueryError($dbh)` | `sqlQueryError.php` | Avslutar vid SQL-fel med PostgreSQLs felmeddelande | allFromTable, configTableNames, markMapsChanged, markMapUnchanged, schemaNamesFromDb, tableNamesFromSchema, updated-funktioner |
 | `tableConfigs($table, $configTablesOrDbh)` | `tableConfigs.php` | Hämtar rader för en konfigurationstabell ur en databaskoppling eller en redan laddad tabellarray | manage (target-uppslag) |
@@ -63,7 +63,8 @@
 
 > `updatedFromTable()` ligger i `functions/manage/`; se manage.md.
 
-`styles/common.css` innehåller gemensamma grundregler för knappar. Den laddas
-efter sidans egen stilmall av `renderUtilityHead()` och direkt efter
+`styles/common.css` innehåller gemensamma knappregler, typografi- och
+bakgrundsbas för `body`, scrollbarernas utseende samt textmarkering. Den laddas
+före sidans egen stilmall av `renderUtilityHead()` och före
 `manage.css` i `manage.php`. `renderUtilityHead()` laddar också
 `js-functions/common/`, där `closeTopFrame()` och `resizeParentFrame()` finns.

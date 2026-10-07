@@ -15,8 +15,8 @@ function renderUtilityHead(array $skin, string $styleName): void
 
     echo '<style>';
     printSkinVariables($skin);
-    require $stylePaths[$styleName];
     require './styles/common.css';
+    require $stylePaths[$styleName];
     echo "</style>\n<script>";
     includeDirectory('./js-functions/common');
     echo '</script>';

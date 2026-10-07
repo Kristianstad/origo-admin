@@ -1,10 +1,5 @@
 		html		{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
-		body		{ height:100%; line-height:1.4; font-family:var(--skin-font, 'Roboto', sans-serif); font-size:clamp(7px, 0.9vw, 12px); background-color:var(--skin-bg, #cfd8dc); color:var(--skin-text, #212121); margin:0 }
+		body		{ height:100%; line-height:1.4 }
 		h3			{ display:inline-block; margin-block-start:0; margin-block-end:0.5em; font-size:clamp(9px, 1vw, 14px) }
 		select		{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); width:20rem; float:left; height:100%; margin-right:5px; background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
 		textarea	{ font-family:inherit; font-size:inherit; display:flex; overflow:auto; width:calc(100% - 20.32rem); border-radius:var(--skin-radius, 0.25em); margin-bottom:0.2em; box-sizing:border-box; padding:0.2em 0.5em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; background-color:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121) }
-		::-webkit-scrollbar { width: 6px }
-		::-webkit-scrollbar-track { background: var(--skin-bg, #cfd8dc); border-radius: 3px }
-		::-webkit-scrollbar-thumb { background: var(--skin-primary, #455a64); border-radius: 3px }
-		::-moz-selection { color:var(--skin-surface, #FFFFFF); background:var(--skin-accent, #00bcd4) }
-		::selection		{ color:var(--skin-surface, #FFFFFF); background: var(--skin-accent, #00bcd4) }

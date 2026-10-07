@@ -1,10 +1,5 @@
 		html		{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
-		body		{ line-height:2; font-family:var(--skin-font, 'Roboto', sans-serif); font-size:clamp(7px, 0.9vw, 12px); background-color:var(--skin-bg, #cfd8dc); padding:0.3em 0.5em 0 0.5em; color:var(--skin-text, #212121); margin:0 }
+		body		{ line-height:2; padding:0.3em 0.5em 0 0.5em }
 		a			{ color:var(--skin-text, #212121) }
 		.helpCloseButton { display:flex; line-height:1.5; margin-top:0.5em; justify-content:flex-start }
 		/*.smallHelpButton { padding-left:0.3em; padding-right:0.3em; height:unset; border-style:none; top:0 }*/
-		::-webkit-scrollbar { width: 6px }
-		::-webkit-scrollbar-track { background:var(--skin-bg, #cfd8dc); border-radius: 3px }
-		::-webkit-scrollbar-thumb { background:var(--skin-primary, #455a64); border-radius: 3px }
-		::-moz-selection { color:var(--skin-surface, #FFFFFF); background:var(--skin-accent, #00bcd4) }
-		::selection		{ color:var(--skin-surface, #FFFFFF); background:var(--skin-accent, #00bcd4) }

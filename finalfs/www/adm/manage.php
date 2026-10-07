@@ -477,8 +477,8 @@ HTML;
 
 // Include all css-stylesheets from the given directory
 printSkinVariables($currentSkin);
-require("./styles/manage.css");
 require("./styles/common.css");
+require("./styles/manage.css");
 
 echo <<<HTML
 	</style>
