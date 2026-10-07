@@ -12,10 +12,10 @@
 			$changeClass='';
 		}
 		$confirmStr="Är du säker att du vill skriva över den befintliga konfigurationen för $mapId?";
-		$confirmJs=json_encode($confirmStr, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
-		$mapIdJs=json_encode($mapId, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+		$confirmAttribute=escapeHtml($confirmStr);
+		$mapIdAttribute=escapeHtml($mapId);
 		echo <<<HERE
-			<button title="Skriv konfiguration till disk (json)" class="updateButton{$changeClass}" type="button" onclick='if (!confirm({$confirmJs})) return false; this.classList.remove("change"); document.getElementById("hiddenFrame").src="writeConfig.php?map="+encodeURIComponent({$mapIdJs});'>
+			<button title="Skriv konfiguration till disk (json)" class="updateButton{$changeClass}" type="button" data-manage-action="write-config" data-confirm="{$confirmAttribute}" data-map-id="{$mapIdAttribute}">
 				Skriv kartkonfiguration
 			</button>
 		HERE;

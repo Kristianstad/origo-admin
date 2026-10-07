@@ -3,6 +3,7 @@
 **Entry point:** `adm/info.php`
 **Funktionsfiler:** `adm/functions/info/*.php`
 **Stilmall:** `adm/styles/info.css`
+**Gemensamma UI-resurser:** `adm/styles/common.css` och `adm/js-functions/common/*.js`, via `renderUtilityHead()`
 
 ## Syfte
 Visar detaljerad information om ett enskilt objekt i systemet (t.ex. en
@@ -64,6 +65,11 @@ utanför webbroten (för `source`-typer med QGIS-tjänst).
 
 **Databas:** läser från flera olika tabeller beroende på `type`
 (`<type>s`), samt `services`-tabellen när `type=source`.
+
+`renderUtilityHead()` skriver skinvariabler, `info.css` följt av
+`common.css`, samt de gemensamma `closeTopFrame()`- och
+`resizeParentFrame()`-funktionerna. Stäng-knappen renderas av
+`renderCloseButton()`.
 
 ## Filer och funktioner
 

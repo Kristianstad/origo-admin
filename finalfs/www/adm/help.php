@@ -26,28 +26,17 @@ HERE;
 
 pg_close($dbh);
 
-$content .= "<br style=\"clear:both\"><div class=\"helpCloseButton\"><button type=\"button\" title=\"Stäng\" aria-label=\"Stäng\" onclick=\"window.parent.postMessage({ action: 'close' }, window.location.origin);\"><span aria-hidden=\"true\">&#x22A0;</span></button></div>";
+$content .= '<br style="clear:both"><div class="helpCloseButton">'.renderCloseButton().'</div>';
 
 // === Början av sidan ===
 echo <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
-	<style>
 HTML;
-
-printSkinVariables($currentSkin);
-require("./styles/help.css");
+renderUtilityHead($currentSkin, 'help');
 
 echo <<<HTML
-	</style>
-	<script>
-		window.onload = function() {
-			if (window.parent !== window) { // Make sure we are in an iframe
-				window.parent.postMessage({ action: 'resize' }, window.location.origin);
-			}
-		};
-	</script>
 </head>
 <body>
 {$content}

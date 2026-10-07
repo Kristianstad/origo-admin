@@ -7,10 +7,10 @@
 	{
 		$type=targetType($basicTarget);
 		$id=targetId($basicTarget);
-		$typeJs=json_encode($type, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
-		$idJs=json_encode($id, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+		$typeAttribute=escapeHtml($type);
+		$idAttribute=escapeHtml($id);
 		echo <<<HERE
-			<button title="Visa/dölj ytterligare information" aria-label="Visa/dölj ytterligare information" class="updateButton historyButton" type="button" onclick='toggleTopFrame("info"); document.getElementById("topFrame").src="info.php?type="+encodeURIComponent({$typeJs})+"&id="+encodeURIComponent({$idJs});'>
+			<button title="Visa/dölj ytterligare information" aria-label="Visa/dölj ytterligare information" class="updateButton historyButton" type="button" data-manage-action="info" data-info-type="{$typeAttribute}" data-info-id="{$idAttribute}">
 				<span aria-hidden="true">&#x24D8;</span>
 			</button>
 		HERE;

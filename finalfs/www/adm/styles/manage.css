@@ -1,9 +1,6 @@
 		html			{ width:100%; height:100%; overflow-x:hidden }
 		body			{ line-height:2; font-family:var(--skin-font, 'Roboto', sans-serif); font-size:clamp(7px, 0.9vw, 12px); background-color:var(--skin-bg, #cfd8dc); padding:0.1em 0.5em 0.5em 0.5em; color:var(--skin-text, #212121); margin:0 }
-		button, .btn	{ height:1.7em; font-family:inherit; font-size:inherit; border:none; padding:0.3em; position:relative; margin-left:0.1em; white-space:nowrap; background-color:var(--skin-primary, #455a64); color:var(--skin-button-text, #FFFFFF); border-radius:var(--skin-radius, 0.25em); cursor:pointer; transition:background-color 0.3s ease; vertical-align:middle }
 		button.change	{ background-color:var(--skin-accent, #00bcd4) }
-		button:hover, .btn:hover { background-color:var(--skin-hover, #0097a7) }
-		button:active	{ background-color:var(--skin-active, #b2ebf2); box-shadow:inset 0 0 0.3125em var(--skin-shadow, #c1c1c1); outline:none }
 		.buttonDiv		{ display:flex; position:absolute; right:0.8em; line-height:1.5; margin-top:0.24em }
 		.exportButtonDiv { position:absolute; right:0; margin-top:2.4em; margin-right:2em }
 		.headButton		{ width:4em }
@@ -24,7 +21,6 @@
 		.historyButton[value="undo"] > span,
 		.historyButton[value="redo"] > span,
 		.historyButton[value="restore"] > span { transform:translateY(1px) }
-		button[aria-label="Stäng"] > span { display:inline-block; transform:translateY(-2px) }
 		.deleteButton > span { filter:none }
 		.deleteButton	{ margin-right:0.2em; color:var(--skin-danger, #ffcdd2); font-weight:bold }
 		.smallMultiselectButton { margin-left:-0.3em; margin-right:0.1em; height:unset; border-style:none; padding:0.1em 0.2em; vertical-align:middle }

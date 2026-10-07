@@ -11,6 +11,10 @@ Alla importerade id:n får suffixet från `importid`, vilket minskar risken
 för krockar med befintlig konfiguration. JSON kan till exempel hämtas från
 `writeConfig.php?getJson=y`.
 
+**Stilmallar:** `adm/styles/read_json.css` och `adm/styles/common.css`
+**JS-filer:** `adm/js-functions/read_json/*.js` samt gemensamma utility-skript
+från `adm/js-functions/common/`
+
 ## Anrop
 
 GET till `read_json.php` visar importformuläret. POST-formuläret använder:
@@ -37,6 +41,11 @@ GET till `read_json.php` visar importformuläret. POST-formuläret använder:
    `maps.changed = 't'`, så att **Skriv kartkonfiguration**-knappen aktiveras.
    Användaren får därefter ett skinat lyckatmeddelande med en **Stäng**-knapp
    som stänger iframe-vyn.
+
+GET-formuläret använder `confirmReadJsonImport()` från
+`js-functions/read_json/`. `renderUtilityHead()` laddar sidans CSS följd av
+`common.css` och de gemensamma utility-skripten; samma head-helper används för
+resultatvyn.
 
 Rå JSON-regex används inte längre. Källor, resolutionslistor och
 `tileGridOptions` läses från den avkodade PHP-arrayen.

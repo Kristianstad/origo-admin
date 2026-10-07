@@ -36,19 +36,15 @@
 		{
 			$styleStr='';
 		}
+		$scrollTopAttribute='';
 		if (isset($sizePosts['scroll'.$ucConfigParam]))
 		{
-			$scrolltopStr="<script>document.getElementById('".$targetId.$ucConfigParam."').scrollTop=".$sizePosts['scroll'.$ucConfigParam].";</script>";
-		}
-		else
-		{
-			$scrolltopStr='';
+			$scrollTopAttribute='data-scroll-top="'.max(0, (int) $sizePosts['scroll'.$ucConfigParam]).'"';
 		}
 		echo <<<HERE
 			<span class="optionSpan">
 				<label title="{$targetType}:{$configParam}" for="{$targetId}{$ucConfigParam}">{$label}</label>
-				<textarea {$ro}rows="1" class="{$class}" id="{$targetId}{$ucConfigParam}" name="update{$ucConfigParam}" onmouseup="document.getElementById('{$targetId}{$ucConfigParam}_width').value=this.offsetWidth; document.getElementById('{$targetId}{$ucConfigParam}_height').value=this.offsetHeight;" onmouseover="document.getElementById('{$targetId}{$ucConfigParam}_width').value=this.offsetWidth; document.getElementById('{$targetId}{$ucConfigParam}_height').value=this.offsetHeight;" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}" onscroll="document.getElementById('{$targetId}{$ucConfigParam}_scroll').value=this.scrollTop;" {$styleStr}>{$configParamValue}</textarea>
-				{$scrolltopStr}
+				<textarea {$ro}rows="1" class="{$class}" id="{$targetId}{$ucConfigParam}" name="update{$ucConfigParam}" data-config-textarea {$scrollTopAttribute} {$styleStr}>{$configParamValue}</textarea>
 				<input type="hidden" name="newwidth{$ucConfigParam}" id="{$targetId}{$ucConfigParam}_width">
 				<input type="hidden" name="newheight{$ucConfigParam}" id="{$targetId}{$ucConfigParam}_height">
 				<input type="hidden" name="newscroll{$ucConfigParam}" id="{$targetId}{$ucConfigParam}_scroll">

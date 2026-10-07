@@ -7,8 +7,9 @@ multiselect.php
  ├─ validerar tabell mot multiselectables.php, tableAliases.php och allowlistan
  ├─ allFromTable($dbh, $configSchema, $table)   [common] → hämtar tillåtna rader
  ├─ toSwedish($table)                        [common] → rubrik på svenska
- ├─ includeDirectory("./js-functions/multiselect")  → klistrar in ALLA js-filer inline i <script>
- └─ renderar HTML: <select> + knappar, med inline onclick-anrop till JS-funktionerna
+ ├─ includeDirectory("./js-functions/multiselect")  → klistrar in modulens JS-filer inline i <script>
+ ├─ renderUtilityHead($currentSkin, 'multiselect')   → skriver modul- och common.css samt gemensamma utility-JS
+ └─ renderar HTML: <select> + knappar, med korta anrop till JS-funktionerna
 */
 
 // Tell browsers to not cache response
@@ -79,24 +80,11 @@ echo <<<HTML
 HTML;
 
 includeDirectory("./js-functions/multiselect");
-
 echo <<<HTML
 	</script>
-	<style>
 HTML;
-
-printSkinVariables($currentSkin);
-require("./styles/multiselect.css");
-
+renderUtilityHead($currentSkin, 'multiselect');
 echo <<<HTML
-	</style>
-	<script>
-		window.onload = function() {
-			if (window.parent !== window) { // Make sure we are in an iframe
-				window.parent.postMessage({ action: 'resize' }, window.location.origin);
-			}
-		};
-	</script>
 </head>
 <body>
 <select id="selectbox" onChange="update(this);" data-sorted-values="{$dataSortedValuesEsc}" multiple>
@@ -117,10 +105,11 @@ if (!empty($currentValue)) {
     echo '<button onClick="window.location.reload();">Återställ</button>&nbsp;';
 }
 
+$closeButton = renderCloseButton();
 echo <<<HTML
-<button onClick='document.querySelector("#selection").innerHTML=null;document.querySelector("#selection").value=null;document.querySelector("#selectbox").setAttribute("data-sorted-values", "");document.querySelector("#selectbox").value="";document.querySelector("#selectbox")?.querySelectorAll("option").forEach(o => o.removeAttribute("selected"));'>Töm</button>&nbsp;
+<button type="button" onClick="clearSelection();">Töm</button>&nbsp;
 <button type="button" onclick="sendSelectionAndClose('{$textareaIdEsc}');">Använd värde</button>&nbsp;
-<button type="button" title="Stäng" aria-label="Stäng" onclick="closeTopFrame();"><span aria-hidden="true">&#x22A0;</span></button>
+{$closeButton}
 <script>selectOptionsByValues('selectbox', '{$dataSortedValuesEsc}');makeSelectToggleOnly('selectbox');</script>
 </body>
 </html>

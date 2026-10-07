@@ -2,7 +2,9 @@
 
 **Entry point:** `adm/sql_import.php`
 **Funktionsfiler:** `adm/functions/sql_import/*.php`
-**CSS:** `adm/styles/sql_import.css`
+**Stilmallar:** `adm/styles/sql_import.css` och `adm/styles/common.css`
+**JS-filer:** `adm/js-functions/sql_import/*.js` samt gemensamma utility-skript
+från `adm/js-functions/common/`
 
 ## Syfte
 
@@ -29,6 +31,11 @@ ett publikt API. SQL körs med den anslutning som anges i
    svaret.
 8. Vid lyckad körning visas ett skinat lyckat-resultat och en **Stäng**-knapp
    som stänger iframe-vyn.
+
+GET-formuläret använder `confirmSqlImport()` och `updateSqlInputState()` från
+`js-functions/sql_import/`. `renderUtilityHead()` laddar sidans CSS följd av
+`common.css` och de gemensamma utility-skripten; samma head-helper används för
+resultatvyn.
 
 I `manage.php` visas formuläret och resultatet i `topFrame`. Höjden anpassas
 automatiskt när innehållet växer eller minskar; iframe-handtaget för manuell

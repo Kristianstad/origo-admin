@@ -61,6 +61,7 @@ Historik, snapshots, restore och kopplingen till konfigurationsschema beskrivs i
 ## UI- och knappreferenser
 
 Följ befintliga komponent- och stylesheetmönster, inklusive tillgängliga namn och etiketter. Kontrollera aktuell CSS innan du ändrar placering eller mått; exakta UI-detaljer hör hemma i modulens dokumentation eller i den aktuella uppgiften.
+Lägg inte längre eller återanvändbar JavaScript-logik i PHP-strängar, heredocs eller HTML-attribut. Placera den i `js-functions/<modul>/` och ladda den via modulens etablerade `includeDirectory()`-flöde; håll eventuella inline-anrop korta.
 
 ## `topFrame` och formulärstorlek
 

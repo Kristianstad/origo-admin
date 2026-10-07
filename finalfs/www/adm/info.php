@@ -51,21 +51,9 @@ echo <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
-	<style>
 HTML;
-
-printSkinVariables($currentSkin);
-require("./styles/info.css");
-
+renderUtilityHead($currentSkin, 'info');
 echo <<<HTML
-	</style>
-	<script>
-		window.onload = function() {
-			if (window.parent !== window) { // Make sure we are in an iframe
-				window.parent.postMessage({ action: 'resize' }, window.location.origin);
-			}
-		};
-	</script>
 </head>
 <body>
 HTML;
@@ -122,7 +110,7 @@ if (!empty($childId)) {
 	}
 
 	echo "&nbsp;<form action='manage.php' method='post' target='_blank' style='display:inline'><button type='submit' title='Administrera' aria-label='Administrera' name='" . $childType . "Id' value='" . $childId . "'><span class='adminArrow' aria-hidden='true'>&#x21AA;</span><span class='adminAsterisk' aria-hidden='true'>*</span></button></form>";
-	echo "&nbsp;<button type=\"button\" title=\"Stäng\" aria-label=\"Stäng\" onclick=\"window.parent.postMessage({ action: 'close' }, window.location.origin);\"><span aria-hidden=\"true\">&#x22A0;</span></button>";
+	echo "&nbsp;".renderCloseButton();
 }
 
 pg_close($dbh);

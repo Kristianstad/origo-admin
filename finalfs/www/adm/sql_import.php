@@ -23,36 +23,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST')
 <head>
 <meta charset="utf-8">
 <title>SQL-import</title>
-<style>
 HTML;
-    printSkinVariables($currentSkin);
-    require("./styles/sql_import.css");
+    $closeButton = renderCloseButton('updateButton');
+    renderUtilityHead($currentSkin, 'sql_import');
+    echo '<script>';
+    includeDirectory("./js-functions/sql_import");
+    echo '</script>';
     echo <<<HTML
-    </style>
-    <script>
-	window.onload = function() {
-		if (window.parent !== window) {
-			window.parent.postMessage({ action: 'resize' }, window.location.origin);
-		}
-	};
-        function updateSqlInputState(fileInput) {
-            const sqlInput=document.getElementById('sql');
-            const hasFile=fileInput.files && fileInput.files.length > 0;
-            sqlInput.value=hasFile ? '' : sqlInput.value;
-            sqlInput.disabled=hasFile;
-        }
-</script>
 </head>
 <body>
 <form method="post" enctype="multipart/form-data"
-      onsubmit="return confirm('SQL kommer att köras direkt mot admin-databasen. Säkerhetskopiera databasen och kontrollera SQL-filen först. Vill du fortsätta?');">
+    onsubmit="return confirmSqlImport();">
 	<input type="hidden" name="csrf_token" value="$csrfToken">
 	<div class="sqlImportForm">
         <span class="optionSpan"><label title="sql_import:sql" for="sql">SQL-text:</label> <textarea class="textareaXLarge" id="sql" name="sql" rows="1"></textarea>{$helpSql}</span><wbr>
         <span class="optionSpan sqlFileOption"><label title="sql_import:sql_file" for="sql_file">SQL-fil:</label>{$helpSqlFile}<input class="sqlImportFile" type="file" id="sql_file" name="sql_file" accept=".sql,text/plain" onchange="updateSqlInputState(this)"></span><wbr>
 		<div class="readJsonButtonDiv">
 			<button class="updateButton" type="submit">Kör SQL</button>
-            <button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
+            $closeButton
 		</div>
 	</div>
 </form>

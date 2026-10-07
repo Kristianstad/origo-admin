@@ -56,6 +56,7 @@ if (empty($post['json'])) {
 	$helpTilegrids=topFormHelpButton('read_json:tilegrids');
 	$helpStyles=topFormHelpButton('read_json:styles');
 	$helpServices=topFormHelpButton('read_json:services');
+	$closeButton=renderCloseButton('updateButton');
 	$dbh=dbh();
 	$currentSkin=currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 	pg_close($dbh);
@@ -66,25 +67,16 @@ if (empty($post['json'])) {
 <head>
 <meta charset="utf-8">
 <title>Importera Origo-konfiguration</title>
-<style>
 HTML;
-
-	printSkinVariables($currentSkin);
-	require("./styles/read_json.css");
-
-	echo <<<HTML
-</style>
-<script>
-	window.onload = function() {
-		if (window.parent !== window) {
-			window.parent.postMessage({ action: 'resize' }, window.location.origin);
-		}
-	};
-</script>
+renderUtilityHead($currentSkin, 'read_json');
+echo '<script>';
+includeDirectory("./js-functions/read_json");
+echo '</script>';
+echo <<<HTML
 </head>
 <body>
 <form method="post"
-      onsubmit="return confirm('Att importera en hel origokonfiguration i JSON-format till databasen är riskabelt. Det kan innebära att ett stort antal redundanta poster läggs till i databasen och att redan befintliga origokonfigurationer slutar att fungera. Är du säker på att du vill importera till databasen?');"
+	onsubmit="return confirmReadJsonImport();"
 		>
 	<div class="printXFormDiv">
 		<input type="hidden" name="csrf_token" value="{$csrfToken}">
@@ -115,7 +107,7 @@ HTML;
 
 	<div class="readJsonButtonDiv">
 		<button class="updateButton" type="submit" name="submit" value="submit">Importera</button>
-		<button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
+		{$closeButton}
 	</div>
 	</div>
 </form>
@@ -547,6 +539,7 @@ catch (Throwable $exception)
 $dbh=dbh();
 $currentSkin=currentSkin(allFromTable($dbh, $configSchema, 'skins'));
 pg_close($dbh);
+$closeButton=renderCloseButton('updateButton');
 
 echo <<<HTML
 <!DOCTYPE html>
@@ -554,18 +547,13 @@ echo <<<HTML
 <head>
 <meta charset="utf-8">
 <title>Importera Origo-konfiguration</title>
-<style>
 HTML;
-
-printSkinVariables($currentSkin);
-require("./styles/read_json.css");
-
+renderUtilityHead($currentSkin, 'read_json');
 echo <<<HTML
-</style>
 </head>
 <body>
 <div class="importSuccessMessage">Import lyckades!</div>
-<button class="updateButton" type="button" title="Stäng" aria-label="Stäng" onclick="window.parent.postMessage({ action: 'close' }, window.location.origin);"><span aria-hidden="true">&#x22A0;</span></button>
+{$closeButton}
 </body>
 </html>
 HTML;

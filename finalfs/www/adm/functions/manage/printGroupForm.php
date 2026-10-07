@@ -11,8 +11,8 @@
 			array('name'=>'layers', 'class'=>'textareaLarge', 'label'=>'Lager:'),
 			array('name'=>'groups', 'class'=>'textareaLarge', 'label'=>'Grupper:'),
 			array('name'=>'title', 'class'=>'textareaMedium', 'label'=>'Titel:'),
-			array('name'=>'expanded', 'type'=>'select', 'options'=>array("f", "t"), 'class'=>'miniSelect', 'label'=>'Expanderad:'),
-			array('name'=>'show_meta', 'type'=>'select', 'options'=>array("f", "t"), 'class'=>'miniSelect', 'label'=>'Visa metadata:'),
+			array('name'=>'expanded', 'type'=>'select', 'options'=>booleanSelectOptions(), 'class'=>'miniSelect', 'label'=>'Expanderad:'),
+			array('name'=>'show_meta', 'type'=>'select', 'options'=>booleanSelectOptions(), 'class'=>'miniSelect', 'label'=>'Visa metadata:'),
 			array('name'=>'abstract', 'class'=>'textareaMedium', 'label'=>'Beskrivning:'),
 			array('name'=>'keywords', 'class'=>'textareaLarge', 'label'=>'Nyckelord:'),
 			array('name'=>'info', 'class'=>'textareaLarge', 'label'=>'Info:')

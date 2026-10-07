@@ -11,7 +11,7 @@
 			array('name'=>'state', 'class'=>'textareaLarge', 'label'=>'Mapstate:'),
 			array('name'=>'created', 'class'=>'textareaMedium', 'label'=>'Skapad:', 'readonly'=>true),
 			array('name'=>'lastuse', 'class'=>'textareaMedium', 'label'=>'Senast använd:', 'readonly'=>true),
-			array('name'=>'preserve', 'type'=>'select', 'options'=>array("f", "t"), 'class'=>'miniSelect', 'label'=>'Rensas ej:'),
+			array('name'=>'preserve', 'type'=>'select', 'options'=>booleanSelectOptions(), 'class'=>'miniSelect', 'label'=>'Rensas ej:'),
 			array('name'=>'info', 'class'=>'textareaLarge', 'label'=>'Info:')
 		), $inheritPosts, $helps, array(
 			'deleteConfirm'=>function ($target) { return "Är du säker att du vill radera mapstatet ".targetId($target)."? Referenser till mapstatet hanteras separat."; }

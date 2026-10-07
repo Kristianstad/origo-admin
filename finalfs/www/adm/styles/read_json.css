@@ -16,10 +16,6 @@
 		.smallHelpButton { margin-left:0.1em; margin-right:0.1em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }
 		.importHelpTooltip { position:absolute; z-index:1000; width:min(36em, calc(100vw - 1em)); max-height:70vh; overflow:auto; box-sizing:border-box; padding:0.5em; line-height:1.4; background:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121); border:0.0625em solid var(--skin-border, #BDBDBD); border-radius:var(--skin-radius, 0.25em); box-shadow:0 0.2em 0.5em var(--skin-shadow, #c1c1c1) }
 		.importSuccessMessage { color:var(--skin-primary, #455a64); padding:0.4em 0.6em; margin-bottom:0.5em }
-		button, .btn	{ height:1.7em; font-family:inherit; font-size:inherit; border:none; padding:0.3em; position:relative; margin-left:0.1em; white-space:nowrap; background-color:var(--skin-primary, #455a64); color:var(--skin-button-text, #FFFFFF); border-radius:var(--skin-radius, 0.25em); cursor:pointer; transition:background-color 0.3s ease; vertical-align:middle }
-		button[aria-label="Stäng"] > span { display:inline-block; transform:translateY(-2px) }
-		button:hover, .btn:hover { background-color:var(--skin-hover, #0097a7) }
-		button:active	{ background-color:var(--skin-active, #b2ebf2); box-shadow:inset 0 0 0.3125em var(--skin-shadow, #c1c1c1); outline:none }
 		::-webkit-scrollbar { width: 6px }
 		::-webkit-scrollbar-track { background: var(--skin-bg, #cfd8dc); border-radius: 3px }
 		::-webkit-scrollbar-thumb { background: var(--skin-primary, #455a64); border-radius: 3px }

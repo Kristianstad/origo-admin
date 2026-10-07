@@ -2,7 +2,7 @@
 
 **Entry point:** `adm/multiselect.php`
 **JS-filer:** `adm/js-functions/multiselect/*.js`
-**Stilmall:** `adm/styles/multiselect.css`
+**Stilmallar:** `adm/styles/multiselect.css` och `adm/styles/common.css`
 
 ## Syfte
 Generisk komponent för att välja flera poster ur en databastabell via en
@@ -52,7 +52,7 @@ som id-kolumn istället för det generella mönstret `<singularis>_id`.
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `closeTopFrame.js` | `closeTopFrame()` | Skickar bara en `close`-signal (utan värde) till förälderfönstret |
+| `js-functions/common/closeTopFrame.js` | `closeTopFrame()` | Gemensam helper som skickar en `close`-signal till förälderfönstret; laddas av `renderUtilityHead()` tillsammans med `resizeParentFrame.js` |
 | `getCurrentSelection.js` | `getCurrentSelection()` | Läser och trimmar värdet från textarean `#selection` |
 | `makeSelectToggleOnly.js` | `makeSelectToggleOnly(selectId)` | Fångar `mousedown` i capture-fas för att göra vanligt klick till "toggla ett alternativ" istället för webbläsarens standard shift/ctrl-rangebeteende |
 | `selectOptionsByValues.js` | `selectOptionsByValues(selectId, optionValues)` | Förvalsmarkerar options baserat på en kommaseparerad sträng, körs vid sidladdning |
@@ -65,6 +65,10 @@ anropar `getCurrentSelection`. Eftersom alla filer i mappen laddas
 tillsammans inline i samma `<script>`-block spelar filordningen inom
 `includeDirectory()` ingen praktisk roll här, men vore det viktigt att
 veta om filerna någonsin laddas separat.
+
+`multiselect.php` laddar först modulens egna skript och därefter
+`renderUtilityHead()`, som skriver sidans stilmall följd av `common.css` och
+de gemensamma utility-skripten.
 
 ## Begränsningar och risker
 

@@ -26,7 +26,7 @@
 			}
 		}
 		$url='writeConfig.php?'.http_build_query($params);
-		$urlJs=json_encode($url, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+		$urlJs=jsonForInlineJs($url);
 		echo <<<HERE
 			<button title="Förhandsgranska {$titleTarget}" aria-label="Förhandsgranska {$titleTarget}" class="updateButton historyButton" type="button" onclick='window.open({$urlJs}, "_blank");'>
 				<span aria-hidden="true">&#x1F50D;&#xFE0E;</span>

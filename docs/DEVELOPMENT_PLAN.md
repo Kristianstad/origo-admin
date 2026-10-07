@@ -22,11 +22,11 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 ## Fas 5. Gemensamma UI-hjälpare
 
 - [ ] `renderCloseButton()` och en gemensam stängfunktion i JavaScript.
-- [ ] `renderIconButton()`; slå ihop undo/redo och add/remove-operation.
-- [ ] `jsonForInlineJs()` för JSON i inline-JavaScript och en kort HTML-escape-helper.
-- [ ] Gemensam sidhuvudhjälpare för utility-sidorna (skin, stilmall, resize-skript).
+- [ ] `renderIconButton()` för gemensam knappmarkup; undo/redo och add/remove behåller egna formulär, POST-värden och bekräftelser.
+- [ ] `jsonForInlineJs()` för JSON i inline-JavaScript och en kort HTML-escape-helper; flytta längre eller återanvändbar JavaScript-logik från PHP till `js-functions/<modul>/`.
+- [ ] Gemensam begränsad sidhuvudhjälpare för utility-sidorna (skin, stilmall, resize-skript); sidornas doctype, titel och unika JS-flöden ligger kvar i respektive sida.
 - [ ] Delad grundstilmall för knappar i stället för samma regel i flera stilmallar.
-- [ ] Konstant för alternativen `f`/`t` i formulären.
+- [ ] Hjälpfunktion för booleska select-alternativ: posta värdena `f`/`t`, men visa `Falskt`/`Sant`. Detta är UI-beteende, inte en installationskonstant.
 
 ## Fas 6. Övrigt
 

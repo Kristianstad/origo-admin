@@ -10,7 +10,7 @@
 			array('name'=>'mode', 'class'=>'textareaMedium', 'label'=>'Typ:'),
 			array('name'=>'ttl', 'class'=>'textareaSmall', 'label'=>'Ttl:'),
 			array('name'=>'limit', 'class'=>'textareaSmall', 'label'=>'Limit:'),
-			array('name'=>'usecentroid', 'type'=>'select', 'options'=>array("f", "t"), 'class'=>'miniSelect', 'label'=>'Använd centroid:'),
+			array('name'=>'usecentroid', 'type'=>'select', 'options'=>booleanSelectOptions(), 'class'=>'miniSelect', 'label'=>'Använd centroid:'),
 			array('name'=>'database', 'type'=>'select', 'options'=>$selectables['databases'], 'class'=>'bodySelect', 'label'=>'Databaser:'),
 			array('name'=>'schema', 'class'=>'textareaMedium', 'label'=>'Schema:'),
 			array('name'=>'table', 'class'=>'textareaMedium', 'label'=>'Tabell:'),

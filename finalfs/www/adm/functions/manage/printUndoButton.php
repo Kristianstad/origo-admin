@@ -10,14 +10,16 @@ function printUndoButton($target, $visible=true)
 	$id=targetId($target);
 	$targetKey=objectHistoryKey($target);
 	$targetTable=targetTable($target);
-	$idEsc=htmlspecialchars($id, ENT_QUOTES, 'UTF-8');
-	$targetKeyEsc=htmlspecialchars($targetKey, ENT_QUOTES, 'UTF-8');
-	$targetTableEsc=htmlspecialchars($targetTable, ENT_QUOTES, 'UTF-8');
-	$idJs=json_encode($id, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
-	echo <<<HERE
-		<input type='hidden' name='target_key' value='{$targetKeyEsc}'>
-		<input type='hidden' name='target_table' value='{$targetTableEsc}'>
-		<input type='hidden' name='target_id' value='{$idEsc}'>
-		<button title='Backa' class='historyButton' type='submit' name='{$type}Button' value='undo' onclick='return confirm("Ångra senaste ändringen för "+{$idJs}+"?");'><span aria-hidden='true'>↶</span></button>
-	HERE;
+	$confirmJs='return confirm("Ångra senaste ändringen för "+'.jsonForInlineJs($id).'+"?");';
+	echo '<input type="hidden" name="target_key" value="'.escapeHtml($targetKey).'">';
+	echo '<input type="hidden" name="target_table" value="'.escapeHtml($targetTable).'">';
+	echo '<input type="hidden" name="target_id" value="'.escapeHtml($id).'">';
+	echo renderIconButton(array(
+		'title' => 'Backa',
+		'class' => 'historyButton',
+		'type' => 'submit',
+		'name' => $type.'Button',
+		'value' => 'undo',
+		'onclick' => $confirmJs
+	), '↶');
 }

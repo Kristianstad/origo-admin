@@ -44,7 +44,7 @@
 					printTextarea($layer, 'clusterstyle', 'textareaLarge', 'Klusterstil:', in_array('clusterstyle', $helps), $sizePosts);
 					printTextarea($layer, 'clusteroptions', 'textareaLarge', 'Klusteralternativ:', in_array('clusteroptions', $helps), $sizePosts);
 				}
-				printUpdateSelect($layer, array('editable'=>array("f", "t")), 'miniSelect', 'Redigerbar:', in_array('editable', $helps));
+				printUpdateSelect($layer, array('editable'=>booleanSelectOptions()), 'miniSelect', 'Redigerbar:', in_array('editable', $helps));
 				if (targetConfigParam($layer, 'editable') == "t")
 				{
 					printTextarea($layer, 'allowededitoperations', 'textareaMedium', 'Redigeringsalt.:', in_array('allowededitoperations', $helps), $sizePosts);
@@ -66,15 +66,15 @@
 			}
 			elseif (targetConfigParam($layer, 'type') == 'WMS')
 			{
-				printUpdateSelect($layer, array('tiled'=>array("f", "t")), 'miniSelect', 'Tiled:', in_array('tiled', $helps));
+				printUpdateSelect($layer, array('tiled'=>booleanSelectOptions()), 'miniSelect', 'Tiled:', in_array('tiled', $helps));
 			}
 			elseif (targetConfigParam($layer, 'type') == 'GROUP')
 			{
 				printTextarea($layer, 'layers', 'textareaMedium', 'Lager:', in_array('layers', $helps), $sizePosts);
 			}
-			printUpdateSelect($layer, array('queryable'=>array("f", "t")), 'miniSelect', 'Klickbar:', in_array('queryable', $helps));
-			printUpdateSelect($layer, array('visible'=>array("f", "t")), 'miniSelect', 'Synlig:', in_array('visible', $helps));
-			printUpdateSelect($layer, array('exportable'=>array("f", "t")), 'miniSelect', 'Exporterbar:', in_array('exportable', $helps));
+			printUpdateSelect($layer, array('queryable'=>booleanSelectOptions()), 'miniSelect', 'Klickbar:', in_array('queryable', $helps));
+			printUpdateSelect($layer, array('visible'=>booleanSelectOptions()), 'miniSelect', 'Synlig:', in_array('visible', $helps));
+			printUpdateSelect($layer, array('exportable'=>booleanSelectOptions()), 'miniSelect', 'Exporterbar:', in_array('exportable', $helps));
 			printTextarea($layer, 'opacity', 'textareaSmall', 'Opacitet:', in_array('opacity', $helps), $sizePosts);
 			if (!empty(targetConfigParam($layer, 'service_id')) && targetConfigParam($layer, 'service_restricted') == 't')
 			{
@@ -122,8 +122,8 @@
 				}
 			
 					printTextarea($layer, 'style_filter', 'textareaLarge', 'Stilfilter:', in_array('style_filter', $helps), $sizePosts);
-					printUpdateSelect($layer, array('show_icon'=>array("f", "t")), 'miniSelect', 'Visa ikon:', in_array('show_icon', $helps));
-					printUpdateSelect($layer, array('show_iconext'=>array("f", "t")), 'miniSelect', 'Visa utfälld ikon:', in_array('show_iconext', $helps));
+					printUpdateSelect($layer, array('show_icon'=>booleanSelectOptions()), 'miniSelect', 'Visa ikon:', in_array('show_icon', $helps));
+					printUpdateSelect($layer, array('show_iconext'=>booleanSelectOptions()), 'miniSelect', 'Visa utfälld ikon:', in_array('show_iconext', $helps));
 					if (targetConfigParam($layer, 'show_icon') != 'f')
 					{
 						printTextarea($layer, 'icon', 'textareaLarge', 'Ikon:', in_array('icon', $helps), $sizePosts);
@@ -156,7 +156,7 @@
 					}
 					if ((targetConfigParam($layer, 'show_icon') == 'f' || empty(targetConfigParam($layer, 'icon'))) && ((targetConfigParam($layer, 'icon_extended') != 't' || empty(targetConfigParam($layer, 'icon_extended'))) && targetConfigParam($layer, 'type') != 'GROUP'))
 					{
-						printUpdateSelect($layer, array('thematicstyling'=>array("f", "t")), 'miniSelect', 'Regelbaserad visning:', in_array('thematicstyling', $helps));
+						printUpdateSelect($layer, array('thematicstyling'=>booleanSelectOptions()), 'miniSelect', 'Regelbaserad visning:', in_array('thematicstyling', $helps));
 					}
 				
 				// If 'style_config' is set then the fields above is hidden by a span-tag and the span-tag is closed.
@@ -177,7 +177,7 @@
 			printTextarea($layer, 'exports', 'textareaMedium', 'Exportlager:', in_array('exports', $helps), $sizePosts);
 			printTextarea($layer, 'attribution', 'textareaLarge', 'Tillskrivning:', in_array('attribution', $helps), $sizePosts);
 			echo '<hr class="dashedHr">';
-			printUpdateSelect($layer, array('show_meta'=>array("f", "t")), 'miniSelect', 'Visa metadata:', in_array('show_meta', $helps));
+						printUpdateSelect($layer, array('show_meta'=>booleanSelectOptions()), 'miniSelect', 'Visa metadata:', in_array('show_meta', $helps));
 			printTextarea($layer, 'abstract', 'textareaLarge', 'Beskrivning:', in_array('abstract', $helps), $sizePosts);
 			printTextarea($layer, 'keywords', 'textareaLarge', 'Nyckelord:', in_array('keywords', $helps), $sizePosts);
 			printTextarea($layer, 'resources', 'textareaMedium', 'Resurser:', in_array('resources', $helps), $sizePosts);

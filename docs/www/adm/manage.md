@@ -3,8 +3,8 @@
 **Entry point:** `adm/manage.php` (32K, den enskilt största och mest
 centrala filen i systemet)
 **Funktionsfiler:** `adm/functions/manage/*.php` (target-primitiverna ligger i `adm/functions/common/`)
-**JS-filer:** `adm/js-functions/manage/*.js` (6 filer)
-**Stilmall:** `adm/styles/manage.css`
+**JS-filer:** `adm/js-functions/manage/*.js` (8 filer)
+**Stilmallar:** `adm/styles/manage.css` och `adm/styles/common.css`
 
 ## Syfte
 Den centrala administrationssidan: en generisk CRUD-motor (skapa, läsa,
@@ -246,10 +246,10 @@ betydande typspecifik villkorslogik:
 | `printUndoButton.php` | `printUndoButton($target, $visible=true)` | "Backa"-knappen: postar `target_key`/`target_table`/`target_id` och `command=undo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
 | `printUpdateButton.php` | `printUpdateButton($type, $formChanged=false)` | "Uppdatera"-knappen. Får ändringsstatus som argument; `manage.php` skickar statusen via `_formChanged` i `inheritPosts` efter ett misslyckat sparförsök |
 | `printUpdateForm.php` | (enkelt mönster) | Namnet är missvisande – detta gäller entiteten "update" (en uppdateringsrutin/schema för när data anses föråldrad, kopplat till `updated`-modulen), inte formulärets egen uppdateringsknapp. Fält: `interval` (tidsintervall som text, t.ex. "+1 month" – ser ut som PHP:s `strtotime()`-kompatibla format), `method` (manuellt/automatiskt) |
-| `printUpdateSelect.php` | `printUpdateSelect($fullTarget, $configParamValues, $class, $label, $help=false, $options=null, $onchange='')` | Motsvarigheten till `printTextarea()` men för `<select>`-fält istället för fritext. Om `$options` inte anges härleds de automatiskt från `$configParamValues` |
+| `printUpdateSelect.php` | `printUpdateSelect($fullTarget, $configParamValues, $class, $label, $help=false, $options=null, $onchange='')` | Motsvarigheten till `printTextarea()` för `<select>`. Associativa alternativ mappar postat värde till synlig etikett; boolean-fält använder `booleanSelectOptions()` (`f`/`t` visas som `Falskt`/`Sant`) |
 | `printUrlButton.php` | `printUrlButton($url, $type)` | Typknapp som öppnar en URL i ny flik utan att skapa ett nästlat formulär; använder typen för knapptexten, exempelvis karta eller externt verktyg |
 | `printViewSwitcher.php` | `printViewSwitcher($view)` | Radioknappar för att växla mellan vyer (`constants/views.php`), autopostar vid ändring |
-| `printWriteConfigButton.php` | `printWriteConfigButton($mapId, $changed='f')` | Typknapp som efter bekräftelse anropar `writeConfig.php` i `hiddenFrame` (utan nästlat formulär). Visar "ändrad"-styling om `maps.changed = 't'` (satt av `markMapsChanged()`) |
+| `printWriteConfigButton.php` | `printWriteConfigButton($mapId, $changed='f')` | Typknapp som efter bekräftelse anropar `writeConfig.php` i `hiddenFrame` via `manageActions.js` (utan nästlat formulär). Visar "ändrad"-styling om `maps.changed = 't'` (satt av `markMapsChanged()`) |
 | `recordHistoryEdit.php` | `recordHistoryEdit($dbh, $target, $action, $beforeConfig, $afterConfig): bool` | Sparar update/create/copy/delete-snapshots, skapar baslinje vid behov (även vid restore utan föregående giltig edit) och flyttar `edit_cursor`; update kastar en kvarvarande gör-om-gren. Se "Historik: Ångra/Gör om" ovan |
 | `restoreDeletedEdit.php` | `restoreDeletedEdit($dbh, $editId): array` | Validerar och återställer objektet från senaste delete-editens snapshot i en transaktion; markerar posten som restored och flyttar historikmarkören tillbaka utan redo-radering |
 
@@ -308,15 +308,15 @@ betydande typspecifik villkorslogik:
 | `printHelpButton.php` | `printHelpButton($type, $configParam=null, $buttonText='?', $buttonClass='smallHelpButton')` | Liten "?"-knapp bredvid ett fält, öppnar/togglar hjälptext för just det fältet (`help.php?id=<type>[:<configParam>]`) i topFrame |
 | `printHiddenInputs.php` | `printHiddenInputs($inheritPosts)` | Skriver ut ett dolt `<input>` per nyckel/värde i `$inheritPosts`, för att bevara navigeringskontext genom formulärinskick |
 | `printHistoryButtons.php` | `printHistoryButtons($target, $dbh=null, $inheritPosts=array())` | Skriver ut "Backa"/"Gör om"-knapparna för given target, efter att ha frågat `historyStateForTarget()` om vilka som är tillgängliga. Öppnar/stänger en egen databaskoppling om ingen skickas in. Se "Historik: Ångra/Gör om" ovan |
-| `printInfoButton.php` | `printInfoButton($basicTarget)` | Typknapp som öppnar `info.php` i `topFrame` för given target, utan eget formulär |
+| `printInfoButton.php` | `printInfoButton($basicTarget)` | Typknapp som öppnar `info.php` i `topFrame` för given target via `manageActions.js`, utan eget formulär |
 | `printMultiselectButton.php` | `printMultiselectButton($configParam, $value=null, $textareaId, $buttonText='+', $buttonClass='smallMultiselectButton')` | Knapp som öppnar multiselect-verktyget i topFrame för ett givet fält, via samma `<textareaId>::<tabell>:<värden>`-kodning som beskrivs i `multiselect.md` |
-| `printReadDbSchemasButton.php` | `printReadDbSchemasButton($databaseId)` | Typknapp som efter bekräftelse anropar `read_db_schemas.php` i `hiddenFrame` och skickar om databasurvalet efter 1 sekund. Avbryt stoppar båda åtgärderna; inget nästlat formulär |
-| `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php`; Avbryt stoppar anrop och formulärresubmit |
+| `printReadDbSchemasButton.php` | `printReadDbSchemasButton($databaseId)` | Typknapp som efter bekräftelse anropar `read_db_schemas.php` i `hiddenFrame` och skickar om databasurvalet efter 1 sekund; hanteras av `manageActions.js`. Avbryt stoppar båda åtgärderna; inget nästlat formulär |
+| `printReadSchemaTablesButton.php` | `printReadSchemaTablesButton($schemaId)` | Motsvarande för `read_schema_tables.php`, hanterad av `manageActions.js`; Avbryt stoppar anrop och formulärresubmit |
 | `printRemoveOperation.php` | (samma mönster som `printAddOperation.php`, se ovan) | Motsatsen till `printAddOperation()` – kräver dessutom `findParents()` [common] för att bara visa de föräldrar objektet faktiskt tillhör (kan inte tas bort från en förälder det inte är kopplat till) |
 | `printRedoButton.php` | `printRedoButton($target, $visible=true)` | "Gör om"-knappen: postar `target_key`/`target_table`/`target_id` och `command=redo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
 | `printRestoreEditButton.php` | `printRestoreEditButton($editId, $targetId)` | Skriver ut Återställ-knappen för en delete-edit; postar edit-id:t och ber om bekräftelse |
 | `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn), om inte `$preserveOrder` är satt (används av `edit`-dropdownen för att bevara kronologisk ordning trots att etiketten är `target_key`, inte datumet). **Visar texten efter sista kommatecknet i etiketten**, se begränsningar |
-| `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Den mest centrala byggstenen i hela manage-modulen – skriver ut ett enskilt redigerbart fält som ett `<textarea>`. Städar Postgres-arraysyntax för visning, bevarar användarens tidigare valda storlek/scrollposition (via `$sizePosts` och dolda fält), visar en hjälpknapp om hjälptext finns, och visar en multiselect-knapp om fältet är konfigurerat som "multiselectable" |
+| `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Skriver ut ett redigerbart `<textarea>`, städar Postgres-arraysyntax, bevarar storlek/scrollposition via `$sizePosts` och dolda fält, visar hjälp och eventuell multiselect-knapp. `textareaState.js` hanterar dimensionering, Tab-inmatning och scrollposition utan inline-händelsekod |
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |
 | `sqlForOperation.php` | `sqlForOperation($operation, $child, $parent): array` | Bygger en parameteriserad UPDATE-sats som lägger till/tar bort ett barn-id ur förälderns array-kolumn; returnerar SQL och parametrar |
 | `sqlForUpdate.php` | `sqlForUpdate($fullTarget, $updatePosts): array` | Bygger en parameteriserad fullständig UPDATE-sats för en target baserat på postat formulärdata; returnerar SQL och parametrar |
@@ -346,8 +346,10 @@ konfigurationstabeller (via `configTables()` och dynamiskt genererad SQL).
 |---|---|---|
 | `formChangeButton.js` | `formChangeButton()` | Lägger till en CSS-klass (`change`) på ett formulärs "Uppdatera"-knapp så fort något fält i formuläret ändras (utom dolda fält), för att visuellt signalera osparade ändringar |
 | `initMessageListener.js` | `initMessageListener()` | Sätter upp en global `postMessage`-lyssnare för hela sidan. Validerar avsändarens origin (måste matcha `window.location.origin`) och att datan har rätt form innan den hanteras. Hanterar tre fall: `action:'close'` utan `targetId` (stäng topFrame, t.ex. från help.php), `action:'resize'` (justera topFrame-höjd; `read_json` och `sql_import` kan även krympa), och `targetId`+`value` (fyll i ett textarea-fält med värde från multiselect-verktyget, samt uppdatera den tillhörande multiselect-knappens `value`-attribut så nästa öppning av multiselect visar rätt förval) |
+| `manageActions.js` | delegerad klickhanterare | Hanterar `data-manage-action`-knappar för skinbyte, informationspanelen, schema-/tabellimport och publicering. Bekräftelser och id:n skickas som escapade data-attribut |
 | `preservePageScroll.js` | `preservePageScroll()` | Initieras i `<head>` och sparar scrollpositionen vid formulärinskick via en delegerad `submit`-lyssnare. Om en positiv position väntar döljs dokumentet tills `DOMContentLoaded`, då sidan scrollas till positionen och visas; formulär riktade mot en annan browsing context sparar inte positionen |
 | `resizeIframe.js` | `resizeIframe(iframe, autoResize=false)` | Anpassar iframens höjd efter innehållet. Standardläget växer bara och behåller det manuella resize-handtaget; `autoResize=true` följer både ökning och minskning och döljer handtaget |
+| `textareaState.js` | `DOMContentLoaded`-hanterare | Återställer textarea-scrollposition och synkroniserar storlek/scroll till dolda formulärfält; infogar tabulatortecken vid Tab utan inline-händelsekod |
 | `toggleTopFrame.js` | `toggleTopFrame(type)` | Visar/döljer den delade toppmonterade iframen (`#topFrame`). Håller reda på vilken typ av innehåll som visas (global variabel `topFrame`, deklarerad i `manage.php`s inline-script) – klick på samma typ igen döljer den, klick på en annan typ byter innehåll och scrollar upp |
 | `updateSelect.js` | `updateSelect(id, array)` | Fyller om en `<select>`-listas alternativ med ett nytt innehåll. Specialhantering för element vars id slutar på `Categories`: värdet sätts till det råa (understreck-separerade) kategorinamnet men visningstexten har understreck ersatta med mellanslag |
 
@@ -469,8 +471,10 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   `printInfoButton()`, `printWriteConfigButton()`,
   `printReadDbSchemasButton()`, `printReadSchemaTablesButton()`,
   `printConfigPreviewButton()`, `printExportJsonButton()` och
-  `printUrlButton()` skriver inga formulär. Bekräftelserna använder
-  knappens `onclick` och Avbryt stoppar åtgärden.
+  `printUrlButton()` skriver inga formulär. Info, publicering och
+  schema-/tabellinläsning hanteras av `manageActions.js` via data-attribut;
+  delete- och historikknappar behåller korta inline-bekräftelser. Avbryt
+  stoppar respektive åtgärd.
 - `printTableForm.php` anropar `updatedFromTable()` (i `functions/manage/`,
   returnerar bara tidsstämpeln). `updated.php` använder
   `updatedFromTable2()`, som också returnerar `xmin` som

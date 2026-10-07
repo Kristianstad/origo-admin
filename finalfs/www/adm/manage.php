@@ -202,7 +202,7 @@ if (isset($postButton)) {
     elseif ($command == 'restore' && $type == 'edit' && !empty($post['restoreEditId'])) {
         $restoreResult = restoreDeletedEdit($dbh, $post['restoreEditId']);
         if (!$restoreResult['ok']) {
-            $errorAlert = 'window.onload=function(){alert(' . json_encode($restoreResult['error'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) . ');}';
+            $errorAlert = 'window.onload=function(){alert(' . jsonForInlineJs($restoreResult['error']) . ');}';
         } else {
             $configTables = configTables($dbh);
             $errorAlert = 'window.onload=function(){alert("Objektet har återställts.");}';
@@ -478,6 +478,7 @@ HTML;
 // Include all css-stylesheets from the given directory
 printSkinVariables($currentSkin);
 require("./styles/manage.css");
+require("./styles/common.css");
 
 echo <<<HTML
 	</style>

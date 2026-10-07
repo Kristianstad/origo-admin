@@ -2,6 +2,7 @@
 
 **Entry point:** `adm/help.php`
 **Stilmall:** `adm/styles/help.css`
+**Gemensamma UI-resurser:** `adm/styles/common.css` och `adm/js-functions/common/*.js`, via `renderUtilityHead()`
 
 ## Syfte
 Visar en hjälptext i en popup/iframe (samma `postMessage`-mönster som
@@ -20,8 +21,8 @@ kopplad till ett formulärfält i `manage.php` (`printHelpButton()`).
 | `id` | (valfri) Id för en specifik hjälptext i `helps`-tabellen. Om utelämnad visas generella hjälplänkar |
 
 ## Beror på
-**Common-funktioner:** `dbh()`, `allFromTable()`, `arrayColumnSearch()`
-(endast när `id` anges – annars inkluderas inte ens `functions/common/`)
+**Common-funktioner:** `dbh()`, `allFromTable()` och `currentSkin()` används
+för skin på varje request. `arrayColumnSearch()` används när `id` anges.
 
 **Konstanter:** `constants/configSchema.php` → `$configSchema`
 
@@ -30,11 +31,13 @@ kopplad till ett formulärfält i `manage.php` (`printHelpButton()`).
 **Filsystem:** länkar till (men läser inte) `../Origo_admin_tutorial_swedish.pdf`
 på toppnivå.
 
+`renderUtilityHead()` skriver sidans skinvariabler, `help.css` följt av
+`common.css`, samt de gemensamma `closeTopFrame()`- och
+`resizeParentFrame()`-funktionerna. `renderCloseButton()` skriver Stäng-knappen.
+
 ## Begränsningar och risker
 - `$help['abstract']` skrivs ut utan `htmlspecialchars()` eftersom
   hjälptexterna skrivs av administratörer och innehåller HTML. Samma
   mönster som i `news.php`; texten måste därför komma från betrodda
   källor. Det är avsiktligt: förutsättningen är att administratörer är
   betrodda.
-- `functions/common` inkluderas bara när `id` anges, så den generella
-  hjälpen öppnar ingen databasanslutning.

@@ -35,7 +35,7 @@
 				echo '<span title="service_typeFileOpenStreetMap" style="display:none">';
 			}
 
-				printUpdateSelect($source, array('with_geometry'=>array("f", "t")), 'miniSelect', 'With_geometry:', in_array('with_geometry', $helps));
+				printUpdateSelect($source, array('with_geometry'=>booleanSelectOptions()), 'miniSelect', 'With_geometry:', in_array('with_geometry', $helps));
 				printTextarea($source, 'fi_point_tolerance', 'textareaSmall', 'Fi_point_tolerance:', in_array('fi_point_tolerance', $helps), $sizePosts);
 				printTextarea($source, 'ttl', 'textareaSmall', 'Ttl:', in_array('ttl', $helps), $sizePosts);
 				printUpdateSelect($source, array('tilegrid'=>$selectables['tilegrids']), 'bodySelect', 'Tilegrid:', in_array('tilegrid', $helps));

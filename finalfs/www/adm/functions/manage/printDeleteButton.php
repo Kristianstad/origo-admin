@@ -41,8 +41,8 @@
 			}
 			*/
 			$targetTypeSwe=toSwedish($targetType);
-			$targetIdEsc=htmlspecialchars($targetId, ENT_QUOTES, 'UTF-8');
-			$deleteConfirmJs=json_encode($deleteConfirmStr, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+			$targetIdEsc=escapeHtml($targetId);
+			$deleteConfirmJs=jsonForInlineJs($deleteConfirmStr);
 			echo <<<HERE
 					<input type="hidden" name="{$targetType}IdDel" value="{$targetIdEsc}">
 					<button title='Radera {$targetTypeSwe}' aria-label='Radera {$targetTypeSwe}' class='deleteButton historyButton' type='submit' name='{$targetType}Button' value='delete' onclick='return confirm({$deleteConfirmJs});'><span aria-hidden='true'>&#x1F5D1;&#xFE0E;</span></button>

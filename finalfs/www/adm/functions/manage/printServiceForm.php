@@ -19,7 +19,7 @@
 			{
 				printTextarea($service, 'base_url', 'textareaLarge', 'Huvudurl:', in_array('base_url', $helps), $sizePosts);
 			}
-			printUpdateSelect($service, array('restricted'=>array("f", "t")), 'miniSelect', 'Rättighetsstyrd:', in_array('restricted', $helps));
+			printUpdateSelect($service, array('restricted'=>booleanSelectOptions()), 'miniSelect', 'Rättighetsstyrd:', in_array('restricted', $helps));
 			printTextarea($service, 'formats', 'textareaLarge', 'Tillgängliga format:', in_array('formats', $helps), $sizePosts);
 			printTextarea($service, 'abstract', 'textareaLarge', 'Beskrivning:', in_array('abstract', $helps), $sizePosts);
 		}

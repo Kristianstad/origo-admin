@@ -3,7 +3,7 @@
 	function printUrlButton($url, $type)
 	{
 		$typeSwe=toSwedish($type);
-		$urlJs=json_encode($url, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+		$urlJs=jsonForInlineJs($url);
 		echo <<<HERE
 			<button class="urlButton" title="Öppna {$typeSwe} i nytt fönster" type="button" onclick='window.open({$urlJs}, "_blank")'>
 				Öppna {$typeSwe}
