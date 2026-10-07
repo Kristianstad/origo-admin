@@ -19,5 +19,6 @@ function renderUtilityHead(array $skin, string $styleName): void
     require $stylePaths[$styleName];
     echo "</style>\n<script>";
     includeDirectory('./js-functions/common');
+    echo 'resizeParentFrame();';
     echo '</script>';
 }

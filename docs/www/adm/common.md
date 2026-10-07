@@ -67,4 +67,5 @@
 bakgrundsbas för `body`, scrollbarernas utseende samt textmarkering. Den laddas
 före sidans egen stilmall av `renderUtilityHead()` och före
 `manage.css` i `manage.php`. `renderUtilityHead()` laddar också
-`js-functions/common/`, där `closeTopFrame()` och `resizeParentFrame()` finns.
+`js-functions/common/` och anropar `resizeParentFrame()` för att registrera
+iframe-aviseringen; `closeTopFrame()` anropas av Stäng-knappen.

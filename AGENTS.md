@@ -62,6 +62,7 @@ Historik, snapshots, restore och kopplingen till konfigurationsschema beskrivs i
 
 Följ befintliga komponent- och stylesheetmönster, inklusive tillgängliga namn och etiketter. Kontrollera aktuell CSS innan du ändrar placering eller mått; exakta UI-detaljer hör hemma i modulens dokumentation eller i den aktuella uppgiften.
 Lägg inte längre eller återanvändbar JavaScript-logik i PHP-strängar, heredocs eller HTML-attribut. Placera den i `js-functions/<modul>/` och ladda den via modulens etablerade `includeDirectory()`-flöde; håll eventuella inline-anrop korta.
+Filer i `js-functions/<modul>/` ska i första hand deklarera namngivna JavaScript-funktioner, normalt en per fil med samma namn som filen. Lägg inte eventregistrering eller annan körbar initiering på toppnivå; anropa initieringsfunktioner uttryckligen från modulens bootstrap efter att katalogen inkluderats.
 
 ## `topFrame` och formulärstorlek
 

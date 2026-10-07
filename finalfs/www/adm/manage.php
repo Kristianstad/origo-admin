@@ -950,6 +950,8 @@ echo <<<HTML
 	<script>
 		/* Change the appearance of the "Uppdatera" button on form edit. */
 		formChangeButton();
+        manageActions();
+        textareaState();
 		
 		/* Detect field changes made with the multiselect tool, frame close and resize commands */
 		initMessageListener();
