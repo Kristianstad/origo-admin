@@ -4,6 +4,7 @@
 .gitattributes
 
 # Editor / OS files
+.editorconfig
 .vscode
 .idea
 *.swp

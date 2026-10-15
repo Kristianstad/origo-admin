@@ -41,7 +41,9 @@ Modulernas `.md`-filer är teknisk referens, inte arbetslogg. Läs `docs/DOCUMEN
 - Använd parametriserade SQL-värden. Dynamiska tabell- och kolumnnamn ska väljas eller valideras mot en tillåten uppsättning.
 - Nya och ändrade funktioner bör få parameter- och returtyper i vanligt läge, men det är en riktlinje, inte en strikt regel: utelämna typer om de försvårar förenkling eller generalisering av koden. Databasvärden är strängar eller `NULL`, så använd nullbara typer eller `mixed` där det behövs. `declare(strict_types=1)` används inte i befintliga filer utan beslut.
 - PHP-hjälpfunktioner namnges i `camelCase`.
+- Indentera PHP, JS och CSS med 4 mellanslag (inte tabbar), enligt `.editorconfig`. Kontrollera och normalisera med `.agents/skills/indent-normalize/SKILL.md`.
 - Filstruktur (detaljer och undantag i `ARCHITECTURE.md`, avsnittet "Strukturregler"): varje hjälpfunktion ligger i en egen fil med samma namn som funktionen, i `functions/<huvudfil>/` eller `functions/common/`. En huvudfil får bara använda hjälpfiler från sin egen mapp, `common` och Composer-tillägg på servern. Varje fil i `constants/` innehåller exakt en variabeldefinition med samma namn som filen (kommentarer är tillåtna).
+- Använd `.agents/skills/poka-yoke/SKILL.md` för att granska nya entry points, formulär eller indatahantering efter faror och för att göra fel omöjligt via struktur.
 - Bevara korrekt escaping och samma-origin-kontroller för `postMessage`. Följ befintlig formulärstruktur; HTML-formulär får inte nästlas.
 - Föredra `json_encode()` för JSON och återanvänd befintliga helpers. Läs `ARCHITECTURE.md` och modulreferensen för lokala include-, target- och POST-mönster.
 - Behandla användartext som UTF-8 och använd multibyte-medvetna funktioner för teckenbaserad textbearbetning. Se `common.md` för gemensamma helpers.
@@ -60,6 +62,7 @@ Lägg inte längre eller återanvändbar JavaScript-logik i PHP-strängar, hered
 
 - Kör relevanta tester och lintning för den ändrade ytan; använd `php -l` för ändrade PHP-filer när PHP finns lokalt och `git diff --check` före avslut.
 - För UI-ändringar, kontrollera det faktiska browserflödet och relevanta stilmallar. För databasspecifikt beteende krävs en miljö som kan verifiera integrationen.
+- Repot har inga automatiska tester. Använd `.agents/skills/test-gap-audit/SKILL.md` för att kartlägga vad som går att testa och vad som kräver databas eller webbläsare.
 - Redovisa kontroller som inte gick att köra; editor-diagnostik ersätter inte en saknad runtime-kontroll.
 
 ## Dokumentation att läsa vid behov
