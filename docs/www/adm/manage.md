@@ -204,23 +204,26 @@ att target-tabellen finns i den laddade konfigurationen och att motsvarande
 | Fil | Typ | Fält utöver id/abstract/info | Extra knappar/sektioner |
 |---|---|---|---|
 | `printAduserForm.php` | aduser | name, email, company, department, lastlogin, adgroups (samtliga skrivskyddade utom abstract/info) | – |
+| `printClasseForm.php` | classe | infogroups, layers, tables | `printAddRemoveOperations` |
 | `printContactForm.php` | contact | name, web, email | – |
 | `printControlForm.php` | control | options, css, js, onload | `printAddOperation`/`printRemoveOperation` mot maps |
 | `printDatabaseForm.php` | database | connectionstring | `printReadDbSchemasButton` |
 | `printEditForm.php` | edit | target_key, target_table, target_id, date, action, changed_by, before_data, after_data (samtliga readonly) | Återställ för delete-poster; Skapa kopia/Radera döljs |
+| `printExttoolForm.php` | exttool | url | `printUrlButton` |
 | `printFooterForm.php` | footer | img, url, text | – |
 | `printFormatForm.php` | format | (endast format_id, ingen extra) | – |
 | `printGroupForm.php` | group | layers, groups, title, expanded (select), show_meta (select), keywords | `printConfigPreviewButton`, `printAddOperation`/`printRemoveOperation` mot maps OCH groups (två par) |
 | `printHelpForm.php` | help | (endast help_id/abstract/info, etiketterna är "Verktygsfält"/"Hjälptext" istället för "Id"/"Beskrivning") | – |
-| `printExttoolForm.php` | exttool | url | `printUrlButton` |
+| `printInfogroupForm.php` | infogroup | infogroups, layers, tables | `printAddRemoveOperations` |
 | `printKeywordForm.php` | keyword | – | – |
 | `printMapstateForm.php` | mapstate | mapurl, state, created, lastuse, preserve (select) | – |
 | `printNewForm.php` | new | text, date, reads, deletes | – |
 | `printOriginForm.php` | origin | name, web, email | – |
 | `printPluginForm.php` | plugin | css_files, css, js_files, js, onload | `printAddOperation`/`printRemoveOperation` mot maps |
 | `printProj4defForm.php` | proj4def | code, projection, projectionextent, alias | – |
-| `printSearchtableForm.php` | searchtable | mode, ttl, limit, usecentroid (select f/t), database (select), schema, table, searchfield, geometryfield, gidfield | – |
 | `printSchemaForm.php` | schema | keywords, contact (select), origin (select), updated, update (select) | `printReadSchemaTablesButton` |
+| `printSearchtableForm.php` | searchtable | mode, ttl, limit, usecentroid (select f/t), database (select), schema, table, searchfield, geometryfield, gidfield | – |
+| `printSkinForm.php` | skin | Färg-, typografi-, ram-, radie- och skugginställningar | `printActivateSkinButton` |
 | `printTilegridForm.php` | tilegrid | tilesize | – |
 
 ## Entitetsformulär (utökade/komplexa varianter)
@@ -296,6 +299,7 @@ betydande typspecifik villkorslogik:
 | `markMapsChanged.php` | `markMapsChanged(&$dbh, $mapIds): void` | Sätter `maps.changed = 't'` för samtliga angivna kartor i en enda batch-SQL (flera `UPDATE`-satser konkatenerade med `; `). Detta är motparten till `markMapUnchanged()` i writeConfig-modulen – manage-modulen flaggar en karta som "ändrad, behöver publiceras om" varje gång något som påverkar den redigeras, och writeConfig-modulen nollställer flaggan efter lyckad publicering |
 | `objectHistoryKey.php` | `objectHistoryKey($target): string` | Bygger den stabila historiknyckeln `<typ>:<id>` (`target_key`) för ett objekt, utifrån `targetType()`/`targetId()`. Se "Historik: Ångra/Gör om" ovan |
 | `postButton.php` | `postButton($post): string\|null` | Hittar namnet på den POST-parameter vars namn slutar på `Button` – det är detta namn (`<typ>Button`) som `manage.php` sedan bryter isär för att få fram `$type` |
+| `printActivateSkinButton.php` | `printActivateSkinButton(string $skinId): void` | Renderar skinvalsknappen; `manageActions.js` sparar skin-id:t i cookien och laddar om sidan |
 | `printAddOperation.php` | `printAddOperation($target, $addToTable, $buttontext, $inheritPosts)` | Skriver ut ett litet formulär: en dropdown med tillgängliga föräldrar (t.ex. kartor eller grupper) + en knapp som postar `operation`-kommandot för att lägga till `$target` i den valda föräldern |
 | `printChildSelect.php` | `printChildSelect($target, $column, &$thClass, $heading, $inheritPosts, $groupLevel=1, $selectedValue=null)` | Den mest komplexa av dessa byggstenar: skriver ut en kolumn i "barn-urvalsraden" (t.ex. vilka lager/grupper/kontroller finns i vald karta). Hanterar specialfall för `schemas`/`tables` och nästlade `groups`/`infogroups`, där respektive id-kedja byggs baserat på djup |
 | `printAddRemoveOperations.php` | `printAddRemoveOperations($target, $operationTables, $inheritPosts, $labels=array())` | Gemensam renderer för add/remove-operationer. `exclusiveOperationGroups.php` kan ange singleton-poster eller grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs när målet redan finns i någon förälder i gruppen |

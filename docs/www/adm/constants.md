@@ -20,6 +20,7 @@
 | `$cookieConfig` | `cookieConfig.php` | Cookieinställningar: namn, krypteringsnyckel, livslängd | authorization |
 | `$dbhConnectionString` | `dbhConnectionString.php` | Anslutningssträng (`pg_connect`-format) till Origos konfigurationsdatabas — standardanslutningen som `dbh()` faller tillbaka på utan argument | samtliga moduler (indirekt via `dbh()`) |
 | `$dbhConnectionStringForUpdated` | `dbhConnectionStringForUpdated.php` | Anslutningssträng för updated-modulen med användaren `origo_updated_readonly`, skapad i `050.postgres.sql` | updated |
+| `$exclusiveOperationGroups` | `exclusiveOperationGroups.php` | Grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs om ett objekt redan finns i en annan förälder i samma grupp | manage (`printAddRemoveOperations`) |
 | `$forwardauthSessionConfig` | `forwardauthSessionConfig.php` | Sessionsinställningar för forward-auth: slideExtension, absoluteMax, baseLifetime | forwardauth |
 | `$iconTtl` | `iconTtl.php` | TTL-parameter (sekunder) som läggs till på lagerträdets ikon-URL:er, för cache-brytning. `'-1'` stänger av parametern helt | writeConfig (addLayersToJson) |
 | `$keywordCategorized` | `keywordCategorized.php` | Vilka tabeller som ska nyckelordskategoriseras | manage (printHeadForm; jfr `viewKeywordCategorized()`) |

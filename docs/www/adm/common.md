@@ -16,12 +16,14 @@
 | `clearAuthSession()` | `clearAuthSession.php` | Nollställer `$_SESSION['user']`, sätter en ny `login_time_stamp` och stänger sessionen. Anropas av `initUserLdap()` när ingen giltig användare kan slås upp | authorization (indirekt via initUserLdap) |
 | `configTableNames($dbh)` | `configTableNames.php` | Cacherar bastabeller i konfigurationsschemat som har förväntad id-kolumn; utesluter `object_identity` och `edit_cursor` | allFromTable, configTables, info, multiselect, updated |
 | `configTables($dbh)` | `configTables.php` | Hämtar konfigurationen från tillåtna objekttabeller i ett svep, avsedd att packas upp med `extract()` | writeConfig, manage, read_json |
+| `currentSkin(array $skins): array` | `currentSkin.php` | Väljer skin från cookien `origo_admin_skin` om id:t finns bland tillgängliga skins; annars returneras en tom array | help, info, manage, multiselect, read_json, sql_import |
 | `dbh($connectionString=null)` | `dbh.php` | Öppnar PostgreSQL-anslutning. Utan argument: standarddatabasen. Med anslutningssträng: godtycklig extern databas | news, mapstate, info, authorization, read_db_schemas, export, writeConfig, manage, read_schema_tables, updated, help, writeTablesForAllLayers |
 | `defineFileConstant($name, $value)` | `defineFileConstant.php` | Skriver en PHP-konstant till fil, läsbar via `includeFileConstant()`. Källan till `RESTRICTEDLAYERS`-konstanten | writeConfig |
 | `escapeHtml(string $value): string` | `escapeHtml.php` | Escapar text för HTML-text eller attribut med UTF-8 och citerade attributtecken | gemensamma renderers, manage |
 | `ensureSessionWritable()` | `ensureSessionWritable.php` | Säkerställer att sessionen är öppen/skrivbar | authorization, forwardauth |
 | `findAllParents($dbh, $child)` | `findAllParents.php` | Rekursivt: alla objekt som refererar till ett givet objekt | info, manage |
 | `findParents($tableToRemoveFrom, $target)` | `findParents.php` | Icke-rekursiv variant: hittar direkta föräldrar | manage (printRemoveOperation) |
+| `generateCsrfToken(): string` | `generateCsrfToken.php` | Säkerställer en skrivbar session och skapar eller återanvänder dess CSRF-token | read_json, sql_import |
 | `getCookieOptions($expiryTimestamp)` | `getCookieOptions.php` | Bygger cookie-inställningar (path/domain/secure/httponly/samesite) | authorization |
 | `includeFileConstant($name)` | `includeFileConstant.php` | Läser en fil-konstant skriven av `defineFileConstant()` | restrictedLayer |
 | `initUserLdap($dbh)` | `initUserLdap.php` | Initierar användarinfo via LDAP (`$authMethod==='ldap'`). **Bieffekt:** skriver och stänger sessionen | news, authorization, export, restrictedLayer |
@@ -37,6 +39,7 @@
 | `mbUcfirst($str)` | `mbUcfirst.php` | Multibyte-säker `ucfirst()` (via `mb_strtoupper()`/`mb_substr()`, kräver `mbstring`-tillägget) – PHP:s vanliga `ucfirst()` är byte-baserad och versaliserar bara ASCII a-z, vilket missar svenska ord som börjar på å/ä/ö | printHeadForms, multiselect (används runt `toSwedish()`-resultat, där ett svenskt ord kan börja på å/ä/ö) |
 | `pgArrayToPhp($pgArray)` | `pgArrayToPhp.php` | Konverterar Postgres arraysyntax (`{a,b,c}`) till PHP-array | news, export, writeConfig |
 | `pkColumnOfTable($table)` | `pkColumnOfTable.php` | Returnerar primärnyckelns kolumnnamn för en tabell | info, writeTablesForAllLayers, target-infrastruktur (targetId, targetIdColumn via targetTable), validateUpdate |
+| `printSkinVariables(array $skin): void` | `printSkinVariables.php` | Skriver tillgängliga skinfärger och typografi som CSS custom properties under `:root` | manage, utility-sidor via renderUtilityHead |
 | `qualifiedTableIdentifier($dbh, $tableWithSchema)` | `qualifiedTableIdentifier.php` | Kontrollerar att `schema.tabell` är en bastabell i den anslutna databasen och returnerar citerade identifierare; annars `false` | manage (updatedFromTable), updated |
 | `readAndCloseSession()` | `readAndCloseSession.php` | Läser in `$_SESSION` och stänger sessionen | news, export |
 | `renderCloseButton(string $class=''): string` | `renderCloseButton.php` | Renderar den gemensamma Stäng-knappen; anropar `closeTopFrame()` från `js-functions/common/` | help, info, multiselect, read_json, sql_import |
@@ -57,8 +60,11 @@
 | `typeTableName($type)` | `typeTableName.php` | Returnerar tabellnamnet för en typ genom att lägga till `s` | manage, target-infrastruktur |
 | `toBasicTarget($target)` | `toBasicTarget.php` | Konverterar en full target till en basic target | manage, parent-traversering |
 | `toFullTarget($target, $configTablesOrDbh)` | `toFullTarget.php` | Konverterar en basic target till en full target genom att slå upp dess konfigurationsrad; en redan full target behålls | manage |
+| `topFormHelpButton(string $helpId): string` | `topFormHelpButton.php` | Renderar en hjälpknapp för importformulär och lägger till tooltip-JS en gång per request | read_json, sql_import |
+| `toPgArrayLiteral(array $items): string` | `toPgArrayLiteral.php` | Escapar strängar till en citerad PostgreSQL-arrayliteral som kan skickas som bunden SQL-parameter | news, read_json |
 | `toSwedish($string)` | `toSwedish.php` | Översätter interna typ-/kolumnnamn till svenska för visning | info, multiselect, printCopyButton, printDeleteButton, printAddOperation, printRemoveOperation, printHeadForm/Forms, validateUpdate |
 | `usedInMaps($dbh, $target, $checkedTargets=[], $usedInMaps=[])` | `usedInMaps.php` | Rekursivt: hittar alla kartor (`map`-target) som ett givet target ytterst ingår i, via `findAllParents()`. Håller reda på redan besökta targets för att undvika oändlig rekursion vid cirkulära referenser | manage (avgör vilka kartor som ska markeras `changed` vid en ändring) |
+| `validateCsrfToken(?string $token): bool` | `validateCsrfToken.php` | Säkerställer en skrivbar session och jämför token mot sessionens värde med `hash_equals()` | read_json, sql_import |
 | `includeDirectory($path)` | *(i `adm/functions/`, ej i `common/` — placerad sist, utanför den alfabetiska listan, eftersom den fysiskt hör hemma på en annan plats)* | Laddar alla `.php`-filer i angiven mapp med `require_once` | samtliga moduler |
 
 > `updatedFromTable()` ligger i `functions/manage/`; se manage.md.

@@ -52,6 +52,7 @@ som id-kolumn istället för det generella mönstret `<singularis>_id`.
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
+| `clearSelection.js` | `clearSelection()` | Tömmer urvalstextarean och återställer selectens värde, valda options och `data-sorted-values` |
 | `js-functions/common/closeTopFrame.js` | `closeTopFrame()` | Gemensam helper som skickar en `close`-signal till förälderfönstret; laddas av `renderUtilityHead()` tillsammans med `resizeParentFrame.js` |
 | `getCurrentSelection.js` | `getCurrentSelection()` | Läser och trimmar värdet från textarean `#selection` |
 | `makeSelectToggleOnly.js` | `makeSelectToggleOnly(selectId)` | Fångar `mousedown` i capture-fas för att göra vanligt klick till "toggla ett alternativ" istället för webbläsarens standard shift/ctrl-rangebeteende |
