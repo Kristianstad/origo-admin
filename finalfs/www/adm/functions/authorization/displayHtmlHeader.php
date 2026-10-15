@@ -2,13 +2,13 @@
 
 function displayHtmlHeader()
 {
-	echo '<!DOCTYPE html>
+    echo '<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
 	<style>';
-	require("./styles/authorization.css");
-	echo '</style>
+    require("./styles/authorization.css");
+    echo '</style>
 </head>
 <body>';
 }

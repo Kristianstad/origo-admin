@@ -1,18 +1,18 @@
-		html			{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
-		body			{ line-height:2; padding:0.1em 0.5em 0.5em 0.5em }
-		label			{ vertical-align:middle; margin-right:-0.2em; margin-left:0.4em }
-		textarea		{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em 0.5em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
-		.textareaXLarge	{ width:66.5em }
-		.textareaLarge	{ width:33.5em }
-		.textareaMedium	{ width:13.5em }
-		.textareaSmall	{ width:4.5em }
-		.textareaXSmall	{ width:2.5em; resize:none }
-		input[type='checkbox'] { accent-color:var(--skin-primary, #455a64); margin-top:0; margin-bottom:0; margin-right:0.3em; vertical-align:middle }
-		form			{ margin:0; margin-block-end:0 }
-		.printXFormDiv	{ float:left; line-height:2.1; margin-top:0.2em; margin-bottom:2.5em }
-		.optionSpan		{ white-space:nowrap }
-		.readJsonButtonDiv { display:flex; position:relative; left:0; line-height:1.5; margin-top:0.5em; justify-content:flex-start }
-		.readJsonButtonDiv .updateButton { margin-right:0.2em }
-		.smallHelpButton { margin-left:0.1em; margin-right:0.1em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }
-		.importHelpTooltip { position:absolute; z-index:1000; width:min(36em, calc(100vw - 1em)); max-height:70vh; overflow:auto; box-sizing:border-box; padding:0.5em; line-height:1.4; background:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121); border:0.0625em solid var(--skin-border, #BDBDBD); border-radius:var(--skin-radius, 0.25em); box-shadow:0 0.2em 0.5em var(--skin-shadow, #c1c1c1) }
-		.importSuccessMessage { color:var(--skin-primary, #455a64); padding:0.4em 0.6em; margin-bottom:0.5em }
+        html			{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
+        body			{ line-height:2; padding:0.1em 0.5em 0.5em 0.5em }
+        label			{ vertical-align:middle; margin-right:-0.2em; margin-left:0.4em }
+        textarea		{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em 0.5em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
+        .textareaXLarge	{ width:66.5em }
+        .textareaLarge	{ width:33.5em }
+        .textareaMedium	{ width:13.5em }
+        .textareaSmall	{ width:4.5em }
+        .textareaXSmall	{ width:2.5em; resize:none }
+        input[type='checkbox'] { accent-color:var(--skin-primary, #455a64); margin-top:0; margin-bottom:0; margin-right:0.3em; vertical-align:middle }
+        form			{ margin:0; margin-block-end:0 }
+        .printXFormDiv	{ float:left; line-height:2.1; margin-top:0.2em; margin-bottom:2.5em }
+        .optionSpan		{ white-space:nowrap }
+        .readJsonButtonDiv { display:flex; position:relative; left:0; line-height:1.5; margin-top:0.5em; justify-content:flex-start }
+        .readJsonButtonDiv .updateButton { margin-right:0.2em }
+        .smallHelpButton { margin-left:0.1em; margin-right:0.1em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }
+        .importHelpTooltip { position:absolute; z-index:1000; width:min(36em, calc(100vw - 1em)); max-height:70vh; overflow:auto; box-sizing:border-box; padding:0.5em; line-height:1.4; background:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121); border:0.0625em solid var(--skin-border, #BDBDBD); border-radius:var(--skin-radius, 0.25em); box-shadow:0 0.2em 0.5em var(--skin-shadow, #c1c1c1) }
+        .importSuccessMessage { color:var(--skin-primary, #455a64); padding:0.4em 0.6em; margin-bottom:0.5em }

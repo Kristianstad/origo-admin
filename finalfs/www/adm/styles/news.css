@@ -1,9 +1,9 @@
-		*			{ -webkit-font-smoothing:antialiased;-moz-font-smoothing:antialiased;-o-font-smoothing:antialiased;font-smoothing:antialiased;text-rendering:optimizeLegibility; }
-		html		{ width:100%;height:100%;overflow:auto }
-		body		{ font:14px Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;text-transform:inherit;overflow:hidden;margin:0 10px 0 0 }
-		a:link		{ color:#19486e;background-color:transparent;text-decoration:none; }
-		a:visited	{ color:#19486e;background-color:transparent;text-decoration:none; }
-		a:hover		{ color:#72bf44;background-color:transparent;text-decoration:none; }
-		a:active	{ color:yellow;background-color:transparent; }
-		button:hover{ background-color:#72bf44; }
-		button		{ cursor:pointer;background:#eee;border-radius:1rem;border:#eee;width:auto;text-align:center;white-space:nowrap;padding: 0.5rem 0.75rem;font:14px Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif; }
+        *			{ -webkit-font-smoothing:antialiased;-moz-font-smoothing:antialiased;-o-font-smoothing:antialiased;font-smoothing:antialiased;text-rendering:optimizeLegibility; }
+        html		{ width:100%;height:100%;overflow:auto }
+        body		{ font:14px Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;text-transform:inherit;overflow:hidden;margin:0 10px 0 0 }
+        a:link		{ color:#19486e;background-color:transparent;text-decoration:none; }
+        a:visited	{ color:#19486e;background-color:transparent;text-decoration:none; }
+        a:hover		{ color:#72bf44;background-color:transparent;text-decoration:none; }
+        a:active	{ color:yellow;background-color:transparent; }
+        button:hover{ background-color:#72bf44; }
+        button		{ cursor:pointer;background:#eee;border-radius:1rem;border:#eee;width:auto;text-align:center;white-space:nowrap;padding: 0.5rem 0.75rem;font:14px Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif; }

@@ -2,7 +2,7 @@
 
 function displayWithHtml($content)
 {
-	displayHtmlHeader();
-	echo $content;
-	displayHtmlFooter();
+    displayHtmlHeader();
+    echo $content;
+    displayHtmlFooter();
 }

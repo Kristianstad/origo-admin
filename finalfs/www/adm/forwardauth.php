@@ -42,46 +42,46 @@ error_log(sprintf(
 $required_groups = $_GET['required_group'] ?? '';
 
 if (!empty($_SESSION['user']['id']) && isset($_SESSION['user']['expires_at'])) {
-	if ($_SESSION['user']['expires_at'] > time()) {
+    if ($_SESSION['user']['expires_at'] > time()) {
 	
-		// Gruppkontroll (OR-logik)
-		if (!empty($required_groups)) {
-			$required = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, array_filter(array_map('trim', explode(',', $required_groups))));
-			$user_groups = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, $_SESSION['user']['groups'] ?? []);
+        // Gruppkontroll (OR-logik)
+        if (!empty($required_groups)) {
+            $required = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, array_filter(array_map('trim', explode(',', $required_groups))));
+            $user_groups = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, $_SESSION['user']['groups'] ?? []);
 
-			if (!array_intersect($required, $user_groups)) {
-				session_write_close();
-				http_response_code(403);
-				echo "Åtkomst nekad. Krävs någon av följande grupper: " . htmlspecialchars($required_groups);
-				exit(0);
-			}
-		}
+            if (!array_intersect($required, $user_groups)) {
+                session_write_close();
+                http_response_code(403);
+                echo "Åtkomst nekad. Krävs någon av följande grupper: " . htmlspecialchars($required_groups);
+                exit(0);
+            }
+        }
 		
-		require('./constants/forwardauthSessionConfig.php');
+        require('./constants/forwardauthSessionConfig.php');
 		
-		// === SLIDING EXPIRATION ===
-		$newExpires = time() + $forwardauthSessionConfig['slideExtension'];
-		if ($newExpires > $_SESSION['user']['expires_at']) {
-			$_SESSION['user']['expires_at'] = min($newExpires, time() + $forwardauthSessionConfig['absoluteMax']);
-		}
+        // === SLIDING EXPIRATION ===
+        $newExpires = time() + $forwardauthSessionConfig['slideExtension'];
+        if ($newExpires > $_SESSION['user']['expires_at']) {
+            $_SESSION['user']['expires_at'] = min($newExpires, time() + $forwardauthSessionConfig['absoluteMax']);
+        }
 		
-		session_write_close();
+        session_write_close();
 
-		// Header för Varnish-cache
-		$ttl = $_SESSION['user']['expires_at'] - time();
-		header('X-Auth-TTL: ' . $ttl);
+        // Header för Varnish-cache
+        $ttl = $_SESSION['user']['expires_at'] - time();
+        header('X-Auth-TTL: ' . $ttl);
 		
-		// Valfria headers att skicka
-		//header('X-Forwarded-User: ' . $_SESSION['user']['id']);
-		//header('X-Forwarded-Email: ' . ($_SESSION['user']['mail'] ?? ''));
-		//header('X-Forwarded-Name: ' . ($_SESSION['user']['name'] ?? ''));
+        // Valfria headers att skicka
+        //header('X-Forwarded-User: ' . $_SESSION['user']['id']);
+        //header('X-Forwarded-Email: ' . ($_SESSION['user']['mail'] ?? ''));
+        //header('X-Forwarded-Name: ' . ($_SESSION['user']['name'] ?? ''));
 
-		http_response_code(200);
-		exit(0);
-	} else {
-		// Session har gått ut → rensa den
-		unset($_SESSION['user']);
-	}
+        http_response_code(200);
+        exit(0);
+    } else {
+        // Session har gått ut → rensa den
+        unset($_SESSION['user']);
+    }
 }
 
 if (!empty($_GET['return_to']) && isSafeReturnTo($_GET['return_to'])) {
@@ -90,9 +90,9 @@ if (!empty($_GET['return_to']) && isSafeReturnTo($_GET['return_to'])) {
     if (!empty($_GET['return_to'])) {
         error_log("Otillåten return_to: " . $_GET['return_to']);
     }
-	$scheme = $_SERVER['HTTP_X_ORIGINAL_PROTO'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'https';
-	$host   = $_SERVER['HTTP_X_ORIGINAL_HOST']  ?? $_SERVER['HTTP_X_FORWARDED_HOST']  ?? $_SERVER['HTTP_HOST'];
-	$uri    = $_SERVER['HTTP_X_ORIGINAL_URI']   ?? $_SERVER['HTTP_X_FORWARDED_URI']   ?? $_SERVER['REQUEST_URI'];
+    $scheme = $_SERVER['HTTP_X_ORIGINAL_PROTO'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'https';
+    $host   = $_SERVER['HTTP_X_ORIGINAL_HOST']  ?? $_SERVER['HTTP_X_FORWARDED_HOST']  ?? $_SERVER['HTTP_HOST'];
+    $uri    = $_SERVER['HTTP_X_ORIGINAL_URI']   ?? $_SERVER['HTTP_X_FORWARDED_URI']   ?? $_SERVER['REQUEST_URI'];
     $_SESSION['return_to'] = $scheme . '://' . $host . $uri;
 }
 

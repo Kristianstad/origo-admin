@@ -1,4 +1,4 @@
 <?php
 
-	chdir('../adm/');
-	require ('azure-callback.php');
+    chdir('../adm/');
+    require ('azure-callback.php');

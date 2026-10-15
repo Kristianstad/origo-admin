@@ -293,10 +293,10 @@ if (isset($postButton)) {
                 if ($command == 'copy') {
                     setTargetConfigParam($fullTarget, $typeTablePkColumn, $copyId);
                     $updatePosts['update' . ucfirst($typeTablePkColumn)] = $copyId;
-					if ($typeTableName === 'maps')
-					{
-						$updatePosts['updateChanged']='t';
-					}
+                    if ($typeTableName === 'maps')
+                    {
+                        $updatePosts['updateChanged']='t';
+                    }
                 }
 
                 $sqlStatements[] = sqlForUpdate($fullTarget, $updatePosts);

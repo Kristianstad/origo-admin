@@ -29,7 +29,7 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-	pg_close($dbh);
+    pg_close($dbh);
     exit(0);
 }
 
@@ -43,13 +43,13 @@ cleanupOldMapStates($dbh, $mapstateMaxUnused);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     createMapState($dbh);
-	pg_close($dbh);
+    pg_close($dbh);
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     retrieveMapState($dbh);
-	pg_close($dbh);
+    pg_close($dbh);
     exit;
 }
 

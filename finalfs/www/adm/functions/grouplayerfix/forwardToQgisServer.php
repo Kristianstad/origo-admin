@@ -19,9 +19,9 @@ function forwardToQgisServer($url, $params, $maxRetries = 4) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_USERAGENT, 'QGIS-Proxy/1.0 (via cURL)');
-		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);// GROK: Tvinga IPv4 – undvik IPv6-timeout
-		//curl_setopt($ch, CURLOPT_STDERR, fopen('/tmp/curl_verbose.log', 'a'));
-		//curl_setopt($ch, CURLOPT_VERBOSE, true);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);// GROK: Tvinga IPv4 – undvik IPv6-timeout
+        //curl_setopt($ch, CURLOPT_STDERR, fopen('/tmp/curl_verbose.log', 'a'));
+        //curl_setopt($ch, CURLOPT_VERBOSE, true);
 
         $requestHeaders = ['Accept: application/json, text/xml, */*'];
         if (isset($_SERVER['HTTP_REFERER'])) {

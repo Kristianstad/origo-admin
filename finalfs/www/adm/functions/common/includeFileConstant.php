@@ -1,6 +1,6 @@
 <?php
 
-	function includeFileConstant($key)
-	{
-		include "./tmp/$key.php";
-	}
+    function includeFileConstant($key)
+    {
+        include "./tmp/$key.php";
+    }

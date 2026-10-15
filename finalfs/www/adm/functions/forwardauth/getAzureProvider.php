@@ -9,7 +9,7 @@ require_once('../../composer/oauth2-client/autoload.php');
 function getAzureProvider()
 {
     require('./constants/azureConfig.php');
-	$provider = new \TheNetworg\OAuth2\Client\Provider\Azure([
+    $provider = new \TheNetworg\OAuth2\Client\Provider\Azure([
         'clientId'                => $azureConfig['clientId'],
         'clientSecret'            => $azureConfig['clientSecret'],
         'redirectUri'             => $azureConfig['redirectUri'],

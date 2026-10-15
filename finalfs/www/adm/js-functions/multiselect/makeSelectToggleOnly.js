@@ -32,8 +32,8 @@ function makeSelectToggleOnly(selectId) {
         // Vanligt vänsterklick → vi tar över kontrollen
         event.preventDefault();
         event.stopPropagation();
-		const scrollTop=select.scrollTop;
-		const scrollLeft=select.scrollLeft;
+        const scrollTop=select.scrollTop;
+        const scrollLeft=select.scrollLeft;
 
         // Toggle det klickade alternativet
         const option = event.target;

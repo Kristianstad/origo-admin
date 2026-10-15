@@ -1,78 +1,78 @@
-		html			{ width:100%; height:100%; overflow-x:hidden }
-		body			{ line-height:2; padding:0.1em 0.5em 0.5em 0.5em }
-		button.change	{ background-color:var(--skin-accent, #00bcd4) }
-		.buttonDiv		{ display:flex; position:absolute; right:0.8em; line-height:1.5; margin-top:0.24em }
-		.exportButtonDiv { position:absolute; right:0; margin-top:2.4em; margin-right:2em }
-		.headButton		{ width:4em }
-		.headIconButton { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; width:2.1em; min-width:2.1em; height:calc(1.7em / 1.1); margin-right:0.2em; padding:0.3em; font-size:1.1em; line-height:1 }
-		.headIconButton[value="create"] { transform:translateY(-1px) }
-		.newDocumentIcon { position:relative; display:inline-block; line-height:1 }
-		.newDocumentAsterisk { position:absolute; top:-3px; right:-0.35em; font-size:1em; line-height:1 }
-		.topButton		{ margin-left:0.1em; margin-right:0.2em; margin-bottom:0.3em; margin-top:0.5em; float:left }
-		.updateButton	{ margin-right:0.2em }
-		.urlButton		{ margin-right:0.2em }
-		.historyButton	{ box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; height:calc(1.7em / 1.1); width:2.1em; min-width:2.1em; margin-right:0.2em; padding:0.3em; font-size:1.1em; line-height:1 }
-		.historyButton > span { display:inline-grid; place-items:center; width:1em; height:1em; line-height:1; text-align:center; filter:grayscale(1) brightness(0) invert(1) }
-		.headIconButton > span,
-		.newDocumentIcon { transform:translateY(1px) }
-		.historyButton[value="update"] > span,
-		.historyButton[value="copy"] > span { transform:translateY(1px) }
-		.historyButton[aria-label="Visa/dölj ytterligare information"] > span { transform:translateY(-1px) }
-		.historyButton[value="undo"] > span,
-		.historyButton[value="redo"] > span,
-		.historyButton[value="restore"] > span { transform:translateY(1px) }
-		.deleteButton > span { filter:none }
-		.deleteButton	{ margin-right:0.2em; color:var(--skin-danger, #ffcdd2); font-weight:bold }
-		.smallMultiselectButton { margin-left:-0.3em; margin-right:0.1em; height:unset; border-style:none; padding:0.1em 0.2em; vertical-align:middle }
-		.smallHelpButton { margin-left:-0.3em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }
-		hr				{ margin-right:0.5em; border-style:solid; color:var(--skin-header, #607d8b) }
-		.childSelectHr	{ margin-bottom:1.8em; position:relative; top:0.4em }
-		.overflowHr		{ overflow:visible }
-		.dashedHr		{ border-style:dashed; border-width:1px 0 0 0; margin-top:1em; margin-bottom:1em }
-		table			{ border-spacing:0; clear:left; min-height:2em; border-collapse:collapse; margin-bottom:1em }
-		tr				{ border: none }
-		th				{ width:16em; text-align:left; vertical-align:top; background-color:var(--skin-header, #607d8b); padding-bottom:0.8em; padding-left:0.5em; color:var(--skin-header-text, #cfd8dc); border-left:dashed 1px var(--skin-header-text, #cfd8dc); border-right:dashed 1px var(--skin-header-text, #cfd8dc) }
-		.thLeft			{ padding-right:0.5em }
-		.thMiddle		{ padding-left:0.5em; padding-right:0.5em }
-		.thRight		{ padding-left:0.5em; padding-right: 0.5em }
-		.thFirst		{ white-space:nowrap; padding-right:0.5em }
-		.thNext			{ white-space:nowrap; padding-left:0.5em; padding-right:0.5em }
-		h3				{ margin-block-start:0.1em; margin-block-end:0.1em; font-size:clamp(9px, 1vw, 14px) }
-		.h3NoFocus		{ margin-block-start:0; font-weight:var(--skin-no-focus-weight, 700) }
-		.h3Focus		{ margin-block-start:0; color:var(--skin-focus-text, #212121); font-weight:var(--skin-focus-weight, 700) }
-		.h3Black		{ color:var(--skin-text, #212121) }
-		select			{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
-		.headSelect		{ width:100%; max-width:calc(100% - 2.6em) }
-		.addSelect		{ width:12em }
-		.operationButton { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:0.3em; width:auto; min-width:0; height:1.7em; padding:0 0.45em; line-height:1; vertical-align:middle }
-		.operationSymbol { display:block; font-size:1.5em; font-weight:900; line-height:0.8; transform:translateY(-1px) }
-		.operationCaption { font-size:inherit; font-weight:inherit; line-height:1 }
-		.bodySelect		{ position:relative; max-width:200px }
-		label			{ vertical-align:middle; margin-right:-0.2em; margin-left:0.4em }
-		input			{ accent-color:var(--skin-primary, #455a64); font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121) }
-		input[type='radio'] { margin-top:0; margin-bottom:0 }
-		.headInput		{ width:100%; max-width:calc(100% - 2.6em); margin-bottom:0.2em }
-		form			{ margin:0; margin-block-end:0 }
-		.headForm		{ display:inline-block; width:100% }
-		.bodyForm		{ width:100vw }
-		.addForm		{ float:left; margin-right:1em }
-		.viewsForm		{ margin-top:0.2em }
-		textarea		{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em 0.5em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
-		.textareaXLarge	{ width:66.5em }
-		.textareaLarge	{ width:33.5em }
-		.textareaMedium	{ width:13.5em }
-		.textareaSmall	{ width:4.5em }
-		.textareaXSmall	{ width:2.5em; resize:none }
-		iframe			{ width:calc(100% - 0.5em); height:50px; max-height:80vh; border-style:solid none none none; border-width:2px; border-color:var(--skin-header, #607d8b); padding-bottom:0.3em; padding-top:0.3em; margin-bottom:0.5em }
-		.printXFormDiv	{ float:left; line-height:2.1; margin-bottom:2.5em }
-		.headFormsDiv	{ width:calc( 100vw - 1.25em ); overflow-x:hidden; margin-bottom:0.8em; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; scrollbar-gutter:stable; }
-		@-moz-document url-prefix() { .headFormsDiv { overflow-x:auto } }
-		.headFormsDiv:hover	{ overflow-x:auto }
-		.headFormsTable	{ margin-bottom:0 }
-		.headFormDiv1	{ width:16em; white-space:nowrap; display:inline-block }
-		.headFormDiv2	{ width:100%; white-space:nowrap; display:inline-block }
-		.headFormDiv3	{ width:100%; white-space:nowrap; display:inline-block; margin-top:2px }
-		.addRemoveDiv	{ position:relative; top:-2.5em; clear:both; max-width:calc(100% - 29em) }
-		.optionSpan		{ white-space:nowrap }
-		.yellowLock		{ margin-right:-0.4em }
-		.viewsSpan		{ vertical-align:middle }
+        html			{ width:100%; height:100%; overflow-x:hidden }
+        body			{ line-height:2; padding:0.1em 0.5em 0.5em 0.5em }
+        button.change	{ background-color:var(--skin-accent, #00bcd4) }
+        .buttonDiv		{ display:flex; position:absolute; right:0.8em; line-height:1.5; margin-top:0.24em }
+        .exportButtonDiv { position:absolute; right:0; margin-top:2.4em; margin-right:2em }
+        .headButton		{ width:4em }
+        .headIconButton { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; width:2.1em; min-width:2.1em; height:calc(1.7em / 1.1); margin-right:0.2em; padding:0.3em; font-size:1.1em; line-height:1 }
+        .headIconButton[value="create"] { transform:translateY(-1px) }
+        .newDocumentIcon { position:relative; display:inline-block; line-height:1 }
+        .newDocumentAsterisk { position:absolute; top:-3px; right:-0.35em; font-size:1em; line-height:1 }
+        .topButton		{ margin-left:0.1em; margin-right:0.2em; margin-bottom:0.3em; margin-top:0.5em; float:left }
+        .updateButton	{ margin-right:0.2em }
+        .urlButton		{ margin-right:0.2em }
+        .historyButton	{ box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; height:calc(1.7em / 1.1); width:2.1em; min-width:2.1em; margin-right:0.2em; padding:0.3em; font-size:1.1em; line-height:1 }
+        .historyButton > span { display:inline-grid; place-items:center; width:1em; height:1em; line-height:1; text-align:center; filter:grayscale(1) brightness(0) invert(1) }
+        .headIconButton > span,
+        .newDocumentIcon { transform:translateY(1px) }
+        .historyButton[value="update"] > span,
+        .historyButton[value="copy"] > span { transform:translateY(1px) }
+        .historyButton[aria-label="Visa/dölj ytterligare information"] > span { transform:translateY(-1px) }
+        .historyButton[value="undo"] > span,
+        .historyButton[value="redo"] > span,
+        .historyButton[value="restore"] > span { transform:translateY(1px) }
+        .deleteButton > span { filter:none }
+        .deleteButton	{ margin-right:0.2em; color:var(--skin-danger, #ffcdd2); font-weight:bold }
+        .smallMultiselectButton { margin-left:-0.3em; margin-right:0.1em; height:unset; border-style:none; padding:0.1em 0.2em; vertical-align:middle }
+        .smallHelpButton { margin-left:-0.3em; padding:0.1em 0.3em; height:unset; border-style:none; vertical-align:middle }
+        hr				{ margin-right:0.5em; border-style:solid; color:var(--skin-header, #607d8b) }
+        .childSelectHr	{ margin-bottom:1.8em; position:relative; top:0.4em }
+        .overflowHr		{ overflow:visible }
+        .dashedHr		{ border-style:dashed; border-width:1px 0 0 0; margin-top:1em; margin-bottom:1em }
+        table			{ border-spacing:0; clear:left; min-height:2em; border-collapse:collapse; margin-bottom:1em }
+        tr				{ border: none }
+        th				{ width:16em; text-align:left; vertical-align:top; background-color:var(--skin-header, #607d8b); padding-bottom:0.8em; padding-left:0.5em; color:var(--skin-header-text, #cfd8dc); border-left:dashed 1px var(--skin-header-text, #cfd8dc); border-right:dashed 1px var(--skin-header-text, #cfd8dc) }
+        .thLeft			{ padding-right:0.5em }
+        .thMiddle		{ padding-left:0.5em; padding-right:0.5em }
+        .thRight		{ padding-left:0.5em; padding-right: 0.5em }
+        .thFirst		{ white-space:nowrap; padding-right:0.5em }
+        .thNext			{ white-space:nowrap; padding-left:0.5em; padding-right:0.5em }
+        h3				{ margin-block-start:0.1em; margin-block-end:0.1em; font-size:clamp(9px, 1vw, 14px) }
+        .h3NoFocus		{ margin-block-start:0; font-weight:var(--skin-no-focus-weight, 700) }
+        .h3Focus		{ margin-block-start:0; color:var(--skin-focus-text, #212121); font-weight:var(--skin-focus-weight, 700) }
+        .h3Black		{ color:var(--skin-text, #212121) }
+        select			{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
+        .headSelect		{ width:100%; max-width:calc(100% - 2.6em) }
+        .addSelect		{ width:12em }
+        .operationButton { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:0.3em; width:auto; min-width:0; height:1.7em; padding:0 0.45em; line-height:1; vertical-align:middle }
+        .operationSymbol { display:block; font-size:1.5em; font-weight:900; line-height:0.8; transform:translateY(-1px) }
+        .operationCaption { font-size:inherit; font-weight:inherit; line-height:1 }
+        .bodySelect		{ position:relative; max-width:200px }
+        label			{ vertical-align:middle; margin-right:-0.2em; margin-left:0.4em }
+        input			{ accent-color:var(--skin-primary, #455a64); font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); color:var(--skin-text, #212121) }
+        input[type='radio'] { margin-top:0; margin-bottom:0 }
+        .headInput		{ width:100%; max-width:calc(100% - 2.6em); margin-bottom:0.2em }
+        form			{ margin:0; margin-block-end:0 }
+        .headForm		{ display:inline-block; width:100% }
+        .bodyForm		{ width:100vw }
+        .addForm		{ float:left; margin-right:1em }
+        .viewsForm		{ margin-top:0.2em }
+        textarea		{ font-family:inherit; font-size:inherit; box-sizing:border-box; padding:0.2em 0.5em; position:relative; line-height:1.4; border:0.0625em solid var(--skin-border, #BDBDBD); vertical-align:middle; border-radius:var(--skin-radius, 0.25em); background-color:var(--skin-surface, #FFFFFF); scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; color:var(--skin-text, #212121) }
+        .textareaXLarge	{ width:66.5em }
+        .textareaLarge	{ width:33.5em }
+        .textareaMedium	{ width:13.5em }
+        .textareaSmall	{ width:4.5em }
+        .textareaXSmall	{ width:2.5em; resize:none }
+        iframe			{ width:calc(100% - 0.5em); height:50px; max-height:80vh; border-style:solid none none none; border-width:2px; border-color:var(--skin-header, #607d8b); padding-bottom:0.3em; padding-top:0.3em; margin-bottom:0.5em }
+        .printXFormDiv	{ float:left; line-height:2.1; margin-bottom:2.5em }
+        .headFormsDiv	{ width:calc( 100vw - 1.25em ); overflow-x:hidden; margin-bottom:0.8em; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin; scrollbar-gutter:stable; }
+        @-moz-document url-prefix() { .headFormsDiv { overflow-x:auto } }
+        .headFormsDiv:hover	{ overflow-x:auto }
+        .headFormsTable	{ margin-bottom:0 }
+        .headFormDiv1	{ width:16em; white-space:nowrap; display:inline-block }
+        .headFormDiv2	{ width:100%; white-space:nowrap; display:inline-block }
+        .headFormDiv3	{ width:100%; white-space:nowrap; display:inline-block; margin-top:2px }
+        .addRemoveDiv	{ position:relative; top:-2.5em; clear:both; max-width:calc(100% - 29em) }
+        .optionSpan		{ white-space:nowrap }
+        .yellowLock		{ margin-right:-0.4em }
+        .viewsSpan		{ vertical-align:middle }

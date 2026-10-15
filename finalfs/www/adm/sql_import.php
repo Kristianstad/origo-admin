@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST')
 {
     $csrfToken=generateCsrfToken();
     $helpSql=topFormHelpButton('sql_import:sql');
-	$helpSqlFile=topFormHelpButton('sql_import:sql_file');
+    $helpSqlFile=topFormHelpButton('sql_import:sql_file');
     echo <<<HTML
 <!DOCTYPE html>
 <html lang="sv">

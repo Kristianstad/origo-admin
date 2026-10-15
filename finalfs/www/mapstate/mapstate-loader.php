@@ -1,3 +1,3 @@
 <?php
-	chdir('../adm/');
-	require ('mapstate.php');
+    chdir('../adm/');
+    require ('mapstate.php');

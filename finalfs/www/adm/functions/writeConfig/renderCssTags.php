@@ -30,8 +30,8 @@ function renderCssTags(array $items): string
                 exit;
             }
 
-			$cssMinifier = new Minify\CSS($content);
-			$minifiedContent=$cssMinifier->minify();
+            $cssMinifier = new Minify\CSS($content);
+            $minifiedContent=$cssMinifier->minify();
             $output[] = "\t\t<style>\n\t\t\t{$minifiedContent}\n\t\t</style>";
             continue;
         }

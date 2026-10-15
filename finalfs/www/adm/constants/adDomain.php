@@ -1,4 +1,4 @@
 <?php
 
-	// Full active directory domain (string).
-	$adDomain = 'example.se';
+    // Full active directory domain (string).
+    $adDomain = 'example.se';

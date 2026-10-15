@@ -1,7 +1,7 @@
 const iframeResizeObservers = new WeakMap();
 
 function resizeIframe(iframe, autoResize = false) {
-	if (!iframe || !iframe.contentWindow || !iframe.contentWindow.document.body) {
+    if (!iframe || !iframe.contentWindow || !iframe.contentWindow.document.body) {
         return;
     }
     const childDocument = iframe.contentWindow.document;

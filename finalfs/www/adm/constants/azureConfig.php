@@ -8,7 +8,7 @@ $azureConfig = [
     'clientSecret'   => 'xxx',                													// Obligatorisk
     'redirectUri'    => 'https://your.domain.com/php/forwardauth/azure-callback-loader.php',	// Ändra!
     'tenant'         => 'common',          														// 'common' = alla konton, eller ange din Tenant ID
-	'scopes'         => [
+    'scopes'         => [
         'openid',
         'profile',
         'email',

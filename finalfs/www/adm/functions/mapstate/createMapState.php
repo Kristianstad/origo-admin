@@ -17,7 +17,7 @@ function createMapState($dbh): never
         exit;
     }
 
-	$stateJson = json_encode($input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $stateJson = json_encode($input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	
     $referer = $_SERVER['HTTP_REFERER'] ?? null;
 

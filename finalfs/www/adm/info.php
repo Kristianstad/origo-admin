@@ -34,14 +34,14 @@ $dbh = dbh();
 
 $childType   = $_GET['type'] ?? '';
 if (!is_string($childType)) {
-	http_response_code(404);
-	exit('Object type not found');
+    http_response_code(404);
+    exit('Object type not found');
 }
 $childId     = $_GET['id'] ?? '';
 $childTable = typeTableName($childType);
 if (!in_array($childTable, configTableNames($dbh), true)) {
-	http_response_code(404);
-	exit('Object type not found');
+    http_response_code(404);
+    exit('Object type not found');
 }
 $childTypeSv = toSwedish($childType);
 $currentSkin = currentSkin(allFromTable($dbh, $configSchema, 'skins'));
@@ -60,57 +60,57 @@ HTML;
 
 // === Innehåll ===
 if (!empty($childId)) {
-	echo "<div>";
-	echo "<h2>$childId</h2> ($childTypeSv)</br>";
+    echo "<div>";
+    echo "<h2>$childId</h2> ($childTypeSv)</br>";
 
-	$child = makeBasicTarget($childType, $childId);
-	$childId = targetId($child);
-	$allOfChildType = allFromTable($dbh, $configSchema, targetTable($child));
-	$childFullTarget = makeFullTarget($childType, arrayColumnSearch($childId, targetIdColumn($child), $allOfChildType));
-	if (!empty(targetConfigParam($childFullTarget, 'name'))) {
-		echo "<b>Namn: </b>" . targetConfigParam($childFullTarget, 'name') . "</br>";
-	}
-	if (!empty(targetConfigParam($childFullTarget, 'alias'))) {
-		echo "<b>Alias: </b>" . targetConfigParam($childFullTarget, 'alias') . "</br>";
-	}
-	if (!empty(targetConfigParam($childFullTarget, 'info'))) {
-		echo targetConfigParam($childFullTarget, 'info') . "</br>";
-	}
+    $child = makeBasicTarget($childType, $childId);
+    $childId = targetId($child);
+    $allOfChildType = allFromTable($dbh, $configSchema, targetTable($child));
+    $childFullTarget = makeFullTarget($childType, arrayColumnSearch($childId, targetIdColumn($child), $allOfChildType));
+    if (!empty(targetConfigParam($childFullTarget, 'name'))) {
+        echo "<b>Namn: </b>" . targetConfigParam($childFullTarget, 'name') . "</br>";
+    }
+    if (!empty(targetConfigParam($childFullTarget, 'alias'))) {
+        echo "<b>Alias: </b>" . targetConfigParam($childFullTarget, 'alias') . "</br>";
+    }
+    if (!empty(targetConfigParam($childFullTarget, 'info'))) {
+        echo targetConfigParam($childFullTarget, 'info') . "</br>";
+    }
 
-	if ($childType == 'source') {
-		$services = allFromTable($dbh, $configSchema, 'services');
-		$serviceTarget = makeBasicTarget('service', targetConfigParam($childFullTarget, 'service'));
-		$serviceConfig = arrayColumnSearch(targetId($serviceTarget), targetIdColumn($serviceTarget), $services);
-		$serviceFullTarget = makeFullTarget('service', $serviceConfig);
-		$serviceType = targetConfigParam($serviceFullTarget, 'type');
-		if (strtolower($serviceType) == 'qgis') {
-			$qgsXml = simplexml_load_file('/services/' . targetConfigParam($childFullTarget, 'service') . '/' . explode('#', $childId)[0] . '.qgs');
-			if (!empty($qgsXml)) {
-				echo "<b>Qgis-version: </b>" . $qgsXml['version'] . "<br>";
-				echo "<b>Senast uppdaterad: </b>" . $qgsXml['saveDateTime'] . ", " . $qgsXml['saveUserFull'] . "<br>";
-			}
-		}
-		unset($serviceTarget, $serviceConfig, $serviceFullTarget);
-	}
+    if ($childType == 'source') {
+        $services = allFromTable($dbh, $configSchema, 'services');
+        $serviceTarget = makeBasicTarget('service', targetConfigParam($childFullTarget, 'service'));
+        $serviceConfig = arrayColumnSearch(targetId($serviceTarget), targetIdColumn($serviceTarget), $services);
+        $serviceFullTarget = makeFullTarget('service', $serviceConfig);
+        $serviceType = targetConfigParam($serviceFullTarget, 'type');
+        if (strtolower($serviceType) == 'qgis') {
+            $qgsXml = simplexml_load_file('/services/' . targetConfigParam($childFullTarget, 'service') . '/' . explode('#', $childId)[0] . '.qgs');
+            if (!empty($qgsXml)) {
+                echo "<b>Qgis-version: </b>" . $qgsXml['version'] . "<br>";
+                echo "<b>Senast uppdaterad: </b>" . $qgsXml['saveDateTime'] . ", " . $qgsXml['saveUserFull'] . "<br>";
+            }
+        }
+        unset($serviceTarget, $serviceConfig, $serviceFullTarget);
+    }
 
-	if ($childType == 'aduser') {
-		printUniqueLogins(array_column($allOfChildType, 'lastlogin'));
-	}
+    if ($childType == 'aduser') {
+        printUniqueLogins(array_column($allOfChildType, 'lastlogin'));
+    }
 
-	$allParents = findAllParents($dbh, $child);
-	if (!empty(array_values($allParents))) {
-		echo "<h3 style='margin-top:0.5em'>Används av</h3></br>";
-		printParents($allParents);
-	}
+    $allParents = findAllParents($dbh, $child);
+    if (!empty(array_values($allParents))) {
+        echo "<h3 style='margin-top:0.5em'>Används av</h3></br>";
+        printParents($allParents);
+    }
 
-	echo '</div>';
+    echo '</div>';
 
-	if (!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'info.php') !== false) {
-		echo '&nbsp;<button type="button" title="Tillbaka" aria-label="Tillbaka" onclick="history.back()"><span class="backArrow" aria-hidden="true">&#x2190;</span></button>';
-	}
+    if (!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'info.php') !== false) {
+        echo '&nbsp;<button type="button" title="Tillbaka" aria-label="Tillbaka" onclick="history.back()"><span class="backArrow" aria-hidden="true">&#x2190;</span></button>';
+    }
 
-	echo "&nbsp;<form action='manage.php' method='post' target='_blank' style='display:inline'><button type='submit' title='Administrera' aria-label='Administrera' name='" . $childType . "Id' value='" . $childId . "'><span class='adminArrow' aria-hidden='true'>&#x21AA;</span><span class='adminAsterisk' aria-hidden='true'>*</span></button></form>";
-	echo "&nbsp;".renderCloseButton();
+    echo "&nbsp;<form action='manage.php' method='post' target='_blank' style='display:inline'><button type='submit' title='Administrera' aria-label='Administrera' name='" . $childType . "Id' value='" . $childId . "'><span class='adminArrow' aria-hidden='true'>&#x21AA;</span><span class='adminAsterisk' aria-hidden='true'>*</span></button></form>";
+    echo "&nbsp;".renderCloseButton();
 }
 
 pg_close($dbh);

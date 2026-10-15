@@ -1,3 +1,3 @@
 <?php
-	chdir('../adm/');
-	require ('grouplayerfix.php');
+    chdir('../adm/');
+    require ('grouplayerfix.php');

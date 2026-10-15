@@ -2,6 +2,6 @@
 
 function displayHtmlFooter()
 {
-	echo '</body>
+    echo '</body>
 </html>';
 }

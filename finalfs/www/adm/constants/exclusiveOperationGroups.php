@@ -1,5 +1,5 @@
 <?php
 
-	$exclusiveOperationGroups=array(
-		['classes', 'infogroups']
-	);
+    $exclusiveOperationGroups=array(
+        ['classes', 'infogroups']
+    );

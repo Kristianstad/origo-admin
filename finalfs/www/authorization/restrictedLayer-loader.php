@@ -1,3 +1,3 @@
 <?php
-	chdir('../adm/');
-	require ('restrictedLayer.php');
+    chdir('../adm/');
+    require ('restrictedLayer.php');

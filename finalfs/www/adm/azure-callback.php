@@ -68,11 +68,11 @@ if (!isset($_GET['code']) || !isset($_SESSION['oauth2state']) || !isset($_GET['s
 try {
     $token = $provider->getAccessToken('authorization_code', ['code' => $_GET['code']]);
     $azureUser = $provider->getResourceOwner($token);
-	$groups = getAzureGroups($token);
+    $groups = getAzureGroups($token);
     $adUser = mb_strtolower(getOnPremisesSamAccountName($token) ?? $azureUser->getId(), 'UTF-8');
-	//error_log("AD-user: ".$adUser." Grupper: ".json_encode($groups));
+    //error_log("AD-user: ".$adUser." Grupper: ".json_encode($groups));
 
-	require('./constants/forwardauthSessionConfig.php');
+    require('./constants/forwardauthSessionConfig.php');
 
     // Använd baseLifetime från sessionConfig
     $baseLifetime = $forwardauthSessionConfig['baseLifetime'] ?? 60*60*10; // 10 timmar
@@ -81,10 +81,10 @@ try {
     $return_to = $_SESSION['return_to'] ?? 'https://kartor.kristianstad.se';
     
     $was_post = $_SESSION['return_to_was_post'] ?? false;
-	session_unset();
-	session_regenerate_id(true); // true = radera gamla session-filen
+    session_unset();
+    session_regenerate_id(true); // true = radera gamla session-filen
 
-	$_SESSION['user'] = [
+    $_SESSION['user'] = [
         'id'                => $adUser,
         //'azureId'           => $azureUser->getId(),
         'mail'              => $azureUser->getUpn() ?? $azureUser->claim('email') ?? '',
@@ -94,10 +94,10 @@ try {
         'expires_at'        => time() + $baseLifetime,
     ];
 
-	if ($was_post) {
-    	$safe_return = htmlspecialchars($return_to);
-    	session_write_close();
-    	echo "<!DOCTYPE html>
+    if ($was_post) {
+        $safe_return = htmlspecialchars($return_to);
+        session_write_close();
+        echo "<!DOCTYPE html>
 	<html>
 	<head><meta charset='utf-8'></head>
 	<body>
@@ -107,14 +107,14 @@ try {
 	</script>
 	</body>
 	</html>";
-    	exit(0);
-	} else {
-    	session_write_close();
-    	header('Location: ' . $return_to);
-    	exit(0);
-	}
+        exit(0);
+    } else {
+        session_write_close();
+        header('Location: ' . $return_to);
+        exit(0);
+    }
 } catch (\Exception $e) {
-	session_write_close();
+    session_write_close();
     http_response_code(500);
     error_log("Azure Callback Error: " . $e->getMessage());
     echo "Ett fel uppstod vid inloggning: " . htmlspecialchars($e->getMessage());

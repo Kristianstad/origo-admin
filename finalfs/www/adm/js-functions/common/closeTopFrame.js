@@ -1,3 +1,3 @@
 function closeTopFrame() {
-	window.parent.postMessage({ action: 'close' }, window.location.origin);
+    window.parent.postMessage({ action: 'close' }, window.location.origin);
 }

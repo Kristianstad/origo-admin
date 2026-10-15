@@ -24,9 +24,9 @@ includeDirectory("./functions/common");
 $dbh = dbh();
 $tableParameter = $_GET['table'] ?? '';
 if (!is_string($tableParameter)) {
-	pg_close($dbh);
-	http_response_code(400);
-	exit('Invalid table');
+    pg_close($dbh);
+    http_response_code(400);
+    exit('Invalid table');
 }
 $submitValue = explode('::', $tableParameter, 2);
 $textareaId = $submitValue[0] ?? '';
@@ -38,15 +38,15 @@ require("./constants/multiselectables.php");
 require("./constants/tableAliases.php");
 $allowedTables = array();
 foreach ($multiselectables as $selectableTable) {
-	$allowedTable = $tableAliases[$selectableTable] ?? $selectableTable;
-	if (in_array($allowedTable, configTableNames($dbh), true)) {
-		$allowedTables[] = $allowedTable;
-	}
+    $allowedTable = $tableAliases[$selectableTable] ?? $selectableTable;
+    if (in_array($allowedTable, configTableNames($dbh), true)) {
+        $allowedTables[] = $allowedTable;
+    }
 }
 if (!in_array($table, $allowedTables, true)) {
-	pg_close($dbh);
-	http_response_code(400);
-	exit('Invalid table');
+    pg_close($dbh);
+    http_response_code(400);
+    exit('Invalid table');
 }
 
 if (empty($submitValue[1])) {

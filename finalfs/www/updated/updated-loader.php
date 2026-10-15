@@ -1,3 +1,3 @@
 <?php
-	chdir('../adm/');
-	require ('updated.php');
+    chdir('../adm/');
+    require ('updated.php');

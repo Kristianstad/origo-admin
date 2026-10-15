@@ -61,11 +61,11 @@ function login(&$dbh)
                 session_write_close();
             }
 			
-			// Stäng db-kopplingen om den finns
-			if (isset($dbh) && $dbh) {
-				pg_close($dbh);
-				$dbh = false;
-			}
+            // Stäng db-kopplingen om den finns
+            if (isset($dbh) && $dbh) {
+                pg_close($dbh);
+                $dbh = false;
+            }
 	
             header('Location: ' . $return_to);
             exit;

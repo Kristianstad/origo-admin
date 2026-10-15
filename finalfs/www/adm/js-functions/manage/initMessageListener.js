@@ -10,17 +10,17 @@ function initMessageListener() {
         }
         const { targetId, value, action } = event.data;
         if (typeof targetId !== 'string' || targetId === '') {
-			if (action === 'close') {
-				toggleTopFrame('');
-			} else if (action === 'resize') {
-				const topframe = document.getElementById('topFrame');
-				if (topframe) {
+            if (action === 'close') {
+                toggleTopFrame('');
+            } else if (action === 'resize') {
+                const topframe = document.getElementById('topFrame');
+                if (topframe) {
                     const autoResize = topFrame === 'read_json' || topFrame === 'sql_import';
                     resizeIframe(topframe, autoResize);
-				}
-			} else {
-				console.warn('Ignored postMessage missing valid targetId');
-			}
+                }
+            } else {
+                console.warn('Ignored postMessage missing valid targetId');
+            }
             return;
         }
         if (typeof value !== 'string') {
@@ -31,17 +31,17 @@ function initMessageListener() {
         if (textarea) {
             textarea.value = value;
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
-			const multiselectButton = document.getElementById(targetId + ":multiselect");
-			let multiselectButtonValue = multiselectButton.getAttribute('value');
-			multiselectButtonValue = multiselectButtonValue.replace(/^([^:]*::[^:]*).*$/, '$1:' + value);
-			multiselectButton.setAttribute('value', multiselectButtonValue)
+            const multiselectButton = document.getElementById(targetId + ":multiselect");
+            let multiselectButtonValue = multiselectButton.getAttribute('value');
+            multiselectButtonValue = multiselectButtonValue.replace(/^([^:]*::[^:]*).*$/, '$1:' + value);
+            multiselectButton.setAttribute('value', multiselectButtonValue)
         } else {
             console.warn('Target textarea not found:', targetId);
-			return;
+            return;
         }
-		if (action === 'close') {
-			toggleTopFrame('');
-		}
+        if (action === 'close') {
+            toggleTopFrame('');
+        }
     }
     window.addEventListener('message', handleMessage);
 }

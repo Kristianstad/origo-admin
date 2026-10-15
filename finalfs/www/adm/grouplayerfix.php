@@ -200,9 +200,9 @@ if ($isDescribeFeatureType) {
             CURLOPT_DNS_CACHE_TIMEOUT => 3600,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
-			CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,   // GROK: Tvinga IPv4 – undvik IPv6-timeout
-			//CURLOPT_STDERR => fopen('/tmp/curl_verbose.log', 'a'),
-			//CURLOPT_VERBOSE => true,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,   // GROK: Tvinga IPv4 – undvik IPv6-timeout
+            //CURLOPT_STDERR => fopen('/tmp/curl_verbose.log', 'a'),
+            //CURLOPT_VERBOSE => true,
             CURLOPT_HTTPHEADER => ['Accept: application/json'],
         ]);
 
@@ -224,10 +224,10 @@ if ($isDescribeFeatureType) {
         $attempt = 0;
 
         while ($attempt < $maxRetriesPerHandle && !$success) {
-			$headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);  // GROK: Måste köras innan curl_close
-			$raw = curl_multi_getcontent($ch);
-			$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			$error = curl_error($ch);
+            $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);  // GROK: Måste köras innan curl_close
+            $raw = curl_multi_getcontent($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
 
             if ($raw !== false && $httpCode >= 200 && $httpCode < 300) {
                 $success = true;
@@ -257,9 +257,9 @@ if ($isDescribeFeatureType) {
                         CURLOPT_DNS_CACHE_TIMEOUT => 3600,
                         CURLOPT_SSL_VERIFYPEER => false,
                         CURLOPT_SSL_VERIFYHOST => false,
-						CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,   // GROK: Tvinga IPv4 – undvik IPv6-timeout
-						//CURLOPT_STDERR => fopen('/tmp/curl_verbose.log', 'a'),
-						//CURLOPT_VERBOSE => true,
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,   // GROK: Tvinga IPv4 – undvik IPv6-timeout
+                        //CURLOPT_STDERR => fopen('/tmp/curl_verbose.log', 'a'),
+                        //CURLOPT_VERBOSE => true,
                         CURLOPT_HTTPHEADER => ['Accept: application/json'],
                     ]);
 
@@ -301,15 +301,15 @@ if ($isDescribeFeatureType) {
         }
 
         // Parse Content-Type (robust variant)
-		$headerString = substr($raw, 0, $headerSize);
-		$headerLines = preg_split('/\r\n|\r|\n/', $headerString);
-		foreach ($headerLines as $line) {
-			$lineLower = strtolower(trim($line));
-			if (strpos($lineLower, 'content-type:') === 0) {
-				$contentTypeFromBackend = trim(substr($line, strpos($line, ':') + 1));
-				break;
-			}
-		}
+        $headerString = substr($raw, 0, $headerSize);
+        $headerLines = preg_split('/\r\n|\r|\n/', $headerString);
+        foreach ($headerLines as $line) {
+            $lineLower = strtolower(trim($line));
+            if (strpos($lineLower, 'content-type:') === 0) {
+                $contentTypeFromBackend = trim(substr($line, strpos($line, ':') + 1));
+                break;
+            }
+        }
 
         if ($baseResponse === null) {
             $baseResponse = $json;
@@ -334,8 +334,8 @@ if ($isDescribeFeatureType) {
 
     header('Content-Type: ' . $contentTypeFromBackend);
     $jsonOutput = json_encode($baseResponse);
-	header('Content-Length: ' . strlen($jsonOutput));
-	echo $jsonOutput;
+    header('Content-Length: ' . strlen($jsonOutput));
+    echo $jsonOutput;
     exit;
 } else {
     // Alla andra anrop → vidarebefordra direkt

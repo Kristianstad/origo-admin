@@ -1,5 +1,5 @@
-		html		{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
-		body		{ line-height:2; padding:0.3em 0.5em 0 0.5em }
-		a			{ color:var(--skin-text, #212121) }
-		.helpCloseButton { display:flex; line-height:1.5; margin-top:0.5em; justify-content:flex-start }
-		/*.smallHelpButton { padding-left:0.3em; padding-right:0.3em; height:unset; border-style:none; top:0 }*/
+        html		{ width:100%; height:100%; scrollbar-color:var(--skin-primary, #455a64) var(--skin-surface, #FFFFFF); scrollbar-width:thin }
+        body		{ line-height:2; padding:0.3em 0.5em 0 0.5em }
+        a			{ color:var(--skin-text, #212121) }
+        .helpCloseButton { display:flex; line-height:1.5; margin-top:0.5em; justify-content:flex-start }
+        /*.smallHelpButton { padding-left:0.3em; padding-right:0.3em; height:unset; border-style:none; top:0 }*/

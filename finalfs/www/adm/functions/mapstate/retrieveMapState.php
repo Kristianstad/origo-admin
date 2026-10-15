@@ -29,6 +29,6 @@ function retrieveMapState($dbh): never
         exit;
     }
 
-	echo $row['state'];
+    echo $row['state'];
     exit;
 }

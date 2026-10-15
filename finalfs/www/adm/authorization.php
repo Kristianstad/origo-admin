@@ -53,7 +53,7 @@ else {
 
 if (session_status() === PHP_SESSION_ACTIVE)
 {
-	session_write_close();
+    session_write_close();
 }
 
 if (isset($dbh) && $dbh) {
