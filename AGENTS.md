@@ -25,13 +25,7 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 
 ## Dokumentationsprinciper
 
-- Dokumentera funktion, indata, resultat, beroenden och viktiga sidoeffekter där det hjälper någon att ändra modulen. Skriv rakt och konkret på svenska; förklara förkortningar eller projektspecifika begrepp när de först behövs.
-- Håll modulreferenser faktiska och navigerbara: kontrollera filträdet och anropare innan en symbol beskrivs som aktiv eller borttagen. Funktions- och konstantlistor ska vara alfabetiskt sorterade.
-- Skilj verifierade fakta från hypoteser. Behåll inte ord som "sannolikt" eller "troligen" som om de vore ett verifierat beteende; verifiera påståendet, ta bort det eller markera den konkreta osäkerheten och vad som behöver kontrolleras.
-- Modulernas `.md`-filer är teknisk referens, inte arbetslogg. Lägg inte in status för dokumentationsarbetet, granskningsgrad, etapper eller kommentarer om att dokumentationen har rättats. Behåll däremot faktiska runtime-statusar, säkerhetsrisker, begränsningar och relevanta öppna tekniska frågor.
-- Ta inte bort en dokumenterad funktion bara för att motsvarande fil inte hittas. Kontrollera om beteendet finns under ett annat namn eller i entry pointen; be användaren bekräfta innan en sådan referens tas bort.
-- Om en organisationsspecifik implementation saknas i repot, dokumentera endast verifierad integration och ange tydligt vad som inte kan kontrolleras i arbetsytan.
-- Undvik att kopiera långa arkitekturbeskrivningar mellan filer. Använd `OVERVIEW.md` som ingång, `ARCHITECTURE.md` för mönster över flera moduler och modulernas egna dokument för lokala kontrakt.
+Modulernas `.md`-filer är teknisk referens, inte arbetslogg. Läs `docs/DOCUMENTATION_GUIDE.md` innan du skriver eller ändrar dokumentation. Använd `.agents/skills/docs-sync-audit/SKILL.md` för att granska om dokumentationen stämmer med koden.
 
 ## Börja här
 
@@ -39,7 +33,7 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 2. Läs närmaste anropare och befintlig modul-dokumentation innan du ändrar ett publikt flöde.
 3. När en kodändring ändrar eller förtydligar beteende, uppdatera motsvarande modul-dokumentation i samma ändring. Om en berörd fil har en inledande kommentar som beskriver dess syfte, flöde eller beroenden, håll även den kommentaren uppdaterad. Lägg inte till standardkommentarer i filer som saknar en sådan.
 4. Gör den minsta ändring som uppfyller önskemålet. Bevara befintliga API:er, POST-namn, command-värden, hidden fields och bekräftelser om de inte uttryckligen ska ändras.
-5. Validera den berörda ytan och granska `git diff --check` innan du avslutar. Commit/push görs bara när användaren uttryckligen ber om det.
+5. Validera den berörda ytan innan du avslutar; följ `.agents/skills/verify-changes/SKILL.md`. Commit/push görs bara när användaren uttryckligen ber om det; följ då `.agents/skills/commit-push/SKILL.md`.
 
 ## Kodkonventioner och säkerhet
 
@@ -58,15 +52,9 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 
 Historik, snapshots, restore och kopplingen till konfigurationsschema beskrivs i `docs/www/adm/manage.md`. Läs den referensen innan du ändrar historikfunktioner, target-mappning eller formulärfält som ingår i snapshots; verifiera alltid nuvarande schema och anropsflöde i koden.
 
-## UI- och knappreferenser
+## UI, JavaScript och stilmallar
 
-Följ befintliga komponent- och stylesheetmönster, inklusive tillgängliga namn och etiketter. Kontrollera aktuell CSS innan du ändrar placering eller mått; exakta UI-detaljer hör hemma i modulens dokumentation eller i den aktuella uppgiften.
-Lägg inte längre eller återanvändbar JavaScript-logik i PHP-strängar, heredocs eller HTML-attribut. Placera den i `js-functions/<modul>/` och ladda den via modulens etablerade `includeDirectory()`-flöde; håll eventuella inline-anrop korta.
-Filer i `js-functions/<modul>/` ska i första hand deklarera namngivna JavaScript-funktioner, normalt en per fil med samma namn som filen. Lägg inte eventregistrering eller annan körbar initiering på toppnivå; anropa initieringsfunktioner uttryckligen från modulens bootstrap efter att katalogen inkluderats.
-
-## `topFrame` och formulärstorlek
-
-Vid ändringar i iframe-flöden, läs `manage.md` och kontrollera huvudsida, barnvy, meddelandevalidering och berörda stilmallar tillsammans. Håll aktuella beteendedetaljer i den modulreferensen.
+Lägg inte längre eller återanvändbar JavaScript-logik i PHP-strängar, heredocs eller HTML-attribut; placera den i `js-functions/<modul>/` som namngivna funktioner. Läs `docs/UI_CONVENTIONS.md` innan du ändrar knappar, formulär, stilmallar, JavaScript eller iframe-flöden (`topFrame`).
 
 ## Verifiering
 
@@ -76,6 +64,8 @@ Vid ändringar i iframe-flöden, läs `manage.md` och kontrollera huvudsida, bar
 
 ## Dokumentation att läsa vid behov
 
+- `docs/DOCUMENTATION_GUIDE.md` – riktlinjer för att skriva och ändra dokumentation.
+- `docs/UI_CONVENTIONS.md` – konventioner för UI, JavaScript, stilmallar och iframe-flöden.
 - `docs/www/adm/OVERVIEW.md` – modulkarta.
 - `docs/www/adm/ARCHITECTURE.md` – gemensamma arkitekturmönster och target-modell.
 - `docs/www/adm/manage.md` – CRUD-flöden, formulärbyggstenar, POST-kommandon, undo/redo och restore.

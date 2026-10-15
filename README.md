@@ -27,6 +27,7 @@ En svensk användarguide för administrationsverktyget finns i [Origo_admin_tuto
 | `.github/workflows/docker-image.yml` | GitHub Actions: bygger och publicerar den färdiga avbilden. |
 | `docs/` | Teknisk referens för utvecklare, se `docs/www/adm/OVERVIEW.md`. |
 | `AGENTS.md` | Instruktioner för utveckling och AI-agenter. |
+| `.agents/skills/` | Återanvändbara arbetsflöden för AI-agenter (till exempel commit och push). |
 | `Origo_admin_tutorial_swedish.pptx` | Källa till användarguiden. |
 | `LICENSE` | Licens (BSD 2-Clause) för filerna i det här repot. |
 | `.gitattributes` | Ser till att textfiler alltid har Unix-radslut (LF), även på Windows. |

@@ -19,6 +19,9 @@ Origo_admin_tutorial_swedish.pptx
 # CI configuration
 .github/
 
+# Agent skills
+.agents/
+
 # Temporary / build files
 *.log
 *.tmp
