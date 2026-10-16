@@ -54,4 +54,4 @@ funktioner/konstanter.
 | Fil | Anteckning |
 |---|---|
 | Loader-filer (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `updated/` på toppnivå) | Aktivt använda; förteckning i ARCHITECTURE.md och beskrivning i respektive modulreferens |
-| `export/` (toppnivå, med egen `functions/`/`constants/`) | Finns enligt export.md, men inte i arbetsytan och kan inte verifieras |
+| Exportmodul (lokal) | Organisationsspecifik och exkluderad från publika GitHub-repot; kan inte verifieras här |

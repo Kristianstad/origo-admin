@@ -140,17 +140,15 @@ Exempel i koden använder URL-prefixet `/php/` (till exempel
 bestäms av webbserverkonfigurationen utanför det här repot och kan inte
 verifieras här.
 
-**Undantag:** modulen `export` har enligt `export.md` en egen
-`export/`-mapp på toppnivå med `functions/`/`constants/` som delvis
-dubblerar `adm/functions/export/`. Mappen finns inte i den här arbetsytan
-och kan därför inte verifieras.
+**Undantag:** den organisationsspecifika modulen `export` hålls utanför det
+publika GitHub-repot och kan därför inte verifieras här.
 
 ## Extern exportpipeline (FME Server)
 
 `export.php` lämnar över tunga formatkonverteringsjobb till en extern
 **FME Server**-instans via REST-API, asynkront
-(`fastcgi_finish_request()`). Se `export.md`. Denna modul är
-organisationsspecifik och ingår inte i det publika GitHub-repot.
+(`fastcgi_finish_request()`). Modulen är organisationsspecifik och ingår
+inte i det publika GitHub-repot.
 
 ## Publiceringskedjan (writeConfig → disk) och "changed"-flaggan
 
