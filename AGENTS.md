@@ -7,6 +7,10 @@ Den här filen samlar bestående repokontext och arbetssätt för personer och A
 - Repot bygger administrationsverktyget för Origo och en Docker-avbild. Runtime-struktur och moduler beskrivs i `docs/www/adm/OVERVIEW.md` och `docs/www/adm/ARCHITECTURE.md`; kontrollera `Dockerfile` för aktuella runtime-beroenden.
 - Modulernas egna dokument i `docs/www/adm/` är den kanoniska referensen för lokala flöden och beteenden.
 - Håll Docker-buildcontexten begränsad med `.dockerignore`; exkludera utvecklarfiler utan att ignorera nödvändiga byggindata eller runtime-filer.
+- Avbilden bygger på ramverket [Secure and Minimal](https://github.com/Kristianstad/secure_and_minimal) (SaM) via basavbilderna `nginx` och `origo`. `Dockerfile` följer SaM:s mall: ändra bara ARG- och ENV-blocken, inte blocken märkta `Generic template (don't edit)`. `ALPINE_VERSION` väljer SaM-taggarna. Ramverkets beteende kan inte verifieras lokalt; läs dess README innan du ändrar bygg- eller startsteg.
+- Innehållet i `finalfs/` kopieras till avbildens rot (`finalfs/www` blir `/www`). Startprocessen är uppdelad i stage1–3; repot äger bara stage3 (`finalfs/start/stage3/`, körs i filnamnsordning, därför tresiffrigt prefix) och egna funktioner i `finalfs/start/functions/`. Stage3-skripten körs som root med begränsade capabilities och får variabler och SaM-funktioner från stage2 (se kommentaren överst i varje skript).
+- Inställningar som ska kunna sättas vid körning är `VAR_*`-variabler: SaM kastar miljövariabler utan `VAR_`-prefix vid uppstart. `VAR_*`-namn som slutar på `_DIR` eller `_FILE` tolkas som sökvägar och skapas automatiskt.
+- Huvudprocessen körs som `VAR_LINUX_USER` (`postgres`) utan capabilities. Nya körbara filer och skrivbara sökvägar måste deklareras i `Dockerfile` (`EXECUTABLES`, `STARTUPEXECUTABLES`, `LINUXUSEROWNED`, `GID0WRITABLES`) eller omfattas av SaM:s regler för sökvägs-`VAR_*`.
 
 ## Övergripande utvecklingsmål
 

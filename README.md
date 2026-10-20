@@ -311,7 +311,7 @@ docker build -t origo-admin .
 docker run --name origo-admin -d -p 8080:8080 origo-admin
 ```
 
-Bygget hämtar basavbilderna `ghcr.io/kristianstad/origo` och `ghcr.io/kristianstad/secure_and_minimal` samt Composer-paketen (till exempel `adldap2/adldap2`), så det kräver internetåtkomst. Vilken Origo-version som används styrs av build-argumentet `ORIGO_VERSION` (standard anges i `Dockerfile`):
+Bygget hämtar basavbilderna `ghcr.io/kristianstad/origo` och `ghcr.io/kristianstad/secure_and_minimal` samt Composer-paketen (till exempel `adldap2/adldap2`), så det kräver internetåtkomst. Ramverket [Secure and Minimal](https://github.com/Kristianstad/secure_and_minimal) beskriver bygg- och startstegen, till exempel `stage3`-skripten i `finalfs/start/`. Vilken Origo-version som används styrs av build-argumentet `ORIGO_VERSION` (standard anges i `Dockerfile`):
 
 ```bash
 docker build --build-arg ORIGO_VERSION=2.10.0-r1 -t origo-admin .
