@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       alpine_version:
-        description: 'Alpine version (e.g. 3.23)'
+        description: 'Alpine version (e.g. 3.24)'
         required: true
-        default: '3.23'
+        default: '3.24'
       app_version:
-        description: 'Application version / Origo version (e.g. 2.10.0)'
+        description: 'Application version / Origo version (e.g. 2.10.0-r2)'
         required: false
       image_name:
         description: 'Image name (e.g. origo-admin)'
