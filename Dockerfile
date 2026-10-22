@@ -3,9 +3,9 @@
 # =========================================================================
 # ARGs (can be passed to Build/Final) <BEGIN>
 ARG SaM_REPO=${SaM_REPO:-ghcr.io/kristianstad/secure_and_minimal}
-ARG ALPINE_VERSION=${ALPINE_VERSION:-3.23}
-ARG ORIGO_VERSION=${ORIGO_VERSION:-2.10.0-r1}
-ARG NGINX_VERSION=${NGINX_VERSION:-1.28.3}
+ARG ALPINE_VERSION=${ALPINE_VERSION:-3.24}
+ARG ORIGO_VERSION=${ORIGO_VERSION:-2.10.0-r2}
+ARG NGINX_VERSION=${NGINX_VERSION:-1.30.4}
 ARG POSTGRESQL_VERSION=${POSTGRESQL_VERSION:-18}
 ARG PHP_VERSION=${PHP_VERSION:-85}
 ARG IMAGETYPE="application"
