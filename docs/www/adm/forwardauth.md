@@ -83,6 +83,8 @@ från ursprunglig inloggning.
   (`slideExtension`, `absoluteMax`, `baseLifetime`)
 - `constants/azureConfig.php` → `$azureConfig` (`clientId`, `clientSecret`,
   `redirectUri`, `tenant`, `scopes`), läses inuti `getAzureProvider()`
+- `constants/trustedDomain.php` → `$trustedDomain`, läses inuti
+  `isSafeReturnTo()`
 
 **Externa bibliotek** (composer, utanför `adm/`):
 - `thenetworg/oauth2-azure` (`../../composer/oauth2-azure/autoload.php`)
@@ -107,17 +109,19 @@ för att `forwardauth.php` ska kunna återskapa ursprunglig URL.
 | `getAzureGroups.php` | `getAzureGroups($graphToken): array` | Hämtar (paginerat) användarens Azure AD-gruppmedlemskap via Microsoft Graph |
 | `getAzureProvider.php` | `getAzureProvider()` | Skapar en konfigurerad OAuth2-klient (`TheNetworg\OAuth2\Client\Provider\Azure`), tvingar Microsoft Graph som API-mål |
 | `getOnPremisesSamAccountName.php` | `getOnPremisesSamAccountName($graphToken)` | Hämtar användarens lokala AD-kontonamn (`onPremisesSamAccountName`) via Microsoft Graph |
-| `isSafeReturnTo.php` | `isSafeReturnTo(string $url): bool` | Validerar att en return-URL:s host slutar på `kristianstad.se`. Hårdkodad domän |
+| `isSafeReturnTo.php` | `isSafeReturnTo(string $url): bool` | Validerar att en return-URL har en host. Om `$trustedDomain` är satt måste hosten vara den domänen eller en underdomän (`isHostInDomain()`); tom `$trustedDomain` (standard) godtar alla hostar |
 
 ## Begränsningar och risker
 
-- **Hårdkodad organisationsdomän** i `isSafeReturnTo.php` (`kristianstad.se`)
-  och som fallback-URL i `azure-callback.php`
-  (`https://kartor.kristianstad.se`). Andra miljöer med annan domän kräver
-  kodändring.
+- **`$trustedDomain` är tom som standard**, vilket betyder att
+  `isSafeReturnTo()` godtar alla hostar och inloggningen kan skicka vidare
+  till vilken adress som helst (open redirect). Sätt `$trustedDomain` till
+  organisationens domän i produktion.
+- **Hårdkodad fallback-URL** `https://kartor.kristianstad.se` i
+  `azure-callback.php`. Andra miljöer med annan domän kräver kodändring.
 - `isSafeReturnUrl()` (authorization-modulen) matchar mot `HTTP_HOST`,
-  medan `isSafeReturnTo()` (denna modul) matchar mot den hårdkodade
-  domänen. De har olika skyddsnivå och är inte utbytbara.
+  medan `isSafeReturnTo()` (denna modul) matchar mot `$trustedDomain`. De har
+  olika skyddsnivå och är inte utbytbara.
 - Docblocket i `getOnPremisesSamAccountName.php` beskriver gruppuppslag
   (kopierat från `getAzureGroups.php`), trots att funktionen hämtar
   `onPremisesSamAccountName`.

@@ -49,11 +49,12 @@ restrictedLayer.php
         $_SERVER['QUERY_STRING']=str_replace('?', '&', $_SERVER['QUERY_STRING']);
         parse_str($_SERVER['QUERY_STRING'], $queryarray);
         $queryarray=array_change_key_case($queryarray, CASE_UPPER);
+        $queryarray += array('SERVICE' => '', 'REQUEST' => '');
         $path=$queryarray['PATH'];
         unset ($queryarray['PATH']);
         require("./constants/restrictedServiceUrl.php");
         $call=$restrictedServiceUrl.$path."?".$_SERVER['QUERY_STRING'];
-        if ($queryarray['REQUEST'] === 'GetCapabilities' || (!isset($queryarray['FORMAT']) && !isset($queryarray['INFO_FORMAT']) && $queryarray['OUTPUTFORMAT'] === 'geojson'))
+        if ($queryarray['REQUEST'] === 'GetCapabilities' || (!isset($queryarray['FORMAT']) && !isset($queryarray['INFO_FORMAT']) && strtolower($queryarray['OUTPUTFORMAT'] ?? '') === 'geojson'))
         {
             header('Content-Type: text/xml; charset=utf-8');
         }
@@ -61,9 +62,13 @@ restrictedLayer.php
         {
             header('Content-Type: '.$queryarray['INFO_FORMAT']);
         }
-        else
+        elseif (isset($queryarray['FORMAT']))
         {
             header('Content-Type: '.$queryarray['FORMAT']);
+        }
+        else
+        {
+            header('Content-Type: text/xml; charset=utf-8');
         }
         if (isset($queryarray['LAYERS']))
         {

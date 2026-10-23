@@ -33,6 +33,7 @@
 | `$sourcesQueryColumns` | `sourcesQueryColumns.php` | Vilka kolumner som ska med som query-parametrar för en källas URL | writeConfig (addSourcesToJson) |
 | `$swedishDic` | `swedishDic.php` | Ordlista engelska→svenska för interna typ-/kolumnnamn (map, layer, group, m.fl.), används av `toSwedish()` | manage, info (indirekt via `toSwedish()`) |
 | `$tableAliases` | `tableAliases.php` | Alias-mappning för tabellnamn använda av multiselect-knappar | manage (printMultiselectButton) |
+| `$trustedDomain` | `trustedDomain.php` | Organisationens internetdomän (till exempel `example.com`). Värdnamn i domänen, den själv och dess underdomäner, godtas som återhämtningsadress efter inloggning och som värd för exportanrop. Tom (standard) godtar alla värdar: fungerar överallt men är mindre säkert, eftersom inloggningen då kan skicka vidare till och exporten anropa vilken värd som helst. Sätt den i produktion | forwardauth (`isSafeReturnTo`), export |
 | `$views` | `views.php` | Definierar vilka tabeller/kolumner som visas i respektive vy | manage (printHeadForms) |
 | `$webRoot` | `webRoot.php` | Rotkatalog dit publicerade kartor skrivs | writeConfig |
 | `RESTRICTEDLAYERS` (fil-konstant) | `RESTRICTEDLAYERS.php` (toppnivå, ej i `constants/` — placerad sist eftersom den fysiskt hör hemma på en annan plats) | Lista över skyddade lager m. behöriga användare/grupper. Genereras av writeConfig | restrictedLayer |

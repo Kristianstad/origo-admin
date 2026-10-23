@@ -31,6 +31,7 @@
 | `invalidTarget($functionName): never` | `invalidTarget.php` | Avslutar med ett gemensamt felmeddelande när target-form eller target-id är ogiltigt | target-hjälpare, manage |
 | `isBasicTarget($target)` | `isBasicTarget.php` | Kontrollerar om en target är "basic" (värdet är en sträng/id) snarare än "full" (värdet är en config-array). Bygger på `isTarget()` | manage (target-infrastruktur) |
 | `isFullTarget($target)` | `isFullTarget.php` | Kontrollerar om en target är "full" (värdet är en config-array) snarare än "basic" | manage, target-infrastruktur |
+| `isHostInDomain(string $host, string $domain): bool` | `isHostInDomain.php` | Kontrollerar att ett värdnamn är domänen själv eller en underdomän till den (skiftlägesokänsligt). En tom domän ger alltid `false` | forwardauth (`isSafeReturnTo`), export |
 | `isIdUniqueInTable($id, $tablePkColumn, $table)` | `isIdUniqueInTable.php` | Kontrollerar att ett id inte redan finns bland värdena i tabellens primärnyckelkolumn | manage (validering vid skapande) |
 | `isTarget($target)` | `isTarget.php` | Kontrollerar att target är en array med exakt en icke-tom strängnyckel (se manage.md) | manage |
 | `jsonForInlineJs(mixed $value): string` | `jsonForInlineJs.php` | JSON-kodar ett värde för säker inbäddning i JavaScript, med HTML-känsliga tecken hex-kodade | manage och verktygssidor |

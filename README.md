@@ -457,6 +457,12 @@ konstantfiler finns i [docs/www/adm/constants.md](docs/www/adm/constants.md).
 - `cookieConfig.php` styr sessionscookie-namn, krypteringsnyckel, livslängd,
   domän, sökväg, `Secure`, `HttpOnly` och `SameSite`. Byt särskilt
   `cookieKey` i en egen installation och använd en unik slumpmässig nyckel.
+- `trustedDomain.php` anger organisationens internetdomän, till exempel
+  `example.com`. Vid inloggning med Microsoft Entra ID godtas bara
+  återhämtningsadresser i den domänen eller dess underdomäner. Tomt värde
+  (standard) godtar alla adresser; det fungerar överallt men gör att
+  inloggningen kan skicka vidare till vilken adress som helst. Cookiedomänen i
+  `cookieConfig.php` bör vara samma som eller smalare än denna domän.
 
 #### Adminvyer och tabellbeteende
 
@@ -493,7 +499,7 @@ alltid att namnen motsvarar tabeller och kolumner i `060.origo.sql`.
 - `swedishDic.php` innehåller svensk terminologi som används av verktyget.
 
 Filer som `dbhConnectionString.php`, `azureConfig.php`, `adldapConfig.php`,
-`cookieConfig.php`, `webRoot.php`, `proxyRoot.php` och
+`cookieConfig.php`, `webRoot.php`, `proxyRoot.php`, `trustedDomain.php` och
 `restrictedServiceUrl.php` är normalt miljöspecifika. De bör därför hanteras
 som lokal konfiguration och inte ersättas slentrianmässigt vid en uppgradering.
 
@@ -604,6 +610,7 @@ Kontrollera lagringskatalogens rättigheter, `docker logs` och att `/pgdata` int
 - Byt standardlösenordet.
 - Använd HTTPS.
 - Begränsa åtkomsten till `/adm/`.
+- Använder du inloggning med Microsoft Entra ID: sätt `trustedDomain.php` till din domän.
 - Publicera inte PostgreSQL-porten 5432 om den inte behövs.
 - Ordna med regelbundna backuper.
 - Tidigare dokumentation anger att avbilden kan köras med alla Linux-capabilities borttagna utom `CHOWN`, `SETPCAP`, `SETGID` och `SETUID`. Det har inte verifierats för administrationsavbilden; testa i så fall `--cap-drop ALL` med dessa `--cap-add` innan du använder det i drift.

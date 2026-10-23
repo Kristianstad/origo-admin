@@ -84,9 +84,12 @@ forwardauth-modulen).
 - `restrictedLayer.php` tolkar `QUERY_STRING` manuellt: `str_replace('&?', '&', ...)`
   och `str_replace('?', '&', ...)` hanterar Origos URL-format med extra
   frågetecken. Tolkningen beror på hur Origo bygger sina anrop.
-- `$queryarray['FORMAT']`, `INFO_FORMAT`, `OUTPUTFORMAT`, `REQUEST` och
-  `SERVICE` läses på flera ställen utan `isset()`-kontroll och ger
-  PHP-varningar (`Undefined array key`) om parametern saknas.
+- `$queryarray['PATH']` läses utan `isset()`-kontroll och ger en PHP-varning
+  (`Undefined array key`) om parametern saknas. `SERVICE` och `REQUEST` får
+  tomma standardvärden. `Content-Type` sätts från `INFO_FORMAT` eller
+  `FORMAT`; saknas båda (till exempel WFS-anrop med bara `OUTPUTFORMAT`)
+  används `text/xml; charset=utf-8`. `OUTPUTFORMAT=geojson` jämförs utan
+  hänsyn till skiftläge.
 - `finishError500($cause)` tar emot `$cause` men skriver alltid samma text.
 - Konstantfilerna `EMPTYPNG.php` och `LOCKPNG.php` finns inte; modulen
   läser bilderna direkt med `file_get_contents()`.
