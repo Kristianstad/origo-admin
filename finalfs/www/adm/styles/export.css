@@ -1,0 +1,51 @@
+* {
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+}
+
+html {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+}
+
+body {
+        margin: 0 10px 0 0;
+        overflow: hidden;
+        font: 14px Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
+        text-transform: inherit;
+}
+
+a:link,
+a:visited {
+        color: #19486e;
+        background-color: transparent;
+        text-decoration: none;
+}
+
+a:hover {
+        color: #72bf44;
+        background-color: transparent;
+        text-decoration: none;
+}
+
+a:active {
+        color: yellow;
+        background-color: transparent;
+}
+
+button {
+        width: auto;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #eee;
+        border-radius: 1rem;
+        background: #eee;
+        cursor: pointer;
+        text-align: center;
+        white-space: nowrap;
+        font: 14px Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
+}
+
+button:hover {
+        background-color: #72bf44;
+}
