@@ -58,7 +58,7 @@
                 {
                     $sourceJson['type'] = $type;
                 }
-                if (!empty($source['tilegrid']))
+                if (!$wfsSource && !empty($source['tilegrid']))
                 {
                     $tilegrid = arrayColumnSearch($source['tilegrid'], 'tilegrid_id', $tilegrids);
                     $tileGridJson = array();
