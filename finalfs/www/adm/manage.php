@@ -50,11 +50,11 @@ Vid id-byte följer referenser, vald rad och historik med till det nya id:t.
  │    └─ bygger JS-variabler för varje nyckelordskategori (läser $categoriesByTable)
  │
  └─ FAS 4: RENDERA DET VALDA OBJEKTETS FORMULÄR (djupt kaskaderande, en gren per typ)
-      ├─ OM map vald   → printMapForm() + printChildSelect() för layers/groups/controls
-      ├─ OM database   → printDatabaseForm() + printChildSelect() för schemas
-      ├─ OM schema     → printSchemaForm() + printChildSelect() för tables
+      ├─ OM map vald   → printMapForm() + printChildSelectRow() för layers/groups/controls
+      ├─ OM database   → printDatabaseForm() + printChildSelectRow() för schemas
+      ├─ OM schema     → printSchemaForm() + printChildSelectRow() för tables
       ├─ OM group(s)   → loop genom $groupIdsArray (nästlade grupper) → printGroupForm()
-      │                  + printChildSelect() för layers/groups (rekursivt genom hierarkin)
+      │                  + printChildSelectRow() för layers/groups (rekursivt genom hierarkin)
       └─ OM övrigt <item> vald (idPosts icke-tom):
            ├─ toFullTarget(makeBasicTarget(...))  [common] → normaliserad datastruktur
            ├─ targetType()                           [common] → vilken typ är detta?
@@ -608,26 +608,17 @@ if (isset($post['mapId'])) {
         printMapForm($map, $selectables, $inheritPosts, typeHelps("map", $helps));
 
         // Print child select dialogs for layers, groups and controls if any exists for selected map
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
         if (!empty($groupIdsArray)) {
             $inheritPosts['groupId'] = $groupIdsArray[0];
         }
+        $mapChildSelects = array(array('groups', 'Grupp'), array('layers', 'Lager'), array('controls', 'Kontroll'));
         if (isset($inheritPosts['layerId']) && !isset($inheritPosts['groupId'])) {
-            printChildSelect($map, 'layers', $thClass, 'Lager', $inheritPosts);
-            printChildSelect($map, 'groups', $thClass, 'Grupp', $inheritPosts);
-            printChildSelect($map, 'controls', $thClass, 'Kontroll', $inheritPosts);
+            $mapChildSelects = array(array('layers', 'Lager'), array('groups', 'Grupp'), array('controls', 'Kontroll'));
         } elseif (isset($inheritPosts['controlId'])) {
-            printChildSelect($map, 'controls', $thClass, 'Kontroll', $inheritPosts);
-            printChildSelect($map, 'groups', $thClass, 'Grupp', $inheritPosts);
-            printChildSelect($map, 'layers', $thClass, 'Lager', $inheritPosts);
-        } else {
-            printChildSelect($map, 'groups', $thClass, 'Grupp', $inheritPosts);
-            printChildSelect($map, 'layers', $thClass, 'Lager', $inheritPosts);
-            printChildSelect($map, 'controls', $thClass, 'Kontroll', $inheritPosts);
+            $mapChildSelects = array(array('controls', 'Kontroll'), array('groups', 'Grupp'), array('layers', 'Lager'));
         }
-        echo '</tr></table>';
-        unset($selectables, $thClass);
+        printChildSelectRow('childSelectHr', $map, $mapChildSelects, $inheritPosts);
+        unset($selectables, $mapChildSelects);
     }
     unset($map, $idPosts['mapId']);
 }
@@ -655,11 +646,8 @@ elseif (isset($post['databaseId'])) {
         setTargetConfigParam($database, 'schemas', '{' . implode(',', $databaseSchemas) . '}');
 
         // Print child select dialog for schemas if any exists for selected database
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($database, 'schemas', $thClass, 'Schema', $inheritPosts);
-        echo '</tr></table>';
-        unset($databaseSchemas, $thClass);
+        printChildSelectRow('childSelectHr', $database, array(array('schemas', 'Schema')), $inheritPosts);
+        unset($databaseSchemas);
     }
     unset($database, $idPosts['databaseId']);
 }
@@ -694,11 +682,8 @@ if (isset($post['schemaId'])) {
         setTargetConfigParam($schema, 'tables', '{' . implode(',', $schemaTables) . '}');
 
         // Print child select dialog for tables if any exists for selected schema
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($schema, 'tables', $thClass, 'Tabell', $inheritPosts);
-        echo '</tr></table>';
-        unset($schemaTables, $thClass);
+        printChildSelectRow('childSelectHr', $schema, array(array('tables', 'Tabell')), $inheritPosts);
+        unset($schemaTables);
     }
     unset($schema, $idPosts['schemaId']);
 }
@@ -721,14 +706,9 @@ if (isset($post['classeId'])) {
         }
         printClasseForm($classe, $operationTables, $inheritPosts, typeHelps('classe', $helps));
         unset($operationTables, $operationTable);
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($classe, 'infogroups', $thClass, 'Informationsgrupp', $inheritPosts);
-        printChildSelect($classe, 'layers', $thClass, 'Lager', $inheritPosts);
-        printChildSelect($classe, 'tables', $thClass, 'Tabell', $inheritPosts);
-        echo '</tr></table>';
+        printChildSelectRow('childSelectHr', $classe, array(array('infogroups', 'Informationsgrupp'), array('layers', 'Lager'), array('tables', 'Tabell')), $inheritPosts);
     }
-    unset($classe, $idPosts['classeId'], $thClass);
+    unset($classe, $idPosts['classeId']);
 }
 
 // If an infogroup is selected
@@ -751,12 +731,7 @@ foreach ($infogroupIdsArray as $infogroupId) {
         }
         printInfogroupForm($infogroup, $operationTables, $inheritPosts, typeHelps('infogroup', $helps));
         unset($operationTables, $operationTable);
-        echo '<hr class="overflowHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($infogroup, 'infogroups', $thClass, 'Informationsgrupp', $inheritPosts, $infogroupLevel);
-        printChildSelect($infogroup, 'layers', $thClass, 'Lager', $inheritPosts, $infogroupLevel);
-        printChildSelect($infogroup, 'tables', $thClass, 'Tabell', $inheritPosts, $infogroupLevel);
-        echo '</tr></table>';
+        printChildSelectRow('overflowHr', $infogroup, array(array('infogroups', 'Informationsgrupp'), array('layers', 'Lager'), array('tables', 'Tabell')), $inheritPosts, $infogroupLevel);
     }
     unset($infogroup);
     $infogroupLevel++;
@@ -799,21 +774,17 @@ foreach ($groupIdsArray as $groupId) {
         printGroupForm($group, array('maps' => $configTables['maps'], 'groups' => $configTables['groups']), $inheritPosts, typeHelps("group", $helps));
 
         // Print child select dialogs for layers and/or groups if any exists for the current loop group
-        echo '<hr class="overflowHr"><table><tr>';
-        $thClass = 'thFirst';
+        $groupChildSelects = array(array('groups', 'Grupp', $parent), array('layers', 'Lager'));
         if ($groupLevel == $totGroupLevels && isset($inheritPosts['layerId'])) {
-            printChildSelect($group, 'layers', $thClass, 'Lager', $inheritPosts, $groupLevel);
-            printChildSelect($group, 'groups', $thClass, 'Grupp', $inheritPosts, $groupLevel, $parent);
-        } else {
-            printChildSelect($group, 'groups', $thClass, 'Grupp', $inheritPosts, $groupLevel, $parent);
-            printChildSelect($group, 'layers', $thClass, 'Lager', $inheritPosts, $groupLevel);
+            $groupChildSelects = array(array('layers', 'Lager'), array('groups', 'Grupp', $parent));
         }
-        echo '</tr></table>';
+        printChildSelectRow('overflowHr', $group, $groupChildSelects, $inheritPosts, $groupLevel);
+        unset($groupChildSelects);
         $groupLevel++;
     }
     unset($group);
 }
-unset($tmpGroupIds, $parent, $groupLevel, $groupId, $thClass, $idPosts['groupId'], $totGroupLevels);
+unset($tmpGroupIds, $parent, $groupLevel, $groupId, $idPosts['groupId'], $totGroupLevels);
 
 // If any <item> is selected
 if (!empty($idPosts)) {
