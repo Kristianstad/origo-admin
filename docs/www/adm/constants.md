@@ -23,6 +23,8 @@
 | `$exclusiveOperationGroups` | `exclusiveOperationGroups.php` | Grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs om ett objekt redan finns i en annan förälder i samma grupp | manage (`printAddRemoveOperations`) |
 | `$forwardauthSessionConfig` | `forwardauthSessionConfig.php` | Sessionsinställningar för forward-auth: slideExtension, absoluteMax, baseLifetime | forwardauth |
 | `$iconTtl` | `iconTtl.php` | TTL-parameter (sekunder) som läggs till på lagerträdets ikon-URL:er, för cache-brytning. `'-1'` stänger av parametern helt | writeConfig (addLayersToJson) |
+| `$idPrefixChildren` | `idPrefixChildren.php` | Tabeller vars id byggs som `<föräldra-id>.<namn>` (databas → schema → tabell), per föräldertabell | manage (`idRenames`) |
+| `$idReferenceOverrides` | `idReferenceOverrides.php` | Avvikelser från namnkonventionen som identifierar id-referenser, `"<tabell>.<kolumn>"` → refererad tabell eller `null` | manage (`idReferencedTable`) |
 | `$keywordCategorized` | `keywordCategorized.php` | Vilka tabeller som ska nyckelordskategoriseras | manage (printHeadForm; jfr `viewKeywordCategorized()`) |
 | `$mapstateMaxUnused` | `mapstateMaxUnused.php` | Dagar innan oanvänt mapstate städas bort | mapstate |
 | `$multiselectables` | `multiselectables.php` | Vilka konfigurationsfält som ska ha en multiselect-knapp | manage (printTextarea) |

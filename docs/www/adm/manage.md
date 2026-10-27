@@ -106,6 +106,40 @@ initdb/060.origo.sql):
   can_undo/can_redo-flaggor (visningsflaggorna räknas dock om från grunden
   av historyStateForTarget() snarare än att läsas direkt).
 
+Om ett objekts primärnyckel ändras ligger `target_key` kvar som historikens
+identitet, medan `object_identity.target_id` följer det aktuella id:t. Ångra/gör
+om skriver snapshotet mot det aktuella id:t, flyttar identitetens id tillsammans
+med snapshotet och återställer även referenserna (se "Ändra id på ett objekt").
+Historikens snapshots för *andra* objekt uppdateras inte vid ett id-byte; ångrar
+man en äldre ändring i ett objekt som refererade till det omdöpta id:t
+återställs det gamla id:t i referensen.
+
+## Ändra id på ett objekt
+
+Id:t (primärnyckeln) kan ändras i objektets formulär för alla typer vars formulär
+visar id-fältet som skrivbart. Relationerna mellan konfigurationsobjekt lagras som
+id:n i kolumner (inga främmande nycklar), så `manage.php` uppdaterar dem i samma
+transaktion som objektets egen `UPDATE`:
+
+- `sqlForIdChange()` bygger satserna. Vilka kolumner som refererar till en tabell
+  härleds ur schemat med `idReferencedTable()`: en array-kolumn refererar till
+  tabellen med samma namn (eller dess alias i `constants/tableAliases.php`), en
+  enkel kolumn till tabellen för typen med samma namn (`source` → `sources`). En
+  ny typ som följer namnkonventionerna (`<typ>_id`, tabell `<typ>s`) omfattas därför
+  utan kodändring. Array-kolumner måste finnas i `constants/arrayColumns.php`.
+- Avvikelser från konventionen anges i `constants/idReferenceOverrides.php`
+  (`layers.format` är en MIME-typ och inget id; `layers.style_layer` och
+  `layers.type` är id:n utan att heta som sin tabell).
+- Id:n som byggs som `<föräldra-id>.<namn>` (databas → schema → tabell, se
+  `constants/idPrefixChildren.php`) byts på samma sätt: `idRenames()` listar de
+  härledda raderna, som döps om med sina referenser och historikidentiteter.
+- Efter lyckad ändring byter `postWithRenamedIds()` ut de valda id:na i `$post`
+  (`<typ>Id` och id-kedjorna `groupIds`/`infogroupIds`), så att sidan återläser
+  objektet med det nya id:t. De berörda kartorna markeras som ändrade via
+  `usedInMaps()` före och efter. Ett id som redan används avvisas av databasens
+  primärnyckel och hela ändringen rullas tillbaka.
+- Publicerade filer under det gamla kart-id:t tas inte bort av id-bytet.
+
 Skrivsidan: i manage.php:s update-gren sparas konfigurationen som den såg
 ut före ändringen ($historyBeforeConfig). recordHistoryEdit() lägger till
 före/efter-snapshotet, flyttar edit_cursor dit och kastar bort en ev.
@@ -287,7 +321,7 @@ betydande typspecifik villkorslogik:
 | Fil | Funktion | Beskrivning |
 |---|---|---|
 | `appendUpdatedColumnsToSql.php` | `appendUpdatedColumnsToSql($dbColumns, $sql, $params=[]): array` | Bygger vidare på en SQL-sträng med parameteriserade `kolumn = $N`-par för en `UPDATE`-sats. Tomma värden (inkl. `'{}'`/`'{{}}'`, tomma Postgres-arrayer) blir `NULL`; returnerar SQL och parametrar |
-| `applyHistoryNavigation.php` | `applyHistoryNavigation($dbh, $targetKey, $direction): array` | Flyttar `edit_cursor` ett steg `undo`/`redo` för given `$targetKey` och skriver tillbaka rätt snapshot (`before_data`/`after_data`) till objektets tabell. Returnerar `['ok', 'target_table', 'target_id', 'error']`. Se "Historik: Ångra/Gör om" ovan |
+| `applyHistoryNavigation.php` | `applyHistoryNavigation($dbh, $targetKey, $direction): array` | Flyttar `edit_cursor` ett steg `undo`/`redo` för given `$targetKey` och skriver tillbaka rätt snapshot (`before_data`/`after_data`) till objektets tabell. Returnerar `['ok', 'target_table', 'target_id', 'renames', 'error']` (`renames` från `idRenames()` när snapshotet byter id; `target_id` är det id objektet har efteråt). Se "Historik: Ångra/Gör om" ovan |
 | `categories.php` | `categories($config, $catParam): array` | Bygger en nyckelordskategorisering: går igenom en hel tabellkonfiguration och grupperar rad-id:n (`$catParam`, primärnyckelkolumnen) efter deras `keywords`-fält. Lägger alltid till en `"Alla"`-kategori med samtliga id:n överst |
 | `categoryPosts.php` | `categoryPosts($post): array` | Filtrerar `$post` till fält vars namn slutar på `Category` |
 | `deleteIdSql.php` | `deleteIdSql($id, $tableName): array` | Bygger parameteriserad `DELETE`-sats för given tabell och id; returnerar SQL och parametrar |
@@ -295,10 +329,14 @@ betydande typspecifik villkorslogik:
 | `hasStringKeys.php` | `hasStringKeys(array $array): bool` | Kontrollerar om en array har minst en textnyckel (dvs. är associativ snarare än numeriskt indexerad). Används av `printSelectOptions()` |
 | `historyStateForTarget.php` | `historyStateForTarget($dbh, $target): array` | Läser `edit_cursor`/`edits` för given target och räknar från grunden ut `['undo', 'redo', 'current_edit_id', 'edits', 'index']`. Används av `printHistoryButtons()` för att avgöra vilka knappar som ska visas |
 | `idPosts.php` | `idPosts($post): array` | Filtrerar `$post` till fält vars namn slutar på `Id`, med undantag för operationernas `from/to`-fält för map, group, classe och infogroup |
+| `idReferencedTable.php` | `idReferencedTable($table, $column, $configTables): string\|null` | Returnerar tabellen vars id:n kolumnen innehåller, eller `null`. Härleds ur namnkonventionerna och `constants/idReferenceOverrides.php`; se "Ändra id på ett objekt" |
+| `idRenames.php` | `idRenames($table, $oldId, $newId, $configTables): array` | Listar `[tabell, gammalt id, nytt id]` för objektet och för rader vars id byggs av dess id (`constants/idPrefixChildren.php`) |
 | `isArrayColumn.php` | `isArrayColumn($column): bool` | Kontrollerar om en given kolumn är en Postgres-array-kolumn, genom att slå upp den mot listan i `constants/arrayColumns.php`. Avslutar programmet (`die()`) om `$column` inte är en icke-tom sträng |
 | `markMapsChanged.php` | `markMapsChanged(&$dbh, $mapIds): void` | Sätter `maps.changed = 't'` för samtliga angivna kartor i en enda batch-SQL (flera `UPDATE`-satser konkatenerade med `; `). Detta är motparten till `markMapUnchanged()` i writeConfig-modulen – manage-modulen flaggar en karta som "ändrad, behöver publiceras om" varje gång något som påverkar den redigeras, och writeConfig-modulen nollställer flaggan efter lyckad publicering |
 | `objectHistoryKey.php` | `objectHistoryKey($target): string` | Bygger den stabila historiknyckeln `<typ>:<id>` (`target_key`) för ett objekt, utifrån `targetType()`/`targetId()`. Se "Historik: Ångra/Gör om" ovan |
 | `postButton.php` | `postButton($post): string\|null` | Hittar namnet på den POST-parameter vars namn slutar på `Button` – det är detta namn (`<typ>Button`) som `manage.php` sedan bryter isär för att få fram `$type` |
+| `postedIdList.php` | `postedIdList($post, $key): array` | Läser en kommaseparerad id-kedja (t.ex. `groupIds`) ur `$post` som array |
+| `postWithRenamedIds.php` | `postWithRenamedIds($post, $renames): array` | Byter ut omdöpta id:n bland de valda id:na i `$post` (`<typ>Id` och `<typ>Ids`) |
 | `printActivateSkinButton.php` | `printActivateSkinButton(string $skinId): void` | Renderar skinvalsknappen; `manageActions.js` sparar skin-id:t i cookien och laddar om sidan |
 | `printAddOperation.php` | `printAddOperation($target, $addToTable, $buttontext, $inheritPosts)` | Skriver ut ett litet formulär: en dropdown med tillgängliga föräldrar (t.ex. kartor eller grupper) + en knapp som postar `operation`-kommandot för att lägga till `$target` i den valda föräldern |
 | `printChildSelect.php` | `printChildSelect($target, $column, &$thClass, $heading, $inheritPosts, $groupLevel=1, $selectedValue=null)` | Den mest komplexa av dessa byggstenar: skriver ut en kolumn i "barn-urvalsraden" (t.ex. vilka lager/grupper/kontroller finns i vald karta). Hanterar specialfall för `schemas`/`tables` och nästlade `groups`/`infogroups`, där respektive id-kedja byggs baserat på djup |
@@ -322,6 +360,7 @@ betydande typspecifik villkorslogik:
 | `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn), om inte `$preserveOrder` är satt (används av `edit`-dropdownen för att bevara kronologisk ordning trots att etiketten är `target_key`, inte datumet). **Visar texten efter sista kommatecknet i etiketten**, se begränsningar |
 | `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Skriver ut ett redigerbart `<textarea>`, städar Postgres-arraysyntax, bevarar storlek/scrollposition via `$sizePosts` och dolda fält, visar hjälp och eventuell multiselect-knapp. `textareaState.js` hanterar dimensionering, Tab-inmatning och scrollposition utan inline-händelsekod |
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |
+| `sqlForIdChange.php` | `sqlForIdChange($renames, $configTables): array` | Bygger satserna som slutför ett id-byte: omdöpta härledda rader med historikidentitet och alla kolumner som refererar till ett omdöpt id. Objektets egen rad uppdateras av `sqlForUpdate()`. Se "Ändra id på ett objekt" |
 | `sqlForOperation.php` | `sqlForOperation($operation, $child, $parent): array` | Bygger en parameteriserad UPDATE-sats som lägger till/tar bort ett barn-id ur förälderns array-kolumn; returnerar SQL och parametrar |
 | `sqlForUpdate.php` | `sqlForUpdate($fullTarget, $updatePosts): array` | Bygger en parameteriserad fullständig UPDATE-sats för en target baserat på postat formulärdata; returnerar SQL och parametrar |
 | `typeHelps.php` | `typeHelps($type, $helps): array` | Filtrerar den globala listan av hjälptext-id:n (`help_id`, format `<typ>:<fält>`) till de som gäller en specifik typ, och returnerar bara fältdelen. Detta är mekaniken bakom `in_array($fältnamn, $helps)`-kontrollerna i varje `print*Form`-funktion – `$helps` som skickas till de funktionerna är redan filtrerat via denna funktion i `manage.php`s entry point |

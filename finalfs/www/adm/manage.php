@@ -1,6 +1,7 @@
 <?php
 /*
 manage.php
+Vid id-byte följer referenser, vald rad och historik med till det nya id:t.
  ├─ includeDirectory("./functions/common")
  ├─ includeDirectory("./functions/manage")
  ├─ $post = array_filter($_POST, ...)      → rensar bort tomma POST-värden (men behåller "0")
@@ -163,6 +164,7 @@ if (isset($postButton)) {
     $command = $post[$postButton];
 
     $sqlStatements = array();
+    $idRenames = array();
 
     if ($command == 'copy' && isset($post[$type . 'Id'])) {
         if (isset($post['update' . ucfirst($typeTablePkColumn)])) {
@@ -218,14 +220,18 @@ if (isset($postButton)) {
             $errorAlert = 'window.onload=function(){alert("' . str_replace('"', '\"', $historyResult['error']) . '");}';
         } else {
             $configTables = configTables($dbh);
+            $historyTarget = makeBasicTarget($type, $historyResult['target_id']);
             $usedInMapsNew = usedInMaps($dbh, $historyTarget);
             $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
             if (!empty($usedInMaps)) {
                 markMapsChanged($dbh, $usedInMaps);
                 $configTables = configTables($dbh);
             }
+            $post = postWithRenamedIds($post, $historyResult['renames']);
             $post[$type . 'Id'] = $historyResult['target_id'];
-            $idPosts[$type . 'Id'] = $historyResult['target_id'];
+            $idPosts = idPosts($post);
+            $groupIdsArray = postedIdList($post, 'groupIds');
+            $infogroupIdsArray = postedIdList($post, 'infogroupIds');
             if (in_array($typeTableName, $keywordCategorized)) {
                 $categoriesByTable[$typeTableName] = categories($configTables[$typeTableName], $typeTablePkColumn);
             }
@@ -300,7 +306,14 @@ if (isset($postButton)) {
                 }
 
                 $sqlStatements[] = sqlForUpdate($fullTarget, $updatePosts);
-                unset($config, $fullTarget);
+
+                // If the id is changed, then the rows that refer to it (or derive their ids from it) must follow
+                $newId = $updatePosts['update' . ucfirst($typeTablePkColumn)] ?? $id;
+                if ($command == 'update' && $newId !== $id) {
+                    $idRenames = idRenames($typeTableName, $id, $newId, $configTables);
+                    $sqlStatements = array_merge($sqlStatements, sqlForIdChange($idRenames, $configTables));
+                }
+                unset($config, $fullTarget, $newId);
             } else {
                 $failedUpdate['type'] = $type;
                 $failedUpdate['id'] = $id;
@@ -392,11 +405,20 @@ if (isset($postButton)) {
                 $id=$copyId;
             }
             $configTables = ($historyConfigTables !== null) ? $historyConfigTables : configTables($dbh);
+            $updatedTarget = $changedTarget;
+            if (!empty($idRenames)) {
+                $id = $idRenames[0][2];
+                $updatedTarget = makeBasicTarget($type, $id);
+                $post = postWithRenamedIds($post, $idRenames);
+                $idPosts = idPosts($post);
+                $groupIdsArray = postedIdList($post, 'groupIds');
+                $infogroupIdsArray = postedIdList($post, 'infogroupIds');
+            }
             if ($command != 'operation' && in_array($typeTableName, $keywordCategorized)) {
                 $categoriesByTable[$typeTableName] = categories($configTables[$typeTableName], $typeTablePkColumn);
             }
             if ($command == 'update' || $command == 'operation') {
-                $usedInMapsNew = usedInMaps($dbh, $changedTarget);
+                $usedInMapsNew = usedInMaps($dbh, $updatedTarget);
                 $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
                 if (!empty($usedInMaps)) {
                     markMapsChanged($dbh, $usedInMaps);
@@ -405,14 +427,14 @@ if (isset($postButton)) {
                 unset($usedInMapsNew, $usedInMaps);
             }
             if ($command == 'update' && isset($historyBeforeConfig)) {
-                $historyAfterConfig = targetConfig(toFullTarget($changedTarget, $configTables));
+                $historyAfterConfig = targetConfig(toFullTarget($updatedTarget, $configTables));
                 recordHistoryEdit($dbh, $changedTarget, 'update', $historyBeforeConfig, $historyAfterConfig);
                 unset($historyAfterConfig);
             }
         }
-        unset($usedInMapsOld, $changedTarget, $result);
+        unset($usedInMapsOld, $changedTarget, $updatedTarget, $result);
     }
-    unset($updatePosts, $copyId, $id, $target, $type, $typeTableName, $typeTablePkColumn, $typeTable, $command, $sqlStatements, $historyBeforeConfig);
+    unset($updatePosts, $copyId, $id, $target, $type, $typeTableName, $typeTablePkColumn, $typeTable, $command, $sqlStatements, $idRenames, $historyBeforeConfig);
 }
 pg_close($dbh);
 

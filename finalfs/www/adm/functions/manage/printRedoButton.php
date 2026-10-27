@@ -1,6 +1,6 @@
 <?php
 
-function printRedoButton($target, $visible=true)
+function printRedoButton($target, $visible=true, $targetKey=null)
 {
     if (!$visible)
     {
@@ -8,7 +8,7 @@ function printRedoButton($target, $visible=true)
     }
     $type=targetType($target);
     $id=targetId($target);
-    $targetKey=objectHistoryKey($target);
+    $targetKey=$targetKey ?? objectHistoryKey($target);
     $targetTable=targetTable($target);
     $confirmJs='return confirm("Gör om senaste ändringen för "+'.jsonForInlineJs($id).'+"?");';
     echo '<input type="hidden" name="target_key" value="'.escapeHtml($targetKey).'">';

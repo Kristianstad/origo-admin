@@ -5,10 +5,20 @@
     function recordHistoryEdit($dbh, $target, $action, $beforeConfig, $afterConfig)
     {
         require("./constants/configSchema.php");
-        $targetKey=objectHistoryKey($target);
         $targetTable=targetTable($target);
         $targetId=targetId($target);
-        pg_query_params($dbh, "INSERT INTO $configSchema.object_identity (target_key, target_table, target_id) VALUES ($1, $2, $3) ON CONFLICT (target_key) DO UPDATE SET updated_at = now()", array($targetKey, $targetTable, $targetId));
+        $targetKey=objectHistoryKey($target);
+        $identityResult=pg_query_params($dbh, "SELECT target_key FROM $configSchema.object_identity WHERE target_table = $1 AND target_id = $2", array($targetTable, $targetId));
+        if ($identityResult !== false && pg_num_rows($identityResult) > 0)
+        {
+            $targetKey=pg_fetch_result($identityResult, 0, 'target_key');
+        }
+        $targetIdColumn=targetIdColumn($target);
+        if ($action === 'update' && isset($afterConfig[$targetIdColumn]))
+        {
+            $targetId=$afterConfig[$targetIdColumn];
+        }
+        pg_query_params($dbh, "INSERT INTO $configSchema.object_identity (target_key, target_table, target_id) VALUES ($1, $2, $3) ON CONFLICT (target_key) DO UPDATE SET target_id = EXCLUDED.target_id, updated_at = now()", array($targetKey, $targetTable, $targetId));
         $cursorResult=pg_query_params($dbh, "SELECT current_edit_id FROM $configSchema.edit_cursor WHERE target_key = $1", array($targetKey));
         $currentEditId=null;
         if ($cursorResult !== false && pg_num_rows($cursorResult) > 0)

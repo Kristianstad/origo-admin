@@ -7,7 +7,14 @@ function historyStateForTarget($dbh, $target)
     {
         return array('undo' => false, 'redo' => false, 'current_edit_id' => null, 'edits' => array());
     }
+    $targetTable = targetTable($target);
+    $targetId = targetId($target);
     $targetKey = objectHistoryKey($target);
+    $identityResult = pg_query_params($dbh, "SELECT target_key FROM map_configs.object_identity WHERE target_table = $1 AND target_id = $2", array($targetTable, $targetId));
+    if ($identityResult !== false && pg_num_rows($identityResult) > 0)
+    {
+        $targetKey = pg_fetch_result($identityResult, 0, 'target_key');
+    }
     $loaded = pg_query_params($dbh, "SELECT current_edit_id FROM map_configs.edit_cursor WHERE target_key = $1", array($targetKey));
     $currentEditId = null;
     if ($loaded !== false && pg_num_rows($loaded) > 0)
@@ -59,5 +66,6 @@ function historyStateForTarget($dbh, $target)
         'current_edit_id' => $currentEditId,
         'edits' => $edits,
         'index' => $index,
+        'target_key' => $targetKey,
     );
 }

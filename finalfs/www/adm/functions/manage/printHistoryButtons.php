@@ -25,8 +25,9 @@ function printHistoryButtons($target, $dbh=null, $inheritPosts=array())
         }
         return;
     }
-    printUndoButton($target, $state['undo']);
-    printRedoButton($target, $state['redo']);
+    $targetKey = $state['target_key'] ?? objectHistoryKey($target);
+    printUndoButton($target, $state['undo'], $targetKey);
+    printRedoButton($target, $state['redo'], $targetKey);
     if ($closeConnection)
     {
         pg_close($dbh);
