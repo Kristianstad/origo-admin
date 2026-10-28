@@ -501,9 +501,7 @@ CREATE TABLE IF NOT EXISTS map_configs.searchtables
     ttl integer,
     "limit" integer,
     usecentroid boolean DEFAULT true,
-    database character varying COLLATE pg_catalog."default",
-    dbschema character varying COLLATE pg_catalog."default",
-    dbtable character varying COLLATE pg_catalog."default",
+    "table" character varying COLLATE pg_catalog."default",
     searchfield character varying COLLATE pg_catalog."default",
     geometryfield character varying COLLATE pg_catalog."default",
     gidfield character varying COLLATE pg_catalog."default",
@@ -939,9 +937,7 @@ INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:mode','<b>S
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:ttl','<b>Söktabell > Cache-tid</b><br>Antal sekunder som söktabellens cache anses färsk. 0 (eller tomt) betyder att sökningen alltid körs direkt mot databasen. Äldre cache används tills en ny hunnit byggas, tills den är dubbelt så gammal som cache-tiden (justerbart med cache-faktorn).') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:limit','<b>Söktabell > Max antal träffar</b><br>Högsta antal träffar från söktabellen. Tomt betyder sökmodellens gräns.') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:usecentroid','<b>Söktabell > Använd centroid</b><br>Om "t" (eller tomt) returneras en punkt på ytan (ST_PointOnSurface) som geometri, annars hela geometrin.') ON CONFLICT DO NOTHING;
-INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:database','<b>Söktabell > Databas</b><br>Databasen som tabellen ligger i. Anslutningen hämtas från databasens anslutningssträng.') ON CONFLICT DO NOTHING;
-INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:dbschema','<b>Söktabell > Schema</b><br>Schemat i databasen där tabellen eller vyn ligger. Tomt betyder public.') ON CONFLICT DO NOTHING;
-INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:dbtable','<b>Söktabell > Tabell</b><br>Tabellen eller vyn som ska sökas. Namnet returneras även som TYPE i träffarna om ingen egen typ anges.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:table','<b>Söktabell > Tabell</b><br>Tabellen eller vyn som ska sökas, vald bland tabellerna (typen tabell). Databasen (anslutningen) och schemat hämtas ur tabellens id, som har formen databas.schema.tabell. Vyer och materialiserade vyer läses inte in automatiskt: skapa en tabell med id databas.schema.vynamn. Tabellens namn returneras som TYPE i träffarna om ingen egen typ anges.') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:searchfield','<b>Söktabell > Sökfält</b><br>Kolumnen som sökordet jämförs med. Värdet returneras som NAMN i träffarna.') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:geometryfield','<b>Söktabell > Geometrifält</b><br>Kolumnen med geometrin. Tomt betyder geom.') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:gidfield','<b>Söktabell > Gidfält</b><br>Kolumnen med ett unikt id per rad (returneras som GID och används för att ta bort dubbletter). Tomt betyder gid.') ON CONFLICT DO NOTHING;

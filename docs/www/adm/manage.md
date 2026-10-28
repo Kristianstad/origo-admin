@@ -28,10 +28,12 @@ Skriver ändringar direkt till konfigurationsdatabasen, och markerar
 inaktuella och behöver köras genom `writeConfig.php` igen för att
 ändringen ska synas för besökare.
 
-Vyn Sök hanterar sökmodulens konfiguration (`searchmodels`, `searchtables` och
-`databases`). Efter en lyckad ändring av någon av dem anropar `manage.php`
+Vyn Sök visar sökmodulens konfiguration (`searchmodels` och `searchtables`) och
+tabellerna (`tables`), där vyer kan skapas manuellt; databaserna hanteras i vyn
+Meta. Efter en lyckad ändring av `searchmodels`, `searchtables` eller
+`databases` anropar `manage.php`
 `searchConfigTableChanged()`, som markerar sökkonfigurationens cache som gammal
-och bygger om den direkt (se search.md).
+och bygger om den direkt, även när ett tabell-id har bytts (se search.md).
 
 Formulärens renderingsstate skickas explicit genom `inheritPosts`-contexten.
 Privata nycklar som `_viewDepth` och `_formChanged` används internt och
@@ -262,7 +264,7 @@ att target-tabellen finns i den laddade konfigurationen och att motsvarande
 | `printProj4defForm.php` | proj4def | code, projection, projectionextent, alias | – |
 | `printSchemaForm.php` | schema | keywords, contact (select), origin (select), updated, update (select) | `printReadSchemaTablesButton` |
 | `printSearchmodelForm.php` | searchmodel | searchtables (flervalsknapp), limit, liverows | – |
-| `printSearchtableForm.php` | searchtable | titlefield, mode (select), sortmode (select), ttl, maxcacheagefactor, limit, usecentroid (select f/t), database (select), dbschema, dbtable, searchfield, geometryfield, gidfield, customtype, fields | – |
+| `printSearchtableForm.php` | searchtable | titlefield, mode (select), sortmode (select), ttl, maxcacheagefactor, limit, usecentroid (select f/t), table (select bland tabellerna), searchfield, geometryfield, gidfield, customtype, fields | – |
 | `printSkinForm.php` | skin | Färg-, typografi-, ram-, radie- och skugginställningar | `printActivateSkinButton` |
 | `printTilegridForm.php` | tilegrid | tilesize | – |
 

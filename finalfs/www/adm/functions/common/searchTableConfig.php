@@ -1,14 +1,16 @@
 <?php
 
     // Takes a searchtables row (array), the databases rows (array), the limit of the search model and its number of live rows.
+    // The row's table is a tables id ("<database>.<schema>.<table>") from which database, schema and table name are taken.
     // Returns the settings used by the search module for that search table, or null (and logs) if the row is unusable.
     function searchTableConfig($searchtable, $databases, $modelLimit, $liveRows)
     {
         $tableKey=$searchtable['searchtable_id'] ?? '';
-        $database=empty($searchtable['database']) ? array() : arrayColumnSearch($searchtable['database'], 'database_id', $databases);
-        if (empty($database['connectionstring']) || empty($searchtable['dbtable']) || empty($searchtable['searchfield']))
+        list($databaseId, $schema, $table)=array_pad(explode('.', (string) ($searchtable['table'] ?? ''), 3), 3, '');
+        $database=($databaseId === '') ? array() : arrayColumnSearch($databaseId, 'database_id', $databases);
+        if (empty($database['connectionstring']) || $schema === '' || $table === '' || empty($searchtable['searchfield']))
         {
-            error_log("Search: search table '$tableKey' is missing, or lacks database, table or search field");
+            error_log("Search: search table '$tableKey' lacks a table of the form database.schema.table in a known database, or lacks a search field");
             return null;
         }
         $title=(string) ($searchtable['title'] ?? '');
@@ -17,15 +19,15 @@
             'tableKey' => $tableKey,
             'connectionString' => $database['connectionstring'],
             'usePconnect' => ($database['usepconnect'] ?? 'f') === 't',
-            'schema' => $searchtable['dbschema'] ?: 'public',
-            'table' => $searchtable['dbtable'],
+            'schema' => $schema,
+            'table' => $table,
             'searchField' => $searchtable['searchfield'],
             'geometryName' => $searchtable['geometryfield'] ?: 'geom',
             'gid' => $searchtable['gidfield'] ?: 'gid',
             'title' => $title,
             'titleField' => $titleField,
             'groupByTitle' => $title === '' && $titleField !== '',
-            'customType' => $searchtable['customtype'] ?: $searchtable['dbtable'],
+            'customType' => $searchtable['customtype'] ?: $table,
             'fields' => array_values(array_filter(array_map('trim', pgArrayToPhp($searchtable['fields'])), 'strlen')),
             'searchMode' => ($searchtable['mode'] ?? '') === 'intelligent' ? 'intelligent' : 'simple',
             'sortMode' => ($searchtable['sortmode'] ?? '') === 'blockunit' ? 'blockunit' : '',

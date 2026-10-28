@@ -36,7 +36,7 @@ Vid id-byte följer referenser, vald rad och historik med till det nya id:t.
  │    │                     förälder (map/group) → sqlForOperation()
  │    ├─ kör statements, om lyckat:
  │    │    ├─ läser om configTables (färsk data)
- │    │    ├─ searchConfigTableChanged() [common] → markerar och bygger om sökkonfigurationens cache om searchmodels/searchtables/databases ändrats (gäller även undo/redo och restore)
+ │    │    ├─ searchConfigTableChanged() [common] → markerar och bygger om sökkonfigurationens cache om searchmodels/searchtables/databases ändrats eller ett tabell-id bytts (gäller även undo/redo och restore)
  │    │    ├─ usedInMaps() FÖRE och EFTER ändringen → markMapsChanged() för påverkade
  │    │    │   kartor (sätter troligen maps.changed='t', vilket writeConfig.php senare
  │    │    │   läser för att veta vilka kartor som behöver publiceras om)
@@ -222,7 +222,7 @@ if (isset($postButton)) {
             $errorAlert = 'window.onload=function(){alert("' . str_replace('"', '\"', $historyResult['error']) . '");}';
         } else {
             $configTables = configTables($dbh);
-            searchConfigTableChanged($dbh, $typeTableName);
+            searchConfigTableChanged($dbh, $typeTableName, $historyResult['renames']);
             $historyTarget = makeBasicTarget($type, $historyResult['target_id']);
             $usedInMapsNew = usedInMaps($dbh, $historyTarget);
             $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
@@ -408,7 +408,7 @@ if (isset($postButton)) {
                 $id=$copyId;
             }
             $configTables = ($historyConfigTables !== null) ? $historyConfigTables : configTables($dbh);
-            searchConfigTableChanged($dbh, $typeTableName);
+            searchConfigTableChanged($dbh, $typeTableName, $idRenames);
             $updatedTarget = $changedTarget;
             if (!empty($idRenames)) {
                 $id = $idRenames[0][2];
@@ -917,9 +917,9 @@ if (!empty($idPosts)) {
 
     // Else, if a searchtable is selected
     elseif ($childType == 'searchtable') {
-        // Table selectable items (databases) are exposed as $selectables (array)
+        // Search table selectable items (tables) are exposed as $selectables (array)
         $selectables = array(
-            'databases' => array_column($configTables['databases'], 'database_id')
+            'tables' => array_column($configTables['tables'], 'table_id')
         );
 
         // Print the form for the selected table

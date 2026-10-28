@@ -19,15 +19,17 @@ Anges ingen känd modell svarar sökningen med HTTP 400 och `{"error":"Unknown s
 **Svar:** JSON-array med träffar. Varje träff har `NAMN` (söktabellens sökfält), `GID`, eventuella extrafält, `TYPE` (söktabellens `customtype`, annars tabellens namn), `TITLE` (om söktabellen har titel eller titelfält) och `GEOM` (WKT). Svarshuvudena `X-Search-Source` (`live`, `cache`, `mixed` eller `none`) och `X-Search-Cache-Age-Seconds` anger varifrån träffarna kom. Kan ingen konfiguration läsas svarar sökningen med HTTP 503.
 
 ## Konfiguration i databasen
-Tre typer, alla i vyn **Sök** i manage-verktyget (`constants/views.php`):
+Tre typer i manage-verktyget. Vyn **Sök** (`constants/views.php`) visar `searchmodels`, `searchtables` och `tables`; databaserna hanteras i vyn Meta.
 
 | Tabell | Innehåll |
 |---|---|
-| `databases` | Anslutningssträng (`connectionstring`) och `usepconnect` (beständig anslutning med `pg_pconnect`, annars `pg_connect`). Anslutningen används för att söka i söktabellens data |
-| `searchtables` | En sökbar tabell eller vy: `database`, `dbschema` (standard `public`), `dbtable`, `searchfield`, `geometryfield` (standard `geom`), `gidfield` (standard `gid`), `title` eller `titlefield` (kategori per träff), `mode`, `sortmode`, `ttl`, `maxcacheagefactor`, `"limit"`, `usecentroid`, `customtype`, `fields` (extra kolumner) |
+| `databases` | Anslutningssträng (`connectionstring`) och `usepconnect` (beständig anslutning med `pg_pconnect`, annars `pg_connect`). Anslutningen används för att söka i söktabellens data; vilken databas som gäller för en söktabell framgår av tabellens id |
+| `searchtables` | En sökbar tabell eller vy: `table` (ett id i typen tabell, `databas.schema.tabell`; databas, schema och tabellnamn härleds ur id:t med uppdelning på de två första punkterna), `searchfield`, `geometryfield` (standard `geom`), `gidfield` (standard `gid`), `title` eller `titlefield` (kategori per träff), `mode`, `sortmode`, `ttl`, `maxcacheagefactor`, `"limit"`, `usecentroid`, `customtype`, `fields` (extra kolumner) |
 | `searchmodels` | En sökmodell: `searchtables` (ordnad lista; ordningen styr träffarnas ordning), `"limit"` (totalt antal träffar, standard 20) och `liverows` (rader vid direktsökning i läget `intelligent`, standard 300) |
 
-Fältens betydelse beskrivs i hjälptexterna (`searchtable:*`, `searchmodel:*`, `database:usepconnect` i `helps`). Id-byte på en databas eller söktabell uppdaterar referenserna i `searchtables.database` respektive `searchmodels.searchtables` (se manage.md, "Ändra id på ett objekt"). Kolumnerna `limit` och `fields` påverkar kolumnnamnscitering och array-hantering: `appendUpdatedColumnsToSql()` citerar alla kolumnnamn, och `fields`/`searchtables` finns i `constants/arrayColumns.php`.
+Fältens betydelse beskrivs i hjälptexterna (`searchtable:*`, `searchmodel:*`, `database:usepconnect` i `helps`). Id-byte på en databas, ett schema, en tabell eller en söktabell uppdaterar referenserna i `searchtables.table` respektive `searchmodels.searchtables` (se manage.md, "Ändra id på ett objekt"). Kolumnerna `limit` och `table` är reserverade ord i PostgreSQL; `appendUpdatedColumnsToSql()` citerar alla kolumnnamn. `fields` och `searchtables` finns i `constants/arrayColumns.php`.
+
+**Tabeller och vyer:** `table` väljs bland tabellerna i konfigurationen. `read_schema_tables.php` registrerar bara bastabeller (`table_type = 'BASE TABLE'`), så vyer och materialiserade vyer måste skapas manuellt som tabell med id `databas.schema.vynamn` innan de kan väljas.
 
 ## Så söks det
 För varje söktabell i modellen, i modellens ordning:
@@ -65,7 +67,7 @@ Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodelle
 - **Gammal cache:** den används vidare (grace) tills en ny är helt skriven. Den första sökningen efter en ändring svarar direkt med den gamla cachen och bygger om efter svaret. Är databasen otillgänglig finns den gamla cachen kvar.
 - **Skrivning:** den nya cachen skrivs till en temporär fil som döps om, därefter flyttas pekaren `config.current` på samma sätt, och först sedan tas de gamla filerna bort. Ändras konfigurationen under ett pågående bygge förblir cachen gammal och byggs om igen.
 - **Ingen fast giltighetstid.** Cachen markeras gammal när konfigurationen ändras:
-  - `manage.php` anropar `searchConfigTableChanged()` efter en lyckad ändring av `searchmodels`, `searchtables` eller `databases` (skapa, uppdatera, kopiera, radera, ångra/gör om, återställ och id-byte) och bygger om direkt med den öppna anslutningen.
+  - `manage.php` anropar `searchConfigTableChanged()` efter en lyckad ändring av `searchmodels`, `searchtables` eller `databases`, eller när ett tabell-id byts (direkt eller genom att dess schema eller databas döps om). Det gäller skapa, uppdatera, kopiera, radera, ångra/gör om, återställ och id-byte, och cachen byggs om direkt med den öppna anslutningen.
   - `sql_import.php` markerar och bygger om efter varje lyckad import.
   - Knappen **Töm sökcache** i Verktyg-vyn kör `clearSearchConfigCache.php`, som markerar cachen gammal och bygger om den direkt. Misslyckas bygget finns den gamla cachen kvar.
   - Ändringar som görs direkt i databasen (utanför verktyget) upptäcks inte; använd knappen.
@@ -108,6 +110,7 @@ Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodelle
 - Konfigurationen innehåller anslutningssträngar i klartext (som `databases.connectionstring`) och finns även i konfigurationscachen i `sys_get_temp_dir()`, med åtkomst bara för webbserveranvändaren.
 - `search.php` är en publik endpoint men använder den ordinarie konfigurationsanslutningen (`dbh()`); koden läser bara.
 - Grace-beteendet kan ge en äldre konfiguration (till exempel en raderad modell) tills den nya cachen är klar.
+- Raderas en tabell i konfigurationen fortsätter söktabellen att fungera, eftersom bara tabellens id används, men söktabellen visas inte i "Används av".
 - Ett sökord med tecken som är ogiltiga i en `tsquery` (till exempel `&`, `|` eller `:` på fel plats) ger ett SQL-fel i läget `intelligent` vid direktsökning; felet loggas och söktabellen ger inga träffar.
 - Samma `customtype` (eller tabellnamn) på flera söktabeller gör att de delar kvot vid den proportionella kapningen.
 - Inga automatiska tester finns; SQL och cache kräver PostgreSQL för att verifieras.
