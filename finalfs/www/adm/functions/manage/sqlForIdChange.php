@@ -26,11 +26,11 @@
                     }
                     if (isArrayColumn($column))
                     {
-                        $sql="UPDATE $configSchema.$referencingTable SET $column = array_replace($column, $2::varchar, $1::varchar) WHERE $2::varchar = ANY($column)";
+                        $sql="UPDATE $configSchema.$referencingTable SET \"$column\" = array_replace(\"$column\", $2::varchar, $1::varchar) WHERE $2::varchar = ANY(\"$column\")";
                     }
                     else
                     {
-                        $sql="UPDATE $configSchema.$referencingTable SET $column = $1 WHERE $column = $2";
+                        $sql="UPDATE $configSchema.$referencingTable SET \"$column\" = $1 WHERE \"$column\" = $2";
                     }
                     $statements[]=array('sql'=>$sql, 'params'=>array($newId, $oldId));
                 }

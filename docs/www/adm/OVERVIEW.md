@@ -17,6 +17,7 @@ funktioner/konstanter.
 | news | `news.php` | Nyheter/meddelanden för inloggade användare |
 | mapstate | `mapstate.php` | Stateless JSON-API för att spara/hämta karttillstånd (delbara länkar) |
 | info | `info.php` | Detaljvy för ett objekt + "Används av"-lista (iframe-popup) |
+| search | `search.php`, `clearSearchConfigCache.php` | Sök-API som söker i konfigurerade databastabeller och returnerar träffar som JSON. Konfigurationen (`databases`, `searchtables`, `searchmodels`) ligger i databasen och cachas; se search.md |
 | multiselect | `multiselect.php` | Generisk flervalskomponent (iframe-popup) |
 | help | `help.php` | Hjälptexter (generella eller fältspecifika), iframe-popup |
 
@@ -53,5 +54,5 @@ funktioner/konstanter.
 
 | Fil | Anteckning |
 |---|---|
-| Loader-filer (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `updated/` på toppnivå) | Aktivt använda; förteckning i ARCHITECTURE.md och beskrivning i respektive modulreferens |
+| Loader-filer (`authorization/`, `forwardauth/`, `grouplayerfix/`, `mapstate/`, `search/`, `updated/` på toppnivå) | Aktivt använda; förteckning i ARCHITECTURE.md och beskrivning i respektive modulreferens |
 | Exportmodul (lokal) | Organisationsspecifik och exkluderad från publika GitHub-repot; kan inte verifieras här |

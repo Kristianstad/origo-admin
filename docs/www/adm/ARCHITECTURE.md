@@ -133,6 +133,7 @@ fungerar. Loadern innehåller ingen egen logik.
 | `forwardauth/forwardauth-loader.php` | `forwardauth.php` | Se `forwardauth.md` |
 | `grouplayerfix/grouplayerfix-loader.php` | `grouplayerfix.php` | Se `grouplayerfix.md` |
 | `mapstate/mapstate-loader.php` | `mapstate.php` | Se `mapstate.md` |
+| `search/search-loader.php` | `search.php` | Se `search.md` |
 | `updated/updated-loader.php` | `updated.php` | Se `updated.md` |
 
 Exempel i koden använder URL-prefixet `/php/` (till exempel

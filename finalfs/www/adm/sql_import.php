@@ -104,6 +104,8 @@ catch (Throwable $exception)
     pg_close($dbh);
     sqlImportError('SQL-importen lyckades, men nya kartor kunde inte markeras som ändrade: '.$error);
 }
+searchConfigMarkStale();
+searchConfigRefresh($dbh);
 pg_close($dbh);
 
 sqlImportPage($currentSkin, 'SQL-import lyckades!', true);

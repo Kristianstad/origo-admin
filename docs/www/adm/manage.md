@@ -28,6 +28,11 @@ Skriver ändringar direkt till konfigurationsdatabasen, och markerar
 inaktuella och behöver köras genom `writeConfig.php` igen för att
 ändringen ska synas för besökare.
 
+Vyn Sök hanterar sökmodulens konfiguration (`searchmodels`, `searchtables` och
+`databases`). Efter en lyckad ändring av någon av dem anropar `manage.php`
+`searchConfigTableChanged()`, som markerar sökkonfigurationens cache som gammal
+och bygger om den direkt (se search.md).
+
 Formulärens renderingsstate skickas explicit genom `inheritPosts`-contexten.
 Privata nycklar som `_viewDepth` och `_formChanged` används internt och
 filtreras bort av `printHiddenInputs()`, så formulärhelpers behöver inte läsa
@@ -241,7 +246,7 @@ att target-tabellen finns i den laddade konfigurationen och att motsvarande
 | `printClasseForm.php` | classe | infogroups, layers, tables | `printAddRemoveOperations` |
 | `printContactForm.php` | contact | name, web, email | – |
 | `printControlForm.php` | control | options, css, js, onload | `printAddOperation`/`printRemoveOperation` mot maps |
-| `printDatabaseForm.php` | database | connectionstring | `printReadDbSchemasButton` |
+| `printDatabaseForm.php` | database | connectionstring, usepconnect (select f/t) | `printReadDbSchemasButton` |
 | `printEditForm.php` | edit | target_key, target_table, target_id, date, action, changed_by, before_data, after_data (samtliga readonly) | Återställ för delete-poster; Skapa kopia/Radera döljs |
 | `printExttoolForm.php` | exttool | url | `printUrlButton` |
 | `printFooterForm.php` | footer | img, url, text | – |
@@ -256,7 +261,8 @@ att target-tabellen finns i den laddade konfigurationen och att motsvarande
 | `printPluginForm.php` | plugin | css_files, css, js_files, js, onload | `printAddOperation`/`printRemoveOperation` mot maps |
 | `printProj4defForm.php` | proj4def | code, projection, projectionextent, alias | – |
 | `printSchemaForm.php` | schema | keywords, contact (select), origin (select), updated, update (select) | `printReadSchemaTablesButton` |
-| `printSearchtableForm.php` | searchtable | mode, ttl, limit, usecentroid (select f/t), database (select), schema, table, searchfield, geometryfield, gidfield | – |
+| `printSearchmodelForm.php` | searchmodel | searchtables (flervalsknapp), limit, liverows | – |
+| `printSearchtableForm.php` | searchtable | titlefield, mode (select), sortmode (select), ttl, maxcacheagefactor, limit, usecentroid (select f/t), database (select), dbschema, dbtable, searchfield, geometryfield, gidfield, customtype, fields | – |
 | `printSkinForm.php` | skin | Färg-, typografi-, ram-, radie- och skugginställningar | `printActivateSkinButton` |
 | `printTilegridForm.php` | tilegrid | tilesize | – |
 
@@ -320,7 +326,7 @@ betydande typspecifik villkorslogik:
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `appendUpdatedColumnsToSql.php` | `appendUpdatedColumnsToSql($dbColumns, $sql, $params=[]): array` | Bygger vidare på en SQL-sträng med parameteriserade `kolumn = $N`-par för en `UPDATE`-sats. Tomma värden (inkl. `'{}'`/`'{{}}'`, tomma Postgres-arrayer) blir `NULL`; returnerar SQL och parametrar |
+| `appendUpdatedColumnsToSql.php` | `appendUpdatedColumnsToSql($dbColumns, $sql, $params=[]): array` | Bygger vidare på en SQL-sträng med parameteriserade `"kolumn" = $N`-par för en `UPDATE`-sats. Kolumnnamnen valideras (`[A-Za-z_][A-Za-z0-9_]*`, annars `invalidTarget()`) och citeras, så att reserverade ord som `limit` kan vara kolumnnamn. Tomma värden (inkl. `'{}'`/`'{{}}'`, tomma Postgres-arrayer) blir `NULL`; returnerar SQL och parametrar |
 | `applyHistoryNavigation.php` | `applyHistoryNavigation($dbh, $targetKey, $direction): array` | Flyttar `edit_cursor` ett steg `undo`/`redo` för given `$targetKey` och skriver tillbaka rätt snapshot (`before_data`/`after_data`) till objektets tabell. Returnerar `['ok', 'target_table', 'target_id', 'renames', 'error']` (`renames` från `idRenames()` när snapshotet byter id; `target_id` är det id objektet har efteråt). Se "Historik: Ångra/Gör om" ovan |
 | `categories.php` | `categories($config, $catParam): array` | Bygger en nyckelordskategorisering: går igenom en hel tabellkonfiguration och grupperar rad-id:n (`$catParam`, primärnyckelkolumnen) efter deras `keywords`-fält. Lägger alltid till en `"Alla"`-kategori med samtliga id:n överst |
 | `categoryPosts.php` | `categoryPosts($post): array` | Filtrerar `$post` till fält vars namn slutar på `Category` |
@@ -341,6 +347,7 @@ betydande typspecifik villkorslogik:
 | `printAddOperation.php` | `printAddOperation($target, $addToTable, $buttontext, $inheritPosts)` | Skriver ut ett litet formulär: en dropdown med tillgängliga föräldrar (t.ex. kartor eller grupper) + en knapp som postar `operation`-kommandot för att lägga till `$target` i den valda föräldern |
 | `printChildSelect.php` | `printChildSelect($target, $column, &$thClass, $heading, $inheritPosts, $groupLevel=1, $selectedValue=null)` | Den mest komplexa av dessa byggstenar: skriver ut en kolumn i "barn-urvalsraden" (t.ex. vilka lager/grupper/kontroller finns i vald karta). Hanterar specialfall för `schemas`/`tables` och nästlade `groups`/`infogroups`, där respektive id-kedja byggs baserat på djup |
 | `printChildSelectRow.php` | `printChildSelectRow($hrClass, $target, $childSelects, $inheritPosts, $groupLevel=1)` | Skriver ut en rad av `printChildSelect()`-kolumner (`$childSelects` = lista av `[kolumn, rubrik, valtVärde]`) inledd av en horisontell linje, men ingenting alls om ingen kolumn har något att visa |
+| `printClearSearchConfigCacheButton.php` | `printClearSearchConfigCacheButton()` | Toppknappen "Töm sökcache" i vyn Verktyg (bredvid Importera JSON/SQL). Efter bekräftelse anropar `manageActions.js` `clearSearchConfigCache.php` i `hiddenFrame`, som markerar sökkonfigurationens cache som gammal och bygger om den direkt; se search.md |
 | `printAddRemoveOperations.php` | `printAddRemoveOperations($target, $operationTables, $inheritPosts, $labels=array())` | Gemensam renderer för add/remove-operationer. `exclusiveOperationGroups.php` kan ange singleton-poster eller grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs när målet redan finns i någon förälder i gruppen |
 | `printConfigPreviewButton.php` | `printConfigPreviewButton($mapId, $group=null, $layer=null)` | Typknapp som öppnar en förhandsgranskning via `writeConfig.php?getHtml=y` i en ny flik, utan att skriva till disk eller skapa ett nästlat formulär. Kan begränsas till en specifik grupp eller ett specifikt lager |
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
@@ -390,7 +397,7 @@ konfigurationstabeller (via `configTables()` och dynamiskt genererad SQL).
 |---|---|---|
 | `formChangeButton.js` | `formChangeButton()` | Lägger till en CSS-klass (`change`) på ett formulärs "Uppdatera"-knapp så fort något fält i formuläret ändras (utom dolda fält), för att visuellt signalera osparade ändringar |
 | `initMessageListener.js` | `initMessageListener()` | Sätter upp en global `postMessage`-lyssnare för hela sidan. Validerar avsändarens origin (måste matcha `window.location.origin`) och att datan har rätt form innan den hanteras. Hanterar tre fall: `action:'close'` utan `targetId` (stäng topFrame, t.ex. från help.php), `action:'resize'` (justera topFrame-höjd; `read_json` och `sql_import` kan även krympa), och `targetId`+`value` (fyll i ett textarea-fält med värde från multiselect-verktyget, samt uppdatera den tillhörande multiselect-knappens `value`-attribut så nästa öppning av multiselect visar rätt förval) |
-| `manageActions.js` | `manageActions()` | Registrerar en delegerad klickhanterare för `data-manage-action`-knappar: skinbyte, informationspanelen, schema-/tabellimport och publicering. Bekräftelser och id:n skickas som escapade data-attribut |
+| `manageActions.js` | `manageActions()` | Registrerar en delegerad klickhanterare för `data-manage-action`-knappar: skinbyte, informationspanelen, schema-/tabellimport, publicering och rensning av sökkonfigurationens cache. Bekräftelser och id:n skickas som escapade data-attribut |
 | `preservePageScroll.js` | `preservePageScroll()` | Initieras i `<head>` och sparar scrollpositionen vid formulärinskick via en delegerad `submit`-lyssnare. Om en positiv position väntar döljs dokumentet tills `DOMContentLoaded`, då sidan scrollas till positionen och visas; formulär riktade mot en annan browsing context sparar inte positionen |
 | `resizeIframe.js` | `resizeIframe(iframe, autoResize=false)` | Anpassar iframens höjd efter innehållet. Standardläget växer bara och behåller det manuella resize-handtaget; `autoResize=true` följer både ökning och minskning och döljer handtaget |
 | `textareaState.js` | `textareaState()` | Återställer textarea-scrollposition och synkroniserar storlek/scroll till dolda formulärfält; infogar tabulatortecken vid Tab utan inline-händelsekod |

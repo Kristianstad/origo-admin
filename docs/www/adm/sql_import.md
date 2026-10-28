@@ -29,7 +29,10 @@ ett publikt API. SQL körs med den anslutning som anges i
   Befintliga kartors `changed`-värde lämnas oförändrat.
 7. Vid fel visas ett skinat felmeddelande och PostgreSQL-felet exponeras i
    svaret.
-8. Vid lyckad körning visas ett skinat lyckat-resultat och en **Stäng**-knapp
+8. Efter lyckad körning markeras sökkonfigurationens cache som gammal och byggs om
+   (`searchConfigMarkStale()` och `searchConfigRefresh()`), eftersom SQL:en kan ha
+   ändrat `searchmodels`, `searchtables` eller `databases` (se search.md).
+9. Vid lyckad körning visas ett skinat lyckat-resultat och en **Stäng**-knapp
    som stänger iframe-vyn.
 
 GET-formuläret använder `confirmSqlImport()` och `updateSqlInputState()` från

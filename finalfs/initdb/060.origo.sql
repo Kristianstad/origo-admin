@@ -486,9 +486,45 @@ CREATE TABLE IF NOT EXISTS map_configs.databases
 (
     database_id character varying COLLATE pg_catalog."default" NOT NULL,
     connectionstring character varying COLLATE pg_catalog."default",
+    usepconnect boolean,
     info character varying COLLATE pg_catalog."default",
     abstract character varying COLLATE pg_catalog."default",
     CONSTRAINT database_pkey PRIMARY KEY (database_id)
+);
+
+CREATE TABLE IF NOT EXISTS map_configs.searchtables
+(
+    searchtable_id character varying COLLATE pg_catalog."default" NOT NULL,
+    title character varying COLLATE pg_catalog."default",
+    titlefield character varying COLLATE pg_catalog."default",
+    mode character varying COLLATE pg_catalog."default",
+    ttl integer,
+    "limit" integer,
+    usecentroid boolean DEFAULT true,
+    database character varying COLLATE pg_catalog."default",
+    dbschema character varying COLLATE pg_catalog."default",
+    dbtable character varying COLLATE pg_catalog."default",
+    searchfield character varying COLLATE pg_catalog."default",
+    geometryfield character varying COLLATE pg_catalog."default",
+    gidfield character varying COLLATE pg_catalog."default",
+    maxcacheagefactor numeric,
+    customtype character varying COLLATE pg_catalog."default",
+    fields character varying[] COLLATE pg_catalog."default",
+    sortmode character varying COLLATE pg_catalog."default",
+    abstract character varying COLLATE pg_catalog."default",
+    info character varying COLLATE pg_catalog."default",
+    CONSTRAINT searchtables_pkey PRIMARY KEY (searchtable_id)
+);
+
+CREATE TABLE IF NOT EXISTS map_configs.searchmodels
+(
+    searchmodel_id character varying COLLATE pg_catalog."default" NOT NULL,
+    searchtables character varying[] COLLATE pg_catalog."default",
+    "limit" integer,
+    liverows integer,
+    abstract character varying COLLATE pg_catalog."default",
+    info character varying COLLATE pg_catalog."default",
+    CONSTRAINT searchmodels_pkey PRIMARY KEY (searchmodel_id)
 );
 
 CREATE TABLE IF NOT EXISTS map_configs.schemas
@@ -895,5 +931,31 @@ INSERT INTO map_configs.helps(help_id,abstract) VALUES ('mapstate:lastuse','<b>M
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('mapstate:mapurl','<b>Mapstate > Kart-url</b><br>Adressen till kartan varifrån man gjorde "Dela karta".') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('mapstate:preserve','<b>Mapstate > Rensas ej</b><br>Mapstates som har "Rensas ej" satt till "t" kommer inte att raderas automatiskt även om det aldrig skulle användas.') ON CONFLICT DO NOTHING;
 INSERT INTO map_configs.helps(help_id,abstract) VALUES ('mapstate:state','<b>Mapstate > Mapstate</b><br>JSON-sträng som innehåller allt som ingår i mapstatet.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('database:usepconnect','<b>Databas > Beständig anslutning</b><br>Om "t" används pg_pconnect (beständig anslutning) vid sökning mot databasen, annars pg_connect. Lämna tomt eller "f" om anslutningen går via en anslutningspool som PgBouncer.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:searchtable_id','<b>Söktabell > Id</b><br>Ett unikt id som används som primärnyckel av verktyget. Id:t används också som namn på söktabellens cachefil.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:title','<b>Söktabell > Titel</b><br>Fast kategori (TITLE) som alla träffar från söktabellen får. Har titeln företräde framför titelfältet.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:titlefield','<b>Söktabell > Titelfält</b><br>Kolumn vars värde används som kategori (TITLE) per träff. Används bara om titel saknas. Träffarna fördelas då jämnt över kategorierna och returneras grupperade.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:mode','<b>Söktabell > Sökläge</b><br>"simple" söker träffar som börjar med sökordet. "intelligent" söker träffar som innehåller sökordet och rangordnar dem efter relevans. Tomt betyder simple.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:ttl','<b>Söktabell > Cache-tid</b><br>Antal sekunder som söktabellens cache anses färsk. 0 (eller tomt) betyder att sökningen alltid körs direkt mot databasen. Äldre cache används tills en ny hunnit byggas, tills den är dubbelt så gammal som cache-tiden (justerbart med cache-faktorn).') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:limit','<b>Söktabell > Max antal träffar</b><br>Högsta antal träffar från söktabellen. Tomt betyder sökmodellens gräns.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:usecentroid','<b>Söktabell > Använd centroid</b><br>Om "t" (eller tomt) returneras en punkt på ytan (ST_PointOnSurface) som geometri, annars hela geometrin.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:database','<b>Söktabell > Databas</b><br>Databasen som tabellen ligger i. Anslutningen hämtas från databasens anslutningssträng.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:dbschema','<b>Söktabell > Schema</b><br>Schemat i databasen där tabellen eller vyn ligger. Tomt betyder public.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:dbtable','<b>Söktabell > Tabell</b><br>Tabellen eller vyn som ska sökas. Namnet returneras även som TYPE i träffarna om ingen egen typ anges.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:searchfield','<b>Söktabell > Sökfält</b><br>Kolumnen som sökordet jämförs med. Värdet returneras som NAMN i träffarna.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:geometryfield','<b>Söktabell > Geometrifält</b><br>Kolumnen med geometrin. Tomt betyder geom.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:gidfield','<b>Söktabell > Gidfält</b><br>Kolumnen med ett unikt id per rad (returneras som GID och används för att ta bort dubbletter). Tomt betyder gid.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:maxcacheagefactor','<b>Söktabell > Cache-faktor</b><br>Cachen används som längst cache-tid multiplicerat med faktorn (äldre cache raderas och sökningen körs direkt mot databasen). Tomt betyder 2.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:customtype','<b>Söktabell > Egen typ</b><br>Värdet som returneras som TYPE i träffarna. Tomt betyder tabellens namn. Typen används också när träffar från flera söktabeller kapas proportionellt, så söktabeller med samma typ delar kvot.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:fields','<b>Söktabell > Extrafält</b><br>Kommaseparerad lista med kolumner som ska följa med i varje träff, utöver NAMN, GID, TYPE, TITLE och GEOM.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:sortmode','<b>Söktabell > Sortering</b><br>Tomt sorterar träffar med samma relevans på sista numret i sökfältet (lämpligt för adresser). "blockunit" sorterar på blocknummer före kolon och därefter enhetsnummer efter kolon (lämpligt för fastigheter, t ex Julebod 1:2). Båda avslutas med sökfältet.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:abstract','<b>Söktabell > Beskrivning</b><br>En informativ text för administratörer som beskriver söktabellen.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchtable:info','<b>Söktabell > Info</b><br>Fält för administrativ information, rörande söktabellen, som inte passar in någon annanstans.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchmodel:searchmodel_id','<b>Sökmodell > Id</b><br>Namnet på sökmodellen. Används som primärnyckel och som frågeparameter vid sökning, t ex search-loader.php?<id>=sökord. Använd bokstäver, siffror, bindestreck och understreck.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchmodel:searchtables','<b>Sökmodell > Söktabeller</b><br>Kommaseparerad lista med de söktabeller som ingår i modellen. Ordningen styr i vilken ordning träffarna returneras.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchmodel:limit','<b>Sökmodell > Max antal träffar</b><br>Högsta antal träffar som sökningen returnerar totalt. Fördelas proportionellt mellan söktabellerna. Tomt betyder 20.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchmodel:liverows','<b>Sökmodell > Antal rader vid direktsökning</b><br>Antal rader som hämtas från databasen vid en direktsökning i läget "intelligent", innan träffarna rangordnas och kapas. Tomt betyder 300.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchmodel:abstract','<b>Sökmodell > Beskrivning</b><br>En informativ text för administratörer som beskriver sökmodellen.') ON CONFLICT DO NOTHING;
+INSERT INTO map_configs.helps(help_id,abstract) VALUES ('searchmodel:info','<b>Sökmodell > Info</b><br>Fält för administrativ information, rörande sökmodellen, som inte passar in någon annanstans.') ON CONFLICT DO NOTHING;
 
 COMMIT;

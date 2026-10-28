@@ -7,6 +7,7 @@
         printSimpleEntityForm($database, 'database', array(
             array('name'=>'database_id', 'class'=>'textareaMedium', 'label'=>'Id:'),
             array('name'=>'connectionstring', 'class'=>'textareaLarge', 'label'=>'Anslutningssträng:'),
+            array('name'=>'usepconnect', 'type'=>'select', 'options'=>booleanSelectOptions(), 'class'=>'miniSelect', 'label'=>'Beständig anslutning:'),
             array('name'=>'abstract', 'class'=>'textareaLarge', 'label'=>'Beskrivning:'),
             array('name'=>'info', 'class'=>'textareaLarge', 'label'=>'Info:')
         ), $inheritPosts, $helps, array(
