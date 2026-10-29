@@ -17,7 +17,7 @@ funktioner/konstanter.
 | news | `news.php` | Nyheter/meddelanden för inloggade användare |
 | mapstate | `mapstate.php` | Stateless JSON-API för att spara/hämta karttillstånd (delbara länkar) |
 | info | `info.php` | Detaljvy för ett objekt + "Används av"-lista (iframe-popup) |
-| search | `search.php`, `clearSearchConfigCache.php` | Sök-API som söker i konfigurerade databastabeller och returnerar träffar som JSON. Konfigurationen (`databases`, `searchtables`, `searchmodels`) ligger i databasen och cachas; se search.md |
+| search | `search.php`, `clearSearchCache.php` | Sök-API som söker i konfigurerade databastabeller och returnerar träffar som JSON. Konfigurationen (`databases`, `searchtables`, `searchmodels`) ligger i databasen och cachas; se search.md |
 | multiselect | `multiselect.php` | Generisk flervalskomponent (iframe-popup) |
 | help | `help.php` | Hjälptexter (generella eller fältspecifika), iframe-popup |
 

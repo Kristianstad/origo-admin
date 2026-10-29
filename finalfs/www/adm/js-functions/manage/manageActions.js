@@ -33,11 +33,11 @@ function manageActions() {
                     form.submit();
                 }, 1000);
                 break;
-            case 'clear-search-config-cache':
+            case 'clear-search-cache':
                 if (!confirm(button.dataset.confirm)) {
                     return;
                 }
-                document.getElementById('hiddenFrame').src = 'clearSearchConfigCache.php';
+                document.getElementById('hiddenFrame').src = 'clearSearchCache.php';
                 break;
             case 'write-config':
                 if (!confirm(button.dataset.confirm)) {

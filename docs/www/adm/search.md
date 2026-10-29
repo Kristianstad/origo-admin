@@ -1,8 +1,8 @@
 # Sökmodul (search)
 
-**Entry points:** `adm/search.php` (sök-API), `adm/clearSearchConfigCache.php` (töm-knappen i Verktyg-vyn)
+**Entry points:** `adm/search.php` (sök-API), `adm/clearSearchCache.php` (töm-knappen i Verktyg-vyn)
 **Loader:** `www/search/search-loader.php` (se ARCHITECTURE.md)
-**Funktionsfiler:** `adm/functions/search/*.php`; konfigurationscachen ligger i `adm/functions/common/search*.php`, eftersom `search.php`, `manage.php`, `sql_import.php` och `clearSearchConfigCache.php` delar den
+**Funktionsfiler:** `adm/functions/search/*.php`; konfigurationscachen ligger i `adm/functions/common/search*.php`, eftersom `search.php`, `manage.php`, `sql_import.php` och `clearSearchCache.php` delar den
 
 ## Syfte
 Söker i konfigurerade databastabeller och returnerar träffarna som JSON, till exempel för Origos sökfunktion. Vilka tabeller som söks, i vilken databas och hur, konfigureras i adminverktyget (vyn **Sök**) och lagras i konfigurationsdatabasen.
@@ -71,7 +71,7 @@ Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodelle
 - **Ingen fast giltighetstid.** Cachen markeras gammal när konfigurationen ändras:
   - `manage.php` anropar `searchConfigTableChanged()` efter en lyckad ändring av `searchmodels`, `searchtables` eller `databases`, eller när ett tabell-id byts (direkt eller genom att dess schema eller databas döps om). Det gäller skapa, uppdatera, kopiera, radera, ångra/gör om, återställ och id-byte, och cachen byggs om direkt med den öppna anslutningen.
   - `sql_import.php` markerar och bygger om efter varje lyckad import.
-  - Knappen **Töm sökcache** i Verktyg-vyn kör `clearSearchConfigCache.php`, som markerar cachen gammal och bygger om den direkt. Misslyckas bygget finns den gamla cachen kvar.
+  - Knappen **Töm sökcache** i Verktyg-vyn kör `clearSearchCache.php`, som tar bort alla söktabellers resultatcachar (`searchClearResultCaches()`; de byggs om av nästa sökning) och markerar konfigurationscachen gammal och bygger om den direkt. Misslyckas bygget finns den gamla konfigurationscachen kvar.
   - Ändringar som görs direkt i databasen (utanför verktyget) upptäcks inte; använd knappen.
 
 ## Beror på
