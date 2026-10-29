@@ -7,7 +7,8 @@
         $lowerQuery=mb_strtolower($query);
         $intelligent=($tableConfig['searchMode'] === 'intelligent');
         $scored=array();
-        foreach (searchLoadCache($tableConfig['tableKey'], $needsRefresh) as $row)
+        $damaged=false;
+        foreach (searchLoadCache($tableConfig['tableKey'], $query, $damaged) as $row)
         {
             $name=$row['NAMN'] ?? '';
             unset($row['RELEVANCE']);
@@ -42,6 +43,11 @@
             {
                 $scored[]=array('row' => $row, 'score' => $score);
             }
+        }
+        if ($damaged)
+        {
+            $needsRefresh=true;
+            return array();
         }
         usort($scored, function ($a, $b) {
             if ($a['score'] !== $b['score'])

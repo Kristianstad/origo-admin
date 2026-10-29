@@ -50,6 +50,8 @@ Varje söktabell med `ttl` över 0 har en cachefil `results_<id>_<hash>.jsonl` i
 | Över `ttl` men högst `ttl × maxcacheagefactor` (standard 2) | Cachen används och byggs om efter svaret |
 | Äldre eller saknas | Direktsökning; cachen tas bort och byggs om efter svaret |
 
+Cachefilen läses rad för rad. En rad avkodas bara om den innehåller det JSON-escapade sökordet (skiftlägesokänsligt); övriga rader hoppas över, vilket sparar tid och minne. Därefter kontrolleras namnet som vanligt, så träffar och ordning påverkas inte. En skadad rad upptäcks bara om den innehåller sökordet; då ger tabellen inga träffar och cachen byggs om. Frågor som matchar nästan alla rader blir något långsammare än innan.
+
 Ombyggnaden körs efter att svaret skickats (`searchAfterResponse()`, kräver `fastcgi_finish_request()`), ett bygge i taget via `flock` på `results.lock`. Filen skrivs via en temporär fil och `rename()`, så en halvskriven cache läses aldrig.
 
 ## Konfigurationscache
@@ -96,7 +98,7 @@ Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodelle
 | `searchDiversifyRows.php` | `searchDiversifyRows($rows, $limit)` | Sprider träffarna över så många olika basnamn som möjligt |
 | `searchGenerateCache.php` | `searchGenerateCache($tableConfig, $dbh)` | Bygger söktabellens resultatcache via temporär fil och `rename()` |
 | `searchLiveRows.php` | `searchLiveRows($tableConfig, $query, &$connections)` | Direktsökning; återanvänder anslutningar per anslutningssträng. Returnerar `null` vid anslutnings- eller SQL-fel (loggas) |
-| `searchLoadCache.php` | `searchLoadCache($tableKey, &$needsRefresh)` | Läser resultatcachens rader; en saknad eller skadad fil sätter `$needsRefresh` |
+| `searchLoadCache.php` | `searchLoadCache($tableKey, $query, &$needsRefresh)` | Generator som ger resultatcachens rader vars rad innehåller sökordet; en saknad eller skadad fil sätter `$needsRefresh` |
 | `searchLoadConfig.php` | `searchLoadConfig()` | Konfigurationscachen (`config`, `stale`); bygger den om den saknas, annars HTTP 503 |
 | `searchRebuildCaches.php` | `searchRebuildCaches($tableConfigs)` | Bygger om gamla eller saknade resultatcachar, grupperat per anslutning; ett bygge i taget (`flock`) |
 | `searchSelectModel.php` | `searchSelectModel($models, $params)` | Väljer modell och sökord ur frågeparametrarna, eller `null` |
