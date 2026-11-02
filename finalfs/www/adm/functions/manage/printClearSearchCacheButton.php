@@ -5,6 +5,6 @@
     {
         $confirmAttribute=escapeHtml("Töm sökcachen? Alla söktabellers resultatcachar tas bort och byggs om vid nästa sökning. Sökkonfigurationens cache byggs om från databasen direkt, och den gamla används tills den nya är klar.");
         echo <<<HERE
-			<button title="Ta bort söktabellernas resultatcachar och bygg om sökkonfigurationens cache" class="topButton" type="button" data-manage-action="clear-search-cache" data-confirm="{$confirmAttribute}">Töm sökcache</button>
-		HERE;
+        <button title="Ta bort söktabellernas resultatcachar och bygg om sökkonfigurationens cache" class="topButton" type="button" data-manage-action="clear-search-cache" data-confirm="{$confirmAttribute}">&#x21BB; Sökcache</button>
+        HERE;
     }
