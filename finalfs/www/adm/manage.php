@@ -527,6 +527,9 @@ if ($view === 'Verktyg')
         <button title="Kör SQL mot admin-databasen" class="topButton" onclick="toggleTopFrame('sql_import');" type="submit">Importera SQL</button>
     </form>
 HTML;
+}
+if ($view === 'Sök')
+{
     printClearSearchCacheButton();
 }
 
