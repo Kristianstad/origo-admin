@@ -4,7 +4,7 @@
     // A stale cache is older than the configuration in the database but is still returned until a new one has been written.
     function searchConfigRead()
     {
-        $dir=searchStorageDir();
+        $dir=cacheStorageDir();
         // The pointer can move (and the old file be removed) between reading it and including the file.
         for ($attempt=0; $attempt < 2; $attempt++)
         {

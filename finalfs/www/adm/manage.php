@@ -36,7 +36,8 @@ Vid id-byte följer referenser, vald rad och historik med till det nya id:t.
  │    │                     förälder (map/group) → sqlForOperation()
  │    ├─ kör statements, om lyckat:
  │    │    ├─ läser om configTables (färsk data)
- │    │    ├─ searchConfigTableChanged() [common] → markerar och bygger om sökkonfigurationens cache om searchmodels/searchtables/databases ändrats eller ett tabell-id bytts (gäller även undo/redo och restore)
+ │    │    ├─ searchConfigTableChanged() [common] → markerar och bygger om sökkonfigurationens cache vid relevanta ändringar
+ │    │    ├─ restrictedCacheTableChanged() [common] → bygger om restricted-cachen vid ändringar i layers/sources/services
  │    │    ├─ usedInMaps() FÖRE och EFTER ändringen → markMapsChanged() för påverkade
  │    │    │   kartor (sätter troligen maps.changed='t', vilket writeConfig.php senare
  │    │    │   läser för att veta vilka kartor som behöver publiceras om)
@@ -209,6 +210,7 @@ if (isset($postButton)) {
         } else {
             $configTables = configTables($dbh);
             searchConfigTableChanged($dbh, targetTable($restoreResult['target']));
+            restrictedCacheTableChanged($dbh, targetTable($restoreResult['target']));
             $errorAlert = 'window.onload=function(){alert("Objektet har återställts.");}';
         }
         unset($restoreResult);
@@ -223,6 +225,7 @@ if (isset($postButton)) {
         } else {
             $configTables = configTables($dbh);
             searchConfigTableChanged($dbh, $typeTableName, $historyResult['renames']);
+            restrictedCacheTableChanged($dbh, $typeTableName);
             $historyTarget = makeBasicTarget($type, $historyResult['target_id']);
             $usedInMapsNew = usedInMaps($dbh, $historyTarget);
             $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
@@ -409,6 +412,7 @@ if (isset($postButton)) {
             }
             $configTables = ($historyConfigTables !== null) ? $historyConfigTables : configTables($dbh);
             searchConfigTableChanged($dbh, $typeTableName, $idRenames);
+            restrictedCacheTableChanged($dbh, $typeTableName);
             $updatedTarget = $changedTarget;
             if (!empty($idRenames)) {
                 $id = $idRenames[0][2];
@@ -527,6 +531,7 @@ if ($view === 'Verktyg')
         <button title="Kör SQL mot admin-databasen" class="topButton" onclick="toggleTopFrame('sql_import');" type="submit">Importera SQL</button>
     </form>
 HTML;
+    printRebuildRestrictedCacheButton();
 }
 if ($view === 'Sök')
 {

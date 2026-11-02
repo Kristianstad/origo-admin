@@ -32,7 +32,7 @@ funktioner/konstanter.
 
 | Modul | Entry point(s) | Beskrivning |
 |---|---|---|
-| restrictedLayer | `restrictedLayer.php` | Behörighetsstyrd proxy mot karttjänst; degraderar svar för obehöriga |
+| restrictedLayer | `restrictedLayer.php`, `rebuildRestrictedCache.php` | Behörighetsstyrd proxy mot karttjänst; restricted-listan cachas och kan byggas om manuellt från Verktyg |
 | grouplayerfix | `grouplayerfix.php` | QGIS-specifik proxy; expanderar "grupplager" till underlager. Begränsad användning, ingen behörighetskoppling (annan QGIS-instans än restrictedLayer) |
 
 ## Databas-/schemaunderhåll

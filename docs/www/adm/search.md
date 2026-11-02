@@ -1,8 +1,8 @@
 # Sökmodul (search)
 
-**Entry points:** `adm/search.php` (sök-API), `adm/clearSearchCache.php` (töm-knappen i Verktyg-vyn)
+**Entry points:** `adm/search.php` (sök-API), `adm/clearSearchCache.php` (töm-knappen i Sök-vyn)
 **Loader:** `www/search/search-loader.php` (se ARCHITECTURE.md)
-**Funktionsfiler:** `adm/functions/search/*.php`; konfigurationscachen ligger i `adm/functions/common/search*.php`, eftersom `search.php`, `manage.php`, `sql_import.php` och `clearSearchCache.php` delar den
+**Funktionsfiler:** `adm/functions/search/*.php`; cachefunktioner som delas med andra moduler ligger i `adm/functions/common/`
 
 ## Syfte
 Söker i konfigurerade databastabeller och returnerar träffarna som JSON, till exempel för Origos sökfunktion. Vilka tabeller som söks, i vilken databas och hur, konfigureras i adminverktyget (vyn **Sök**) och lagras i konfigurationsdatabasen.
@@ -42,7 +42,7 @@ För varje söktabell i modellen, i modellens ordning:
 Sökordet och sökvärdena skickas som bundna SQL-parametrar; schema, tabell och kolumner citeras med `pg_escape_identifier()` mot måldatabasens anslutning.
 
 ## Resultatcache
-Varje söktabell med `ttl` över 0 har en cachefil `results_<id>_<hash>.jsonl` i `sys_get_temp_dir()/origo-search/` (en JSON-rad per tabellrad, hela tabellen).
+Varje söktabell med `ttl` över 0 har en cachefil `results_<id>_<hash>.jsonl` i `sys_get_temp_dir()/origo-cache/` (en JSON-rad per tabellrad, hela tabellen).
 
 | Ålder | Beteende |
 |---|---|
@@ -55,14 +55,14 @@ Cachefilen läses rad för rad. En rad avkodas bara om den innehåller det JSON-
 Ombyggnaden körs efter att svaret skickats (`searchAfterResponse()`, kräver `fastcgi_finish_request()`), ett bygge i taget via `flock` på `results.lock`. Filen skrivs via en temporär fil och `rename()`, så en halvskriven cache läses aldrig.
 
 ## Konfigurationscache
-Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodeller (med färdigupplösta söktabeller och anslutningssträngar) cachas som en PHP-fil som `opcache` kan hålla i minnet. Allt ligger i `sys_get_temp_dir()/origo-search/` (katalog 0700, filer 0600).
+Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodeller (med färdigupplösta söktabeller och anslutningssträngar) cachas som en PHP-fil som `opcache` kan hålla i minnet. Allt ligger i `sys_get_temp_dir()/origo-cache/` (katalog 0700, filer 0600). Katalog, atomisk skrivning och fillås delas med restrictedLayer-modulen.
 
 | Fil | Innehåll |
 |---|---|
-| `config.<token>.php` | Själva cachen (`return array(...)`); en ny fil per version, aldrig ändrad på plats |
+| `config.<token>.php` | Själva sökcachen (`return array(...)`); en ny fil per version, aldrig ändrad på plats |
 | `config.current` | Token för den färdigskrivna cache som används |
 | `config.desired` | Token för den version som önskas; skiljer den sig från `config.current` är cachen gammal |
-| `config.lock` | `flock`-lås; bara en process bygger om cachen i taget, och låset släpps automatiskt om processen dör |
+| `config.lock` | `flock`-lås via gemensamma `cacheLock()`/`cacheUnlock()`; bara en process bygger om cachen i taget, och låset släpps automatiskt om processen dör |
 | `config.attempt` | Markör (tidpunkt) för senaste försök, används för att inte försöka igen oftare än var 30:e sekund automatiskt |
 
 - **Första sökningen** (ingen cache): processen väntar högst 5 sekunder på ett pågående bygge, annars bygger den själv via `dbh()`. Går det inte svarar sökningen 503.
@@ -71,11 +71,11 @@ Sökningen läser inte konfigurationsdatabasen vid varje anrop. Alla sökmodelle
 - **Ingen fast giltighetstid.** Cachen markeras gammal när konfigurationen ändras:
   - `manage.php` anropar `searchConfigTableChanged()` efter en lyckad ändring av `searchmodels`, `searchtables` eller `databases`, eller när ett tabell-id byts (direkt eller genom att dess schema eller databas döps om). Det gäller skapa, uppdatera, kopiera, radera, ångra/gör om, återställ och id-byte, och cachen byggs om direkt med den öppna anslutningen.
   - `sql_import.php` markerar och bygger om efter varje lyckad import.
-  - Knappen **Töm sökcache** i Verktyg-vyn kör `clearSearchCache.php`, som tar bort alla söktabellers resultatcachar (`searchClearResultCaches()`; de byggs om av nästa sökning) och markerar konfigurationscachen gammal och bygger om den direkt. Misslyckas bygget finns den gamla konfigurationscachen kvar.
+  - Knappen **Töm sökcache** i Sök-vyn kör `clearSearchCache.php`, som tar bort alla söktabellers resultatcachar (`searchClearResultCaches()`; de byggs om av nästa sökning) och markerar konfigurationscachen gammal och bygger om den direkt. Misslyckas bygget finns den gamla konfigurationscachen kvar.
   - Ändringar som görs direkt i databasen (utanför verktyget) upptäcks inte; använd knappen.
 
 ## Beror på
-**Common-funktioner:** `dbh()`, `allFromTable()`, `configTableNames()`, `arrayColumnSearch()`, `pgArrayToPhp()` samt de nya `searchStorageDir()`, `searchWriteFile()`, `searchConfig*()` och `searchTableConfig()` (se common.md)
+**Common-funktioner:** `dbh()`, `allFromTable()`, `configTableNames()`, `arrayColumnSearch()`, `pgArrayToPhp()` samt `cacheStorageDir()`, `cacheWriteFile()`, `cacheLock()`, `cacheUnlock()`, `searchConfig*()` och `searchTableConfig()` (se common.md)
 
 **Konstanter:** `constants/configSchema.php`
 

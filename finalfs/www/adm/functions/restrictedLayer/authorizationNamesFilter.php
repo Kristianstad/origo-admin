@@ -1,6 +1,6 @@
 <?php
 
-    function authorizationNamesFilter($layerNames)
+    function authorizationNamesFilter($layerNames, $restrictedLayers)
     {
-        return array_column(authorizationFilter($layerNames), 'name');
+        return array_column(authorizationFilter($layerNames, $restrictedLayers), 'name');
     }

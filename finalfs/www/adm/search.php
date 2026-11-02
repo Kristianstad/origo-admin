@@ -15,7 +15,7 @@ search.php
       ├─ searchRebuildCaches()               [search] → bygger om gamla/saknade resultatcachar (ett bygge i taget, flock)
       └─ searchConfigRefresh()               [common] → bygger om en gammal konfigurationscache (manage.php markerar den gammal vid ändringar)
 
-Konfigurationscachen (functions/common/searchConfig*.php) ligger i sys_get_temp_dir()/origo-search/ och byggs från databasens tabeller
+Konfigurationscachen (functions/common/searchConfig*.php) ligger i sys_get_temp_dir()/origo-cache/ och byggs från databasens tabeller
 searchmodels, searchtables och databases. Den gamla cachen används tills en ny är helt skriven (atomiskt byte). Anropas via
 www/search/search-loader.php.
 */

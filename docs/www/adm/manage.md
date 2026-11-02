@@ -35,6 +35,11 @@ Meta. Efter en lyckad ändring av `searchmodels`, `searchtables` eller
 `searchConfigTableChanged()`, som markerar sökkonfigurationens cache som gammal
 och bygger om den direkt, även när ett tabell-id har bytts (se search.md).
 
+Efter lyckade ändringar i `layers`, `sources` eller `services` bygger `manage.php`
+även om restricted-lagercachen direkt, inklusive create/update/copy/delete,
+undo/redo och restore. JSON- och SQL-import uppdaterar inte den cachen; använd
+knappen **Bygg om restricted-cache** i Verktyg efter import.
+
 Formulärens renderingsstate skickas explicit genom `inheritPosts`-contexten.
 Privata nycklar som `_viewDepth` och `_formChanged` används internt och
 filtreras bort av `printHiddenInputs()`, så formulärhelpers behöver inte läsa
@@ -350,6 +355,7 @@ betydande typspecifik villkorslogik:
 | `printChildSelect.php` | `printChildSelect($target, $column, &$thClass, $heading, $inheritPosts, $groupLevel=1, $selectedValue=null)` | Den mest komplexa av dessa byggstenar: skriver ut en kolumn i "barn-urvalsraden" (t.ex. vilka lager/grupper/kontroller finns i vald karta). Hanterar specialfall för `schemas`/`tables` och nästlade `groups`/`infogroups`, där respektive id-kedja byggs baserat på djup |
 | `printChildSelectRow.php` | `printChildSelectRow($hrClass, $target, $childSelects, $inheritPosts, $groupLevel=1)` | Skriver ut en rad av `printChildSelect()`-kolumner (`$childSelects` = lista av `[kolumn, rubrik, valtVärde]`) inledd av en horisontell linje, men ingenting alls om ingen kolumn har något att visa |
 | `printClearSearchCacheButton.php` | `printClearSearchCacheButton()` | Toppknappen "Töm sökcache" i vyn Sök. Efter bekräftelse anropar `manageActions.js` `clearSearchCache.php` i `hiddenFrame`, som tar bort söktabellernas resultatcachar och markerar sökkonfigurationens cache som gammal och bygger om den direkt; se search.md |
+| `printRebuildRestrictedCacheButton.php` | `printRebuildRestrictedCacheButton()` | Toppknappen "Bygg om restricted-cache" i Verktyg. Efter bekräftelse bygger `rebuildRestrictedCache.php` om restricted-lagercachen atomiskt; vid fel lämnas en tidigare cache kvar |
 | `printAddRemoveOperations.php` | `printAddRemoveOperations($target, $operationTables, $inheritPosts, $labels=array())` | Gemensam renderer för add/remove-operationer. `exclusiveOperationGroups.php` kan ange singleton-poster eller grupper av ömsesidigt exklusiva föräldratabeller; add-knappen döljs när målet redan finns i någon förälder i gruppen |
 | `printConfigPreviewButton.php` | `printConfigPreviewButton($mapId, $group=null, $layer=null)` | Typknapp som öppnar en förhandsgranskning via `writeConfig.php?getHtml=y` i en ny flik, utan att skriva till disk eller skapa ett nästlat formulär. Kan begränsas till en specifik grupp eller ett specifikt lager |
 | `printCopyButton.php` | `printCopyButton($type)` | Enkel "Spara kopia"-knapp (`command=copy`) |
@@ -399,7 +405,7 @@ konfigurationstabeller (via `configTables()` och dynamiskt genererad SQL).
 |---|---|---|
 | `formChangeButton.js` | `formChangeButton()` | Lägger till en CSS-klass (`change`) på ett formulärs "Uppdatera"-knapp så fort något fält i formuläret ändras (utom dolda fält), för att visuellt signalera osparade ändringar |
 | `initMessageListener.js` | `initMessageListener()` | Sätter upp en global `postMessage`-lyssnare för hela sidan. Validerar avsändarens origin (måste matcha `window.location.origin`) och att datan har rätt form innan den hanteras. Hanterar tre fall: `action:'close'` utan `targetId` (stäng topFrame, t.ex. från help.php), `action:'resize'` (justera topFrame-höjd; `read_json` och `sql_import` kan även krympa), och `targetId`+`value` (fyll i ett textarea-fält med värde från multiselect-verktyget, samt uppdatera den tillhörande multiselect-knappens `value`-attribut så nästa öppning av multiselect visar rätt förval) |
-| `manageActions.js` | `manageActions()` | Registrerar en delegerad klickhanterare för `data-manage-action`-knappar: skinbyte, informationspanelen, schema-/tabellimport, publicering och rensning av sökkonfigurationens cache. Bekräftelser och id:n skickas som escapade data-attribut |
+| `manageActions.js` | `manageActions()` | Registrerar en delegerad klickhanterare för `data-manage-action`-knappar: skinbyte, informationspanelen, schema-/tabellimport, publicering, rensning av sökcachen och ombyggnad av restricted-cachen. Bekräftelser och id:n skickas som escapade data-attribut |
 | `preservePageScroll.js` | `preservePageScroll()` | Initieras i `<head>` och sparar scrollpositionen vid formulärinskick via en delegerad `submit`-lyssnare. Om en positiv position väntar döljs dokumentet tills `DOMContentLoaded`, då sidan scrollas till positionen och visas; formulär riktade mot en annan browsing context sparar inte positionen |
 | `resizeIframe.js` | `resizeIframe(iframe, autoResize=false)` | Anpassar iframens höjd efter innehållet. Standardläget växer bara och behåller det manuella resize-handtaget; `autoResize=true` följer både ökning och minskning och döljer handtaget |
 | `textareaState.js` | `textareaState()` | Återställer textarea-scrollposition och synkroniserar storlek/scroll till dolda formulärfält; infogar tabulatortecken vid Tab utan inline-händelsekod |

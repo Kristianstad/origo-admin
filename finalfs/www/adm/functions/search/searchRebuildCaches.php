@@ -4,14 +4,9 @@
     // Only one process rebuilds at a time; others return at once.
     function searchRebuildCaches($tableConfigs)
     {
-        $lock=fopen(searchStorageDir().'results.lock', 'c');
+        $lock=cacheLock(cacheStorageDir().'results.lock');
         if ($lock === false)
         {
-            return;
-        }
-        if (!flock($lock, LOCK_EX | LOCK_NB))
-        {
-            fclose($lock);
             return;
         }
         try
@@ -48,7 +43,6 @@
         }
         finally
         {
-            flock($lock, LOCK_UN);
-            fclose($lock);
+            cacheUnlock($lock);
         }
     }

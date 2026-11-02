@@ -13,19 +13,21 @@
 | `arrayColumnSearch($value, $column, $rows)` | `arrayColumnSearch.php` | Hittar första raden där given kolumn matchar värdet | info, read_db_schemas, export, writeConfig, manage, writeTablesForAllLayers |
 | `assocArrayValues($array)` | `assocArrayValues.php` | Kontrollerar/hämtar faktiska värden i nästlad associativ array | info, manage |
 | `booleanSelectOptions(): array` | `booleanSelectOptions.php` | Returnerar select-alternativen `f => ☐ Nej` och `t => ☑ Ja` | manage |
+| `cacheLock($path, $waitSeconds=0)` | `cacheLock.php` | Tar exklusivt fillås, eventuellt med väntetid; `false` om låset inte kunde tas | search, restrictedLayer |
+| `cacheStorageDir()` | `cacheStorageDir.php` | Gemensam cachekatalog (`sys_get_temp_dir()/origo-cache/`, katalogläge 0700), skapas vid behov | search, restrictedLayer |
+| `cacheUnlock($lock)` | `cacheUnlock.php` | Släpper och stänger ett lås från `cacheLock()` | search, restrictedLayer |
+| `cacheWriteFile($path, $contents)` | `cacheWriteFile.php` | Skriver via temporär fil och `rename()` så läsare aldrig ser en halvskriven cachefil | search, restrictedLayer |
 | `clearAuthSession()` | `clearAuthSession.php` | Nollställer `$_SESSION['user']`, sätter en ny `login_time_stamp` och stänger sessionen. Anropas av `initUserLdap()` när ingen giltig användare kan slås upp | authorization (indirekt via initUserLdap) |
 | `configTableNames($dbh)` | `configTableNames.php` | Cacherar bastabeller i konfigurationsschemat som har förväntad id-kolumn; utesluter `object_identity` och `edit_cursor` | allFromTable, configTables, info, multiselect, updated |
 | `configTables($dbh)` | `configTables.php` | Hämtar konfigurationen från tillåtna objekttabeller i ett svep, avsedd att packas upp med `extract()` | writeConfig, manage, read_json |
 | `currentSkin(array $skins): array` | `currentSkin.php` | Väljer skin från cookien `origo_admin_skin` om id:t finns bland tillgängliga skins; annars returneras en tom array | help, info, manage, multiselect, read_json, sql_import |
 | `dbh($connectionString=null)` | `dbh.php` | Öppnar PostgreSQL-anslutning. Utan argument: standarddatabasen. Med anslutningssträng: godtycklig extern databas | news, mapstate, info, authorization, read_db_schemas, export, writeConfig, manage, read_schema_tables, updated, help, writeTablesForAllLayers |
-| `defineFileConstant($name, $value)` | `defineFileConstant.php` | Skriver en PHP-konstant till fil, läsbar via `includeFileConstant()`. Källan till `RESTRICTEDLAYERS`-konstanten | writeConfig |
 | `escapeHtml(string $value): string` | `escapeHtml.php` | Escapar text för HTML-text eller attribut med UTF-8 och citerade attributtecken | gemensamma renderers, manage |
 | `ensureSessionWritable()` | `ensureSessionWritable.php` | Säkerställer att sessionen är öppen/skrivbar | authorization, forwardauth |
 | `findAllParents($dbh, $child)` | `findAllParents.php` | Rekursivt: alla objekt som refererar till ett givet objekt | info, manage |
 | `findParents($tableToRemoveFrom, $target)` | `findParents.php` | Icke-rekursiv variant: hittar direkta föräldrar | manage (printRemoveOperation) |
 | `generateCsrfToken(): string` | `generateCsrfToken.php` | Säkerställer en skrivbar session och skapar eller återanvänder dess CSRF-token | read_json, sql_import |
 | `getCookieOptions($expiryTimestamp)` | `getCookieOptions.php` | Bygger cookie-inställningar (path/domain/secure/httponly/samesite) | authorization |
-| `includeFileConstant($name)` | `includeFileConstant.php` | Läser en fil-konstant skriven av `defineFileConstant()` | restrictedLayer |
 | `initUserLdap($dbh)` | `initUserLdap.php` | Initierar användarinfo via LDAP (`$authMethod==='ldap'`). **Bieffekt:** skriver och stänger sessionen | news, authorization, export, restrictedLayer |
 | `insertIdSql($id, $tableName)` | `insertIdSql.php` | Bygger en parameteriserad `INSERT`-sats som skapar en ny rad med angivet id som primärnyckel, övriga kolumner tomma; returnerar SQL och parametrar | manage (postButton-kommandona `create`/`copy`) |
 | `invalidTarget($functionName): never` | `invalidTarget.php` | Avslutar med ett gemensamt felmeddelande när target-form eller target-id är ogiltigt | target-hjälpare, manage |
@@ -46,6 +48,10 @@
 | `renderCloseButton(string $class=''): string` | `renderCloseButton.php` | Renderar den gemensamma Stäng-knappen; anropar `closeTopFrame()` från `js-functions/common/` | help, info, multiselect, read_json, sql_import |
 | `renderIconButton(array $button, string $icon, ?string $caption=null, string $iconClass=''): string` | `renderIconButton.php` | Renderar en escaped ikonknapp; formulär och POST-värden ägs av anroparen | manage (historik och add/remove) |
 | `renderUtilityHead(array $skin, string $styleName): void` | `renderUtilityHead.php` | Skriver skinvariabler, `styles/common.css` följd av sidans stylesheet, samt gemensamma utility-skript. Tillåtna stilmallar är help, info, multiselect, read_json och sql_import | help, info, multiselect, read_json, sql_import |
+| `restrictedCacheLoad($dbh=null): ?array` | `restrictedCacheLoad.php` | Läser restricted-lagercachen; försöker bygga den om den saknas och returnerar `null` om ingen användbar cache kan fås | restrictedLayer |
+| `restrictedCacheRefresh($dbh=null): bool` | `restrictedCacheRefresh.php` | Bygger restricted-lagercachen som en versionsfil under fillås och byter pekare atomiskt; läser konfigurationen efter att låset tagits och lämnar den tidigare cachen orörd vid fel | manage, restrictedLayer, rebuildRestrictedCache |
+| `restrictedCacheTableChanged($dbh, $table): bool` | `restrictedCacheTableChanged.php` | Bygger om restricted-cachen när `$table` är `layers`, `sources` eller `services` | manage |
+| `restrictedLayersFromConfig(array $configTables): array` | `restrictedLayersFromConfig.php` | Bygger listan över skyddade icke-GROUP-lager med behöriga användare och grupper | restrictedCacheRefresh |
 | `searchClearResultCaches()` | `searchClearResultCaches.php` | Tar bort alla söktabellers resultatcachefiler (`results_*.jsonl`); nästa sökning går live och bygger om cachen efter svaret | clearSearchCache |
 | `searchConfigFromDb($dbh)` | `searchConfigFromDb.php` | Bygger alla sökmodeller med färdigupplösta söktabeller ur `searchmodels`, `searchtables` och `databases`; `null` om tabellerna saknas | search (konfigurationscachen) |
 | `searchConfigMarkStale()` | `searchConfigMarkStale.php` | Markerar sökkonfigurationens cache som gammal (ny önskad token); den gamla cachen används tills en ny är klar | search, manage, sql_import |
@@ -53,9 +59,7 @@
 | `searchConfigRefresh($dbh=null, $waitSeconds=0, $honorBackoff=false)` | `searchConfigRefresh.php` | Bygger om konfigurationscachen om den saknas eller är gammal. Ett bygge i taget (`flock`), atomisk skrivning och pekarbyte, gamla filer tas bort först när den nya är klar. Returnerar `true` om cachen är aktuell efteråt | search, manage, sql_import, clearSearchCache |
 | `searchConfigTableChanged($dbh, $table, $renames=[])` | `searchConfigTableChanged.php` | Markerar och bygger om konfigurationscachen om `$table` är `searchmodels`, `searchtables` eller `databases`, eller om `$renames` (från `idRenames()`) innehåller ett tabell-id-byte | manage |
 | `searchConfigToken($name)` | `searchConfigToken.php` | Läser versionstoken (`desired` eller `current`) för konfigurationscachen; ogiltiga värden ger `null` | search (konfigurationscachen) |
-| `searchStorageDir()` | `searchStorageDir.php` | Katalogen för sökmodulens cachar (`sys_get_temp_dir()/origo-search/`, läge 0700), skapas vid behov | search |
 | `searchTableConfig($searchtable, $databases, $modelLimit, $liveRows)` | `searchTableConfig.php` | Normaliserar en `searchtables`-rad (databas, schema och tabellnamn härleds ur `table`-id:t; anslutning från `databases`) till sökmodulens inställningar; `null` och loggning om raden är oanvändbar | search (konfigurationscachen) |
-| `searchWriteFile($path, $contents)` | `searchWriteFile.php` | Skriver en fil via temporär fil i samma katalog och `rename()`, så att läsare aldrig ser en halvskriven fil | search (konfigurationscachen) |
 | `setTargetConfigParam(&$fullTarget, $configParam, $value)` | `setTargetConfigParam.php` | Ändrar ett konfigurationsvärde i en full target in-memory | manage, target-infrastruktur |
 | `sqlQueryError($dbh)` | `sqlQueryError.php` | Avslutar vid SQL-fel med PostgreSQLs felmeddelande | allFromTable, configTableNames, markMapsChanged, markMapUnchanged, schemaNamesFromDb, tableNamesFromSchema, updated-funktioner |
 | `tableConfigs($table, $configTablesOrDbh)` | `tableConfigs.php` | Hämtar rader för en konfigurationstabell ur en databaskoppling eller en redan laddad tabellarray | manage (target-uppslag) |

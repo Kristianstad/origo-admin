@@ -39,6 +39,12 @@ function manageActions() {
                 }
                 document.getElementById('hiddenFrame').src = 'clearSearchCache.php';
                 break;
+            case 'rebuild-restricted-cache':
+                if (!confirm(button.dataset.confirm)) {
+                    return;
+                }
+                document.getElementById('hiddenFrame').src = 'rebuildRestrictedCache.php';
+                break;
             case 'write-config':
                 if (!confirm(button.dataset.confirm)) {
                     return;

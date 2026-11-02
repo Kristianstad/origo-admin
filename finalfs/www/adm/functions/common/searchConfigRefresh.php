@@ -6,25 +6,15 @@
     // The old cache stays in use until the new one is completely written. Returns true if the cache is up to date afterwards.
     function searchConfigRefresh($dbh=null, $waitSeconds=0, $honorBackoff=false)
     {
-        $dir=searchStorageDir();
+        $dir=cacheStorageDir();
         if ($honorBackoff && time() - (int) @filemtime($dir.'config.attempt') < 30)
         {
             return false;
         }
-        $lock=fopen($dir.'config.lock', 'c');
+        $lock=cacheLock($dir.'config.lock', $waitSeconds);
         if ($lock === false)
         {
             return false;
-        }
-        $deadline=microtime(true) + $waitSeconds;
-        while (!flock($lock, LOCK_EX | LOCK_NB))
-        {
-            if (microtime(true) >= $deadline)
-            {
-                fclose($lock);
-                return false;
-            }
-            usleep(50000);
         }
         $current=searchConfigToken('current');
         $token=searchConfigToken('desired') ?? $current ?? bin2hex(random_bytes(8));
@@ -41,8 +31,8 @@
                 }
                 $models=searchConfigFromDb($dbh);
                 $upToDate=($models !== null)
-                    && searchWriteFile($dir.'config.'.$token.'.php', "<?php\nreturn ".var_export($models, true).";\n")
-                    && searchWriteFile($dir.'config.current', $token);
+                    && cacheWriteFile($dir.'config.'.$token.'.php', "<?php\nreturn ".var_export($models, true).";\n")
+                    && cacheWriteFile($dir.'config.current', $token);
                 if ($upToDate)
                 {
                     foreach (glob($dir.'config.*.php') ?: array() as $file)
@@ -67,7 +57,6 @@
                 }
             }
         }
-        flock($lock, LOCK_UN);
-        fclose($lock);
+        cacheUnlock($lock);
         return $upToDate;
     }

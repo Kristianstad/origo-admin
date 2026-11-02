@@ -11,8 +11,8 @@ JSON-konfiguration, dels en komplett, fristående, minifierad HTML-sida
 som innehåller den färdiga kartan. Skriver resultatet till disk under
 `<webRoot>/maps/<mapNamn>/`. Genererar även SEO-relaterad strukturerad
 data (schema.org JSON-LD) och en `sitemap.xml` för kartor som är
-markerade som sökmotorindexerbara. **Skriver även `RESTRICTEDLAYERS`-
-konstanten** som används av `restrictedLayer.php`.
+markerade som sökmotorindexerbara. Restricted-lagercachen hanteras separat
+och byggs om efter relevanta ändringar i manage-vyn eller manuellt i Verktyg.
 
 Anropas av knappen `printWriteConfigButton()` i `manage.php`.
 
@@ -36,9 +36,6 @@ Anropas av knappen `printWriteConfigButton()` i `manage.php`.
   `writeConfig.php` extraherar dem sedan till lokala variabler med
   `extract()`.
 - `pgArrayToPhp()`, `arrayColumnSearch()`
-- `defineFileConstant($name, $value)` – skriver en PHP-konstant till en fil
-  på disk (källan till `RESTRICTEDLAYERS` och andra
-  `includeFileConstant()`-lästa konstanter)
 
 **Konstanter:**
 - `constants/webRoot.php` → `$webRoot`

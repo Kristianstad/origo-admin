@@ -25,10 +25,8 @@ writeConfig.php
            ├─ minifiera CSS/JS med Minify-biblioteket
            ├─ fixDuplicateDeclarations() [writeConfig] → JS-transformation, se nedan
            ├─ (om sökmotorindexerbar) bygger strukturerad data (schema.org JSON-LD) + sitemap.xml
-           ├─ publishMapFiles()          [writeConfig, EJ SEDD ÄNNU] → skriver till disk
-           ├─ markMapUnchanged()         [writeConfig] → nollställer "ändrad"-flaggan i databasen
-           └─ bygger RESTRICTEDLAYERS-konstanten (!) baserat på tjänsternas restricted-flagga
-                → defineFileConstant('RESTRICTEDLAYERS', ...)  [common]
+         ├─ publishMapFiles()          [writeConfig, EJ SEDD ÄNNU] → skriver till disk
+         └─ markMapUnchanged()         [writeConfig] → nollställer "ändrad"-flaggan i databasen
 */
 
 // Tell browsers to not cache response
@@ -466,26 +464,6 @@ HERE;
         publishMapFiles($filepathWithoutSuffix, $html, $jsonPretty, $mapId);
         unset($filepathWithoutSuffix, $html, $jsonPretty);
         markMapUnchanged($dbh, $mapId);
-
-        $restrictedLayers = array();
-        foreach ($layers as $layer) {
-            if ($layer['type'] !== 'GROUP') {
-                $layerServiceId = arrayColumnSearch($layer['source'], 'source_id', $sources)['service'];
-                $layerServiceRestricted = arrayColumnSearch($layerServiceId, 'service_id', $services)['restricted'];
-                if ($layerServiceRestricted == 't') {
-                    $restrictedLayers[] = array(
-                        'name' => explode('#', $layer['layer_id'])[0],
-                        'authorized_users' => $layer['adusers'],
-                        'authorized_groups' => $layer['adgroups']
-                    );
-                }
-            }
-        }
-        array_walk($restrictedLayers, function (&$restrictedLayer) {
-            $restrictedLayer['authorized_users'] = array_map(function ($user) { return mb_strtolower($user, 'UTF-8'); }, pgArrayToPhp(str_replace('"', '', $restrictedLayer['authorized_users'])));
-            $restrictedLayer['authorized_groups'] = array_map(function ($group) { return mb_strtolower($group, 'UTF-8'); }, pgArrayToPhp(str_replace('"', '', $restrictedLayer['authorized_groups'])));
-        });
-        defineFileConstant('RESTRICTEDLAYERS', $restrictedLayers);
     }
 }
 

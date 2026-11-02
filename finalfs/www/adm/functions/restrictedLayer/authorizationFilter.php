@@ -1,13 +1,13 @@
 <?php
 
-    function authorizationFilter($layerNames)
+    function authorizationFilter($layerNames, $restrictedLayers)
     {
         if (!is_array($layerNames))
         {
             $layerNames = array_unique(explode(',', $layerNames));
         }
         $authorizedLayers = array();
-        foreach (RESTRICTEDLAYERS as $restrictedLayer)
+        foreach ($restrictedLayers as $restrictedLayer)
         {
             $foundKey = array_search($restrictedLayer['name'], $layerNames);
             if ($foundKey !== false)

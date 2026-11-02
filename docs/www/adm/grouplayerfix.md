@@ -93,7 +93,7 @@ tillbaka baserat på filens ändringstid jämfört med TTL.
   (`$rawResponse === false || $httpCode === 0`), medan `fetchWithStatus()` i
   restrictedLayer-modulen gör om vid *5xx-svar*.
 - `grouplayerfix.php` och `restrictedLayer.php` pekar mot **två skilda
-  QGIS-tjänster**, så avsaknaden av koppling till `RESTRICTEDLAYERS` och
+  QGIS-tjänster**, så avsaknaden av koppling till restricted-layer-behörigheter och
   `$_SESSION['user']` i grouplayerfix läcker inte skyddad information.
 - Curl-inställningarna (`CURLOPT_*`) upprepas tre gånger i
   `grouplayerfix.php` (initiering och retry-block för describeFeatureType)

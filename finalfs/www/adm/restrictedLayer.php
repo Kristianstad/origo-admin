@@ -4,7 +4,7 @@ restrictedLayer.php
  ├─ includeDirectory("./functions/common")
  ├─ includeDirectory("./functions/restrictedLayer")
  ├─ readAndCloseSession()                    [common]
- ├─ includeFileConstant('RESTRICTEDLAYERS')  [common] → laddar RESTRICTEDLAYERS-konstanten (lista över skyddade lager)
+ ├─ restrictedCacheLoad()                    [common] → läser eller bygger restricted-lagercachen
  ├─ (om authMethod === 'ldap') initUserLdap()   → öppnar en egen databasanslutning när $dbh saknas
  ├─ tolkar QUERY_STRING manuellt (byter ut '&?' och '?' mot '&', för att hantera Origos url-format)
  ├─ bygger $call = URL mot bakomliggande karttjänst (restrictedServiceUrl + path + querystring)
@@ -15,8 +15,8 @@ restrictedLayer.php
  │    └─ fetchWithStatus($call, ...)  [restrictedLayer] → hämtar och returnerar svaret oförändrat
  │
  └─ OM begränsat:
-      ├─ authorizationNamesFilter($callLayers)  [restrictedLayer]
-      │    └─ authorizationFilter($layerNames)    [restrictedLayer]
+    ├─ authorizationNamesFilter($callLayers, $restrictedLayers)  [restrictedLayer]
+    │    └─ authorizationFilter($layerNames, $restrictedLayers)    [restrictedLayer]
       │         └─ userAuthorized($_SESSION['user'], $restrictedLayer)  [restrictedLayer]
       ├─ OM alla begärda lager är godkända → fetchWithStatus(...) som ovan
       ├─ OM GetLegendGraphic → returnerar en "lås"-bild istället för riktig legend
@@ -37,7 +37,12 @@ restrictedLayer.php
 	
     require './constants/authMethod.php';
     readAndCloseSession();
-    includeFileConstant('RESTRICTEDLAYERS');
+    $restrictedLayers=restrictedCacheLoad();
+    if ($restrictedLayers === null)
+    {
+        http_response_code(503);
+        exit('Restricted layer permissions are temporarily unavailable.');
+    }
     if ($authMethod === 'ldap')
     {
         initUserLdap();
@@ -92,7 +97,7 @@ restrictedLayer.php
         {
             $unrestricted = true;
         }
-        elseif (count($callLayers) === count(array_diff($callLayers, array_column(RESTRICTEDLAYERS, 'name'))))
+        elseif (count($callLayers) === count(array_diff($callLayers, array_column($restrictedLayers, 'name'))))
         {
             $unrestricted = true;
         }
@@ -115,7 +120,7 @@ restrictedLayer.php
         else
         {
             header('Restricted: 1');
-            if (empty(array_diff($callLayers, authorizationNamesFilter($callLayers))))
+            if (empty(array_diff($callLayers, authorizationNamesFilter($callLayers, $restrictedLayers))))
             {
                 $opts=array('http'=>array('protocol_version'=>1.1, 'method'=>"GET",'header'=>$headers, 'ignore_errors'=>true));
                 $context=stream_context_create($opts);

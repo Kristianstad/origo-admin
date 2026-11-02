@@ -159,8 +159,9 @@ Den fysiska kartkatalogen ligger under `<webRoot>/maps/<kartnamn>`.
 `<webRoot>/<kartnamn>` är en symlink till samma katalog, så webbroten och
 `maps` använder en enda uppsättning filer. Befintliga mål ersätts rekursivt
 innan symlänken skapas.
-Samma fil skriver även `constants/RESTRICTEDLAYERS.php`
-(`defineFileConstant()`), som `restrictedLayer.php` läser.
+Restricted-lagerbehörigheter cachas separat utanför webbträdet. Manage
+uppdaterar cachen när lager, källor eller tjänster ändras; Verktyg-vyn har
+en manuell ombyggnad efter import. Kartpublicering uppdaterar inte cachen.
 
 `manage.php` (`markMapsChanged()`) sätter `maps.changed='t'` när något
 som påverkar en publicerad karta ändras; `writeConfig.php`

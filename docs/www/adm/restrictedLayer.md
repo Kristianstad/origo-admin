@@ -6,8 +6,8 @@
 ## Syfte
 Fungerar som en säkerhetsgateway/proxy mellan Origo-kartan och den
 bakomliggande karttjänsten (WMS/WFS, t.ex. QGIS Server). Vissa kartlager
-är märkta som skyddade (`RESTRICTEDLAYERS`-konstanten, med tillåtna
-användare och/eller grupper per lager). Anrop som inte innehåller några
+är märkta som skyddade (restricted-cachen innehåller tillåtna användare
+och grupper per lager). Anrop som inte innehåller några
 skyddade lager, eller där användaren är behörig till alla begärda lager,
 vidarebefordras oförändrat till karttjänsten. Anrop till lager användaren
 saknar behörighet till degraderas istället till ett "tomt" svar anpassat
@@ -44,8 +44,7 @@ inkluderar `restrictedLayer.php`.
 ## Beror på
 **Common-funktioner** (`adm/functions/common/`):
 - `readAndCloseSession()` – läser in sessionen
-- `includeFileConstant('RESTRICTEDLAYERS')` – laddar konstanten
-  `RESTRICTEDLAYERS` (lista över skyddade lager, se nedan)
+- `restrictedCacheLoad()` – läser restricted-cachen eller bygger den vid första anropet
 - `initUserLdap()` – anropas om `$authMethod === 'ldap'`. Utan
   `$dbh`-argument öppnar funktionen själv en databasanslutning med `dbh()`
 
@@ -53,15 +52,14 @@ inkluderar `restrictedLayer.php`.
 - `constants/authMethod.php` → `$authMethod`
 - `constants/restrictedServiceUrl.php` → `$restrictedServiceUrl` (bas-URL
   till den bakomliggande karttjänsten)
-- `RESTRICTEDLAYERS` (via `includeFileConstant`, se `constants/`-mappen på
-  toppnivå, `constants/RESTRICTEDLAYERS.php`) – array med skyddade lager,
-  varje post har minst `name`, `authorized_users`, `authorized_groups`
-
 **Session:** läser `$_SESSION['user']['id']` och `$_SESSION['user']['groups']`
 (satt av antingen authorization- eller forwardauth-modulen).
 
 **Filsystem:** läser statiska bildfiler direkt (`../img/png/lock_yellow.png`,
-`../img/png/empty.png`).
+`../img/png/empty.png`). Restricted-cachen ligger utanför webbträdet i
+`sys_get_temp_dir()/origo-cache/`; `restricted.current` pekar på en
+versionsfil `restricted.<token>.php`. Nya versioner skrivs färdigt innan
+pekaren byts, så befintliga läsare kan fortsätta använda föregående fil.
 
 **Nätverk:** gör utgående HTTP-anrop till `$restrictedServiceUrl` via
 `file_get_contents()` med stream context (inte curl, till skillnad från
@@ -73,8 +71,8 @@ forwardauth-modulen).
 
 | Fil | Funktion | Beskrivning |
 |---|---|---|
-| `authorizationFilter.php` | `authorizationFilter($layerNames): array` | Filtrerar en lista lagernamn till de som är antingen obegränsade eller där användaren är behörig. Returnerar array av lager-arrayer (inte bara namn) |
-| `authorizationNamesFilter.php` | `authorizationNamesFilter($layerNames): array` | Wrapper runt `authorizationFilter()` som returnerar enbart lagernamnen |
+| `authorizationFilter.php` | `authorizationFilter($layerNames, $restrictedLayers): array` | Filtrerar en lista lagernamn till de som är antingen obegränsade eller där användaren är behörig. Returnerar array av lager-arrayer (inte bara namn) |
+| `authorizationNamesFilter.php` | `authorizationNamesFilter($layerNames, $restrictedLayers): array` | Wrapper runt `authorizationFilter()` som returnerar enbart lagernamnen |
 | `fetchWithStatus.php` | `fetchWithStatus($url, $context, $maxAttempts = 2): array` | Hämtar en URL, läser ut HTTP-statuskoden, gör om anropet vid 5xx-fel (max `$maxAttempts` försök, 150ms paus mellan försök). Returnerar `['content' => ..., 'status' => ...]` |
 | `finishError500.php` | `finishError500($cause)` | Avslutar requesten med HTTP 500 och texten "Rättigheter saknas!". `$cause` tas emot men används inte |
 | `userAuthorized.php` | `userAuthorized($user, $restrictedLayer): bool` | Avgör om en given användare är behörig till ett specifikt skyddat lager, baserat på `authorized_users` (id-matchning) eller `authorized_groups` (någon gemensam grupp) |
@@ -93,7 +91,10 @@ forwardauth-modulen).
 - `finishError500($cause)` tar emot `$cause` men skriver alltid samma text.
 - Konstantfilerna `EMPTYPNG.php` och `LOCKPNG.php` finns inte; modulen
   läser bilderna direkt med `file_get_contents()`.
-- `RESTRICTEDLAYERS.php` genereras av `writeConfig.php` vid varje
-  publicering via `defineFileConstant('RESTRICTEDLAYERS', ...)`, baserat på
-  tjänster som är markerade `restricted` i databasen. En kopia ligger i
-  `adm/tmp/`.
+## Restricted-cache
+
+Cacheinnehållet byggs från `layers`, `sources` och `services`: icke-GROUP-lager vars källa pekar på en tjänst med `restricted = 't'` tas med, tillsammans med normaliserade användar- och gruppnamn. Cachefilen skrivs atomiskt under fillås i `sys_get_temp_dir()/origo-cache/` och ligger inte i webbträdet.
+
+`manage.php` bygger om cachen efter lyckade ändringar i `layers`, `sources` eller `services`, inklusive create/update/copy/delete, undo/redo och restore. Kartpublicering i `writeConfig.php` påverkar inte cachen. JSON- och SQL-import, samt ändringar direkt i databasen, kräver manuell ombyggnad via **Bygg om restricted-cache** i Verktyg.
+
+Vid misslyckad ombyggnad lämnas en befintlig cache orörd och fortsätter användas. Om cache saknas försöker första proxyanropet bygga den; om det misslyckas svarar proxyn HTTP 503 i stället för att behandla lagren som obegränsade.
