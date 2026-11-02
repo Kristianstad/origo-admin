@@ -25,10 +25,9 @@ writeConfig.php
            ├─ minifiera CSS/JS med Minify-biblioteket
            ├─ fixDuplicateDeclarations() [writeConfig] → JS-transformation, se nedan
            ├─ (om sökmotorindexerbar) bygger strukturerad data (schema.org JSON-LD) + sitemap.xml
-         ├─ publishMapFiles()          [writeConfig, EJ SEDD ÄNNU] → skriver till disk
-         └─ markMapUnchanged()         [writeConfig] → nollställer "ändrad"-flaggan i databasen
+           ├─ publishMapFiles()          [writeConfig, EJ SEDD ÄNNU] → skriver filer/länkar och rapporterar fel
+           └─ markMapUnchanged()         [writeConfig] → körs bara efter lyckad publicering
 */
-
 // Tell browsers to not cache response
 header("Cache-Control: must-revalidate, max-age=0, s-maxage=0, no-cache, no-store");
 
@@ -461,7 +460,13 @@ HERE;
 HERE;
 
         $filepathWithoutSuffix = "$configDir/index$mapNumber";
-        publishMapFiles($filepathWithoutSuffix, $html, $jsonPretty, $mapId);
+        if (!publishMapFiles($filepathWithoutSuffix, $html, $jsonPretty, $mapId)) {
+            error_log("writeConfig: failed to publish files for map '$mapId'");
+            http_response_code(500);
+            echo '<script>alert(' . jsonForInlineJs('Publiceringen misslyckades. Kartan är fortfarande markerad som ändrad.') . ');</script>';
+            pg_close($dbh);
+            exit;
+        }
         unset($filepathWithoutSuffix, $html, $jsonPretty);
         markMapUnchanged($dbh, $mapId);
     }

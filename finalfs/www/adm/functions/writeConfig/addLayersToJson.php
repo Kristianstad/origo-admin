@@ -25,6 +25,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
         $map =& $context['map'];
         $layers =& $context['layers'];
         $mapStyles =& $context['mapStyles'];
+        $mapStyleLayers =& $context['mapStyleLayers'];
         $mapSources =& $context['mapSources'];
         $sources =& $context['sources'];
         $services =& $context['services'];
@@ -354,10 +355,12 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
                 }
                 if (empty($styleLayer['style_config']))
                 {
+                    $styleRestricted=false;
                     if ($styleLayer['type'] !== 'GROUP')
                     {
                         $styleSource = arrayColumnSearch($styleLayer['source'], 'source_id', $sources);
                         $styleService = arrayColumnSearch($styleSource['service'], 'service_id', $services);
+                        $styleRestricted=($styleService['restricted'] ?? null) === 't';
                         if (empty($styleLayer['type']))
                         {
                             $styleLayer['type'] = 'WMS';
@@ -396,7 +399,7 @@ addLayersToJson($mapLayersList, &$layersMeta, $groupLayer=false, &$context)
                         unset($styleSource, $styleService, $styleSourceProject, $paramSeparator);
                     }
                     require("./constants/iconTtl.php");
-                    if (isset($service) && isset($service['restricted']) && $service['restricted'] == 't')
+                    if ($styleRestricted)
                     {
                         $restricted = true;
                     }

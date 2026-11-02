@@ -80,11 +80,11 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 | `pgBoolToText.php` | `pgBoolToText($pgBool)` | Konverterar Postgres bool-representation (`'t'`/`'f'`) till JS-litteralerna `"true"`/`"false"`. Returnerar värdet oförändrat om det inte är `'t'`/`'f'` |
 | `pgBoxToText.php` | `pgBoxToText($pgBox): string` | Konverterar Postgres box-syntax (`(x2,y2),(x1,y1)`) till en kommaseparerad koordinatlista, och sorterar hörnen så att den mindre x-koordinaten kommer först |
 | `pgCoordsToText.php` | `pgCoordsToText($pgCoords): string` | Konverterar Postgres punkt-syntax (`(x,y)`) till kommaseparerad text utan parenteser |
-| `publishMapFiles.php` | `publishMapFiles($filepathWithoutSuffix, $html, $json, $mapId): void` | Skriver HTML/JSON och komprimerade varianter, skapar symlänkar i `/www/maps` och länkar `/www/<kartnamn>` till samma fysiska kartkatalog |
+| `publishMapFiles.php` | `publishMapFiles($filepathWithoutSuffix, $html, $json, $mapId): bool` | Skriver HTML/JSON och komprimerade varianter atomiskt, skapar symlänkar i `/www/maps` och `/www/<kartnamn>`. Returnerar `false` om någon nödvändig skrivning eller länk misslyckas |
 | `removePath.php` | `removePath(string $path): bool` | Tar bort filer, symlänkar och katalogträd innan ett länkmål ersätts |
 | `renderCssTags.php` | `renderCssTags(array $items): string` | Bygger HTML för CSS-inkludering: `include(sökväg)`-syntax läses in och minifieras som inline `<style>`, annars renderas som vanlig `<link rel="stylesheet">` |
 | `renderJavaScriptTags.php` | `renderJavaScriptTags(array $items): string` | Bygger HTML för JS-inkludering: stödjer `include(...)`/`include_minify(...)` (minifieras) och `include_nominify(...)` (lämnas oförändrad, för redan minifierade bundles), annars renderas som vanlig `<script src="...">` |
-| `saveFile.php` | `saveFile(string $path, string $content): bool` | Enkel, defensiv wrapper runt `file_put_contents()` |
+| `saveFile.php` | `saveFile(string $path, string $content): bool` | Skriver via temporär fil i samma katalog och `rename()`; bevarar befintligt filläge och använder 0644 för nya publika filer |
 | `splitValues.php` | `splitValues($valueString): array` | Delar en kommaseparerad JS-värdelista utan att dela vid komma inom strängar eller `{}`/`[]`/`()`. Används av `fixDuplicateDeclarations()` |
 
 ## Koppling till manage-modulen: "changed"-flaggan
@@ -92,8 +92,10 @@ skriver `maps.changed = 'f'` (via `markMapUnchanged`).
 `manage.php` (via `markMapsChanged()`) sätter `maps.changed = 't'` varje
 gång en ändring görs som påverkar en publicerad karta (lager, grupper,
 källor, etc.), och `writeConfig.php` (via `markMapUnchanged()`) nollställer
-flaggan (`'f'`) efter lyckad publicering. `printWriteConfigButton()` använder
-flaggan för att visa knappen i "ändrad"-läge.
+flaggan (`'f'`) först efter att `publishMapFiles()` lyckats med alla nödvändiga
+filer och länkar. Vid fel rapporteras publiceringen som misslyckad och flaggan
+förblir `'t'`. `printWriteConfigButton()` använder flaggan för att visa knappen
+i "ändrad"-läge.
 
 ## Publiceringskedjan till disk
 
