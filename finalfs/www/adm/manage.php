@@ -653,7 +653,10 @@ elseif (isset($post['databaseId'])) {
         printDatabaseForm($database, $inheritPosts, typeHelps("database", $helps));
 
         // Expose all schema ids of selected database as $databaseSchemas (array)
-        $databaseSchemas = preg_grep("/^" . $post['databaseId'] . "[.]/", array_column($configTables['schemas'], 'schema_id'));
+        $databaseSchemaPrefix=$post['databaseId'].'.';
+        $databaseSchemas=array_filter(array_column($configTables['schemas'], 'schema_id'), function ($schemaId) use ($databaseSchemaPrefix) {
+            return str_starts_with($schemaId, $databaseSchemaPrefix);
+        });
 
         // Add $databaseSchemas to $database
         setTargetConfigParam($database, 'schemas', '{' . implode(',', $databaseSchemas) . '}');
@@ -689,7 +692,10 @@ if (isset($post['schemaId'])) {
         printSchemaForm($schema, $selectables, $inheritPosts, typeHelps("schema", $helps));
 
         // Expose all table ids of selected schema as $schemaTables (array)
-        $schemaTables = preg_grep("/^" . $post['schemaId'] . "[.]/", array_column($configTables['tables'], 'table_id'));
+        $schemaTablePrefix=$post['schemaId'].'.';
+        $schemaTables=array_filter(array_column($configTables['tables'], 'table_id'), function ($tableId) use ($schemaTablePrefix) {
+            return str_starts_with($tableId, $schemaTablePrefix);
+        });
 
         // Add $schemaTables to $schema
         setTargetConfigParam($schema, 'tables', '{' . implode(',', $schemaTables) . '}');

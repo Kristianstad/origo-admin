@@ -52,14 +52,14 @@ Planen samlar framtida arbete för att förenkla, förtydliga och minska redunda
 Åtgärder som tidigare stod i modulreferenserna. Risker och begränsningar beskrivs fortfarande där.
 
 - **manage:** förenkla upprepad schema-/tabellvisning (`printHeadForm` och `printChildSelect` har var sin prefix-strippning av föräldrans id); bryt ut delad QGIS-metadatahantering (`qgisProjectMetadata`) som även `info.php` och `writeTablesForAllLayers.php` behöver; lägg till null-kontroll i `initMessageListener.js`; överväg semantiska kontroller i `validateUpdate()` (PostgreSQL validerar redan kolumntyperna, inklusive `json`); ersätt `exit(1)` utan meddelande i `tableConfigs()`; låt `markMapsChanged()` använda parametrar.
-- **writeConfig:** utvärdera `fixDuplicateDeclarations` (radbaserad JavaScript-parser); slå ihop `renderCssTags` och `renderJavaScriptTags`; bryt ut en `buildLegendUrl` utan att ändra värdena (kräver visuell verifiering); städa oanvända delar.
+- **writeConfig:** ersätt eller ta bort `fixDuplicateDeclarations`-transformeringen; om den behövs, bygg den på en JavaScript-AST-parser i stället för regex och rad-/klammerheuristik; slå ihop `renderCssTags` och `renderJavaScriptTags`; bryt ut en `buildLegendUrl` utan att ändra värdena (kräver visuell verifiering); städa oanvända delar.
 - **info:** bryt ut källdetaljer och AD-användardetaljer ur `info.php`; ersätt upprepad inloggningsräkning med en funktion.
 - **forwardauth:** rätta docblock i `getOnPremisesSamAccountName`; ta bort eller styr utkommenterade debugblock.
 - **authorization:** ta bort det dolda `call`-fältet i `displayLogin()` om ingen avsändare hittas (inget i repot skickar parametern och `login()` läser den inte); bryt ut dubblerad logik för nyhets-iframens URL; läs in `adldap2` först när LDAP används.
 - **multiselect:** använd `$configSchema` i stället för hårdkodat schema; flytta inline-`onclick` till en namngiven funktion.
 - **restrictedLayer:** lägg till `isset()`-kontroller för frågeparametrar; använd eller ta bort `$cause` i `finishError500`; överväg tydligare filnamn för `authorizationFilter`.
-- **grouplayerfix:** rätta `$DEFAULT_QGIS_SERVER_PATH`/`_URL` och operatorprioritet i `getCachedProjectSettings`; ta bort dubblerade kodblock; harmonisera retry med `fetchWithStatus`; samla curl-inställningar.
-- **read_json:** smoke-testa mot en riktig PostgreSQL med specialtecken i titlar, URL:er och beskrivningar samt rollback efter databasfel.
+- **grouplayerfix:** rätta operatorprioritet i `getCachedProjectSettings`; ta bort dubblerade kodblock; harmonisera retry med `fetchWithStatus`; samla curl-inställningar.
+- **read_json:** ersätt regexen som tar bort administrationsformuläret ur importerad HTML med HTML-parsning eller strukturerad data innan formuläret läggs till; smoke-testa mot en riktig PostgreSQL med specialtecken i titlar, URL:er och beskrivningar samt rollback efter databasfel.
 - **read_db_schemas:** utred syftet med `unset($_GET)`.
 - **news:** ta bort död kod i `pgNewsArray` och `selectNew`; begränsa `includeDirectory("./functions/common")` till nödvändiga filer.
 - **writeTablesForAllLayers:** överväg batchning och framsteg om timeout uppstår vid många lager.

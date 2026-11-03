@@ -20,7 +20,7 @@ oförändrat till QGIS Server.
 
 | Parameter | Beskrivning |
 |---|---|
-| `qgis_url` | Full URL eller path som börjar med `/` till QGIS Server. Om relativ path byggs full URL från klientens `HTTP_HOST` |
+| `qgis_url` | HTTP/HTTPS-URL med giltig värd och valfri port 1–65535, eller path som börjar med `/`. Relativ path byggs till full URL från klientens `HTTP_HOST`; URL:er med userinfo avvisas |
 | `ttl` | (valfri) Cache-livslängd i sekunder för projektstruktur/describeFeatureType, default 600 |
 | övriga | Godtyckliga WMS/WFS-parametrar, vidarebefordras till QGIS Server |
 
@@ -74,11 +74,6 @@ tillbaka baserat på filens ändringstid jämfört med TTL.
 
 ## Begränsningar och risker
 
-- **Odefinierad variabel `$DEFAULT_QGIS_SERVER_PATH`:** koden sätter
-  `$DEFAULT_QGIS_SERVER_URL = '';` men läser
-  `$_GET['qgis_url'] ?? $DEFAULT_QGIS_SERVER_PATH`. `_PATH`-variabeln sätts
-  aldrig, så fallbacken när `qgis_url` saknas ger en PHP-varning
-  (undefined variable) och `null`.
 - **Operatorprioritet i `getCachedProjectSettings.php`:**
   `if ($response['headers']['http_code'] ?? 0 >= 200 && ($response['headers']['http_code'] ?? 0) < 300)`
   tolkas som `$response['headers']['http_code'] ?? (0 >= 200 && ...)`.

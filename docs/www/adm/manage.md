@@ -133,6 +133,9 @@ visar id-fältet som skrivbart. Relationerna mellan konfigurationsobjekt lagras 
 id:n i kolumner (inga främmande nycklar), så `manage.php` uppdaterar dem i samma
 transaktion som objektets egen `UPDATE`:
 
+Vid listning av scheman och tabeller i `manage.php` väljs barn med bokstavlig
+`<föräldra-id>.`-prefixmatchning.
+
 - `sqlForIdChange()` bygger satserna. Vilka kolumner som refererar till en tabell
   härleds ur schemat med `idReferencedTable()`: en array-kolumn refererar till
   tabellen med samma namn (eller dess alias i `constants/tableAliases.php`), en
@@ -374,7 +377,7 @@ betydande typspecifik villkorslogik:
 | `printRedoButton.php` | `printRedoButton($target, $visible=true)` | "Gör om"-knappen: postar `target_key`/`target_table`/`target_id` och `command=redo`, med JS-bekräftelsedialog. Se "Historik: Ångra/Gör om" ovan |
 | `printRestoreEditButton.php` | `printRestoreEditButton($editId, $targetId)` | Skriver ut Återställ-knappen för en delete-edit; postar edit-id:t och ber om bekräftelse |
 | `printSelectOptions.php` | `printSelectOptions($optionValues, $selectedValue=null, $preserveOrder=false)` | Skriver ut `<option>`-element för en `<select>`. Sorterar alfabetiskt om arrayen är associativ (id→namn), om inte `$preserveOrder` är satt (används av `edit`-dropdownen för att bevara kronologisk ordning trots att etiketten är `target_key`, inte datumet). **Visar texten efter sista kommatecknet i etiketten**, se begränsningar |
-| `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Skriver ut ett redigerbart `<textarea>`, städar Postgres-arraysyntax, bevarar storlek/scrollposition via `$sizePosts` och dolda fält, visar hjälp och eventuell multiselect-knapp. `textareaState.js` hanterar dimensionering, Tab-inmatning och scrollposition utan inline-händelsekod |
+| `printTextarea.php` | `printTextarea($fullTarget, $configParam, $class, $label, $help=false, $sizePosts=array(), $readonly=false)` | Skriver ut ett redigerbart `<textarea>`, avkodar arraykolumner med `pgArrayToPhp()` till kommaseparerad text, bevarar storlek/scrollposition via `$sizePosts` och dolda fält, visar hjälp och eventuell multiselect-knapp. `textareaState.js` hanterar dimensionering, Tab-inmatning och scrollposition utan inline-händelsekod |
 | `sizePosts.php` | `sizePosts($post): array` | Filtrerar `$post` till bredd-/höjd-/scrollrelaterade fält, och normaliserar `new*`-prefixade nycklar (från senaste formulärinskicket) till samma nyckelformat som de ursprungliga (`width*`/`height*`/`scroll*`) – nyare värden skriver över äldre i sammanslagningen |
 | `sqlForIdChange.php` | `sqlForIdChange($renames, $configTables): array` | Bygger satserna som slutför ett id-byte: omdöpta härledda rader med historikidentitet och alla kolumner som refererar till ett omdöpt id. Objektets egen rad uppdateras av `sqlForUpdate()`. Se "Ändra id på ett objekt" |
 | `sqlForOperation.php` | `sqlForOperation($operation, $child, $parent): array` | Bygger en parameteriserad UPDATE-sats som lägger till/tar bort ett barn-id ur förälderns array-kolumn; returnerar SQL och parametrar |

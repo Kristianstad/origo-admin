@@ -5,7 +5,7 @@ Proxy för QGIS Server med stöd för describeFeatureType och filter på valfria
 grouplayerfix.php
  ├─ includeDirectory("./functions/grouplayerfix")   [OBS: common INTE inkluderad, se nedan]
  ├─ läser $_GET['qgis_url'] – vilken QGIS-server som ska anropas
- ├─ validerar qgis_url mot regex (http/https eller relativ path)
+ ├─ parser och validerar qgis_url (HTTP/HTTPS, tillåten värd och port eller relativ path)
  └─ tre grenar beroende på anropstyp:
      │
      ├─ [1] WMS GetMap med FILTER på ett grupplager:
@@ -42,7 +42,10 @@ if (!function_exists('apcu_fetch')) {
 $DEFAULT_QGIS_SERVER_URL = '';
 
 // Läs qgis_url från query
-$qgis_url = $_GET['qgis_url'] ?? $DEFAULT_QGIS_SERVER_PATH;
+$qgis_url = $_GET['qgis_url'] ?? $DEFAULT_QGIS_SERVER_URL;
+if (!is_string($qgis_url)) {
+    $qgis_url = '';
+}
 
 // Om relativ path → bygg full URL från klientens request
 if (strpos($qgis_url, 'http') !== 0 && strpos($qgis_url, '/') === 0) {
@@ -51,12 +54,34 @@ if (strpos($qgis_url, 'http') !== 0 && strpos($qgis_url, '/') === 0) {
     $qgis_url = $protocol . $host . $qgis_url;
 }
 
-// GROK: Validering – måste vara giltig https/http-URL
-if (!preg_match('#^https?://[a-z0-9\.-]+(:[0-9]+)?(/.*)?$#i', $qgis_url)) {
+$parsedUrl = false;
+try {
+    $parsedUrl = parse_url($qgis_url);
+} catch (ValueError $error) {
+    $parsedUrl = false;
+}
+$host = is_array($parsedUrl) ? ($parsedUrl['host'] ?? '') : '';
+$hostForValidation = str_starts_with($host, '[') && str_ends_with($host, ']')
+    ? substr($host, 1, -1)
+    : $host;
+$validHost = $hostForValidation !== '' && (
+    filter_var($hostForValidation, FILTER_VALIDATE_IP) !== false
+    || filter_var($hostForValidation, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false
+);
+$port = is_array($parsedUrl) ? ($parsedUrl['port'] ?? null) : null;
+$validPort = $port === null || ($port >= 1 && $port <= 65535);
+$validUrl = is_array($parsedUrl)
+    && in_array(strtolower($parsedUrl['scheme'] ?? ''), array('http', 'https'), true)
+    && $validHost
+    && !array_key_exists('user', $parsedUrl)
+    && !array_key_exists('pass', $parsedUrl)
+    && $validPort;
+
+if (!$validUrl) {
     http_response_code(400);
     header('Content-Type: application/json;charset=utf-8');
     echo json_encode([
-        'error' => 'Invalid qgis_url. Must be a valid HTTP/HTTPS URL or relative path starting with /.',
+        'error' => 'Invalid qgis_url. Must be an HTTP/HTTPS URL with a valid host and port, or a relative path starting with /.',
         'example' => '?qgis_url=https://example.com/ows/project or ?qgis_url=/internal/path'
     ]);
     exit;

@@ -12,9 +12,9 @@
         }
         require("./constants/multiselectables.php");
         $configParamValue=targetConfigParam($fullTarget, $configParam);
-        if (preg_match('/^\{(("[[:alnum:]åäöÅÄÖ=\-\+#_\:\.\/\?\&\(\)]+([[:space:]][[:alnum:]åäöÅÄÖ=\-\+#_\:\.\/\?\&\(\)]+)*"|[[:alnum:]åäöÅÄÖ=\-\+#_\:\.\/\?\&\(\)]*),?)*\}$/', $configParamValue))
+        if (isArrayColumn($configParam))
         {
-            $configParamValue=str_replace('"', '', trim($configParamValue, '{}'));
+            $configParamValue=implode(',', pgArrayToPhp($configParamValue));
         }
         $configParamValue=str_replace('&center=', '&amp;center=', $configParamValue);
         $ucConfigParam=ucfirst($configParam);
