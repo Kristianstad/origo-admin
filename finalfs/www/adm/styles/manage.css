@@ -75,4 +75,5 @@
         .addRemoveDiv	{ position:relative; top:-2.5em; clear:both; max-width:calc(100% - 29em) }
         .optionSpan		{ white-space:nowrap }
         .yellowLock		{ margin-right:-0.4em }
+        .restrictedLayerField { white-space:nowrap }
         .viewsSpan		{ vertical-align:middle }

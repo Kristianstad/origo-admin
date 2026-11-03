@@ -78,9 +78,9 @@
             printTextarea($layer, 'opacity', 'textareaSmall', 'Opacitet:', in_array('opacity', $helps), $sizePosts);
             if (!empty(targetConfigParam($layer, 'service_id')) && targetConfigParam($layer, 'service_restricted') == 't')
             {
-                echo "<span><img class='yellowLock' src='../img/png/lock_yellow.png' alt='Skyddat lager' title='Skyddat lager'>";
+                echo "<span class='restrictedLayerField'><img class='yellowLock' src='../img/png/lock_yellow.png' alt='Skyddat lager' title='Skyddat lager'>";
                 printTextarea($layer, 'adusers', 'textareaLarge', 'AD-användare:', in_array('adusers', $helps), $sizePosts);
-                echo "</span><wbr><span><img class='yellowLock' src='../img/png/lock_yellow.png' alt='Skyddat lager' title='Skyddat lager'>";
+                echo "</span><wbr><span class='restrictedLayerField'><img class='yellowLock' src='../img/png/lock_yellow.png' alt='Skyddat lager' title='Skyddat lager'>";
                 printTextarea($layer, 'adgroups', 'textareaLarge', 'AD-grupper:', in_array('adgroups', $helps), $sizePosts);
                 echo "</span><wbr>";
             }
