@@ -93,7 +93,7 @@ forwardauth-modulen).
   läser bilderna direkt med `file_get_contents()`.
 ## Restricted-cache
 
-Cacheinnehållet byggs från `layers`, `sources` och `services`: icke-GROUP-lager vars källa pekar på en tjänst med `restricted = 't'` tas med, tillsammans med normaliserade användar- och gruppnamn. Cachefilen skrivs atomiskt under fillås i `sys_get_temp_dir()/origo-cache/` och ligger inte i webbträdet.
+Cacheinnehållet byggs från `layers`, `sources` och `services`: icke-GROUP-lager vars källa pekar på en tjänst med `restricted = 't'` tas med, tillsammans med normaliserade användar- och gruppnamn. Gruppjämförelsen är UTF-8-skiftlägesokänslig, eftersom LDAP och Azure kan leverera samma gruppnamn med olika skiftläge. Cachefilen skrivs atomiskt under fillås i `sys_get_temp_dir()/origo-cache/` och ligger inte i webbträdet.
 
 `manage.php` bygger om cachen efter lyckade ändringar i `layers`, `sources` eller `services`, inklusive create/update/copy/delete, undo/redo och restore. Kartpublicering i `writeConfig.php` påverkar inte cachen. JSON- och SQL-import, samt ändringar direkt i databasen, kräver manuell ombyggnad via **Bygg om restricted-cache** i Verktyg.
 
