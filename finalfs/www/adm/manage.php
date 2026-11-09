@@ -4,7 +4,7 @@ manage.php
 Vid id-byte följer referenser, vald rad och historik med till det nya id:t.
  ├─ includeDirectory("./functions/common")
  ├─ includeDirectory("./functions/manage")
- ├─ $post = array_filter($_POST, ...)      → rensar bort tomma POST-värden (men behåller "0")
+ ├─ $post = array_filter($_POST, ...)      → behåller alla update-fält och "0", filtrerar övriga tomma värden
  ├─ $view = $_GET['view']                   → styr vilken vy/flik som visas
  ├─ unset($_POST, $_GET)                    → försiktighetsmönster vi sett förut
  │
@@ -76,9 +76,9 @@ includeDirectory("./functions/common");
 includeDirectory("./functions/manage");
 
 // Expose posted data as $post (array)
-$post = array_filter($_POST, function ($value) {
-    return (!empty($value) || $value === "0");
-});
+$post = array_filter($_POST, function ($value, $key) {
+    return (str_starts_with($key, 'update') || !empty($value) || $value === "0");
+}, ARRAY_FILTER_USE_BOTH);
 
 // Expose view query parameter as $view (string)
 $view = null;
