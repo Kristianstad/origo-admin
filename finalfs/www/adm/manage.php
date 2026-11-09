@@ -1,9 +1,10 @@
 <?php
 /*
 manage.php
+Vid id-byte följer referenser, vald rad och historik med till det nya id:t.
  ├─ includeDirectory("./functions/common")
  ├─ includeDirectory("./functions/manage")
- ├─ $post = array_filter($_POST, ...)      → behåller alla update-fält och "0", filtrerar övriga tomma värden
+ ├─ $post = array_filter($_POST, ...)      → rensar bort tomma POST-värden (men behåller "0")
  ├─ $view = $_GET['view']                   → styr vilken vy/flik som visas
  ├─ unset($_POST, $_GET)                    → försiktighetsmönster vi sett förut
  │
@@ -35,6 +36,8 @@ manage.php
  │    │                     förälder (map/group) → sqlForOperation()
  │    ├─ kör statements, om lyckat:
  │    │    ├─ läser om configTables (färsk data)
+ │    │    ├─ searchConfigTableChanged() [common] → markerar och bygger om sökkonfigurationens cache vid relevanta ändringar
+ │    │    ├─ restrictedCacheTableChanged() [common] → bygger om restricted-cachen vid ändringar i layers/sources/services
  │    │    ├─ usedInMaps() FÖRE och EFTER ändringen → markMapsChanged() för påverkade
  │    │    │   kartor (sätter troligen maps.changed='t', vilket writeConfig.php senare
  │    │    │   läser för att veta vilka kartor som behöver publiceras om)
@@ -49,11 +52,11 @@ manage.php
  │    └─ bygger JS-variabler för varje nyckelordskategori (läser $categoriesByTable)
  │
  └─ FAS 4: RENDERA DET VALDA OBJEKTETS FORMULÄR (djupt kaskaderande, en gren per typ)
-      ├─ OM map vald   → printMapForm() + printChildSelect() för layers/groups/controls
-      ├─ OM database   → printDatabaseForm() + printChildSelect() för schemas
-      ├─ OM schema     → printSchemaForm() + printChildSelect() för tables
+      ├─ OM map vald   → printMapForm() + printChildSelectRow() för layers/groups/controls
+      ├─ OM database   → printDatabaseForm() + printChildSelectRow() för schemas
+      ├─ OM schema     → printSchemaForm() + printChildSelectRow() för tables
       ├─ OM group(s)   → loop genom $groupIdsArray (nästlade grupper) → printGroupForm()
-      │                  + printChildSelect() för layers/groups (rekursivt genom hierarkin)
+      │                  + printChildSelectRow() för layers/groups (rekursivt genom hierarkin)
       └─ OM övrigt <item> vald (idPosts icke-tom):
            ├─ toFullTarget(makeBasicTarget(...))  [common] → normaliserad datastruktur
            ├─ targetType()                           [common] → vilken typ är detta?
@@ -73,9 +76,9 @@ includeDirectory("./functions/common");
 includeDirectory("./functions/manage");
 
 // Expose posted data as $post (array)
-$post = array_filter($_POST, function ($value, $key) {
-    return (substr($key, 0, 6) === 'update' || !empty($value) || $value === "0");
-}, ARRAY_FILTER_USE_BOTH);
+$post = array_filter($_POST, function ($value) {
+    return (!empty($value) || $value === "0");
+});
 
 // Expose view query parameter as $view (string)
 $view = null;
@@ -163,6 +166,7 @@ if (isset($postButton)) {
     $command = $post[$postButton];
 
     $sqlStatements = array();
+    $idRenames = array();
 
     if ($command == 'copy' && isset($post[$type . 'Id'])) {
         if (isset($post['update' . ucfirst($typeTablePkColumn)])) {
@@ -205,6 +209,8 @@ if (isset($postButton)) {
             $errorAlert = 'window.onload=function(){alert(' . jsonForInlineJs($restoreResult['error']) . ');}';
         } else {
             $configTables = configTables($dbh);
+            searchConfigTableChanged($dbh, targetTable($restoreResult['target']));
+            restrictedCacheTableChanged($dbh, targetTable($restoreResult['target']));
             $errorAlert = 'window.onload=function(){alert("Objektet har återställts.");}';
         }
         unset($restoreResult);
@@ -218,14 +224,20 @@ if (isset($postButton)) {
             $errorAlert = 'window.onload=function(){alert("' . str_replace('"', '\"', $historyResult['error']) . '");}';
         } else {
             $configTables = configTables($dbh);
+            searchConfigTableChanged($dbh, $typeTableName, $historyResult['renames']);
+            restrictedCacheTableChanged($dbh, $typeTableName);
+            $historyTarget = makeBasicTarget($type, $historyResult['target_id']);
             $usedInMapsNew = usedInMaps($dbh, $historyTarget);
             $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
             if (!empty($usedInMaps)) {
                 markMapsChanged($dbh, $usedInMaps);
                 $configTables = configTables($dbh);
             }
+            $post = postWithRenamedIds($post, $historyResult['renames']);
             $post[$type . 'Id'] = $historyResult['target_id'];
-            $idPosts[$type . 'Id'] = $historyResult['target_id'];
+            $idPosts = idPosts($post);
+            $groupIdsArray = postedIdList($post, 'groupIds');
+            $infogroupIdsArray = postedIdList($post, 'infogroupIds');
             if (in_array($typeTableName, $keywordCategorized)) {
                 $categoriesByTable[$typeTableName] = categories($configTables[$typeTableName], $typeTablePkColumn);
             }
@@ -300,7 +312,14 @@ if (isset($postButton)) {
                 }
 
                 $sqlStatements[] = sqlForUpdate($fullTarget, $updatePosts);
-                unset($config, $fullTarget);
+
+                // If the id is changed, then the rows that refer to it (or derive their ids from it) must follow
+                $newId = $updatePosts['update' . ucfirst($typeTablePkColumn)] ?? $id;
+                if ($command == 'update' && $newId !== $id) {
+                    $idRenames = idRenames($typeTableName, $id, $newId, $configTables);
+                    $sqlStatements = array_merge($sqlStatements, sqlForIdChange($idRenames, $configTables));
+                }
+                unset($config, $fullTarget, $newId);
             } else {
                 $failedUpdate['type'] = $type;
                 $failedUpdate['id'] = $id;
@@ -392,11 +411,22 @@ if (isset($postButton)) {
                 $id=$copyId;
             }
             $configTables = ($historyConfigTables !== null) ? $historyConfigTables : configTables($dbh);
+            searchConfigTableChanged($dbh, $typeTableName, $idRenames);
+            restrictedCacheTableChanged($dbh, $typeTableName);
+            $updatedTarget = $changedTarget;
+            if (!empty($idRenames)) {
+                $id = $idRenames[0][2];
+                $updatedTarget = makeBasicTarget($type, $id);
+                $post = postWithRenamedIds($post, $idRenames);
+                $idPosts = idPosts($post);
+                $groupIdsArray = postedIdList($post, 'groupIds');
+                $infogroupIdsArray = postedIdList($post, 'infogroupIds');
+            }
             if ($command != 'operation' && in_array($typeTableName, $keywordCategorized)) {
                 $categoriesByTable[$typeTableName] = categories($configTables[$typeTableName], $typeTablePkColumn);
             }
             if ($command == 'update' || $command == 'operation') {
-                $usedInMapsNew = usedInMaps($dbh, $changedTarget);
+                $usedInMapsNew = usedInMaps($dbh, $updatedTarget);
                 $usedInMaps = array_unique(array_merge($usedInMapsOld, $usedInMapsNew));
                 if (!empty($usedInMaps)) {
                     markMapsChanged($dbh, $usedInMaps);
@@ -405,14 +435,14 @@ if (isset($postButton)) {
                 unset($usedInMapsNew, $usedInMaps);
             }
             if ($command == 'update' && isset($historyBeforeConfig)) {
-                $historyAfterConfig = targetConfig(toFullTarget($changedTarget, $configTables));
+                $historyAfterConfig = targetConfig(toFullTarget($updatedTarget, $configTables));
                 recordHistoryEdit($dbh, $changedTarget, 'update', $historyBeforeConfig, $historyAfterConfig);
                 unset($historyAfterConfig);
             }
         }
-        unset($usedInMapsOld, $changedTarget, $result);
+        unset($usedInMapsOld, $changedTarget, $updatedTarget, $result);
     }
-    unset($updatePosts, $copyId, $id, $target, $type, $typeTableName, $typeTablePkColumn, $typeTable, $command, $sqlStatements, $historyBeforeConfig);
+    unset($updatePosts, $copyId, $id, $target, $type, $typeTableName, $typeTablePkColumn, $typeTable, $command, $sqlStatements, $idRenames, $historyBeforeConfig);
 }
 pg_close($dbh);
 
@@ -501,6 +531,11 @@ if ($view === 'Verktyg')
         <button title="Kör SQL mot admin-databasen" class="topButton" onclick="toggleTopFrame('sql_import');" type="submit">Importera SQL</button>
     </form>
 HTML;
+    printRebuildRestrictedCacheButton();
+}
+if ($view === 'Sök')
+{
+    printClearSearchCacheButton();
 }
 
 printViewSwitcher($view);
@@ -586,26 +621,17 @@ if (isset($post['mapId'])) {
         printMapForm($map, $selectables, $inheritPosts, typeHelps("map", $helps));
 
         // Print child select dialogs for layers, groups and controls if any exists for selected map
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
         if (!empty($groupIdsArray)) {
             $inheritPosts['groupId'] = $groupIdsArray[0];
         }
+        $mapChildSelects = array(array('groups', 'Grupp'), array('layers', 'Lager'), array('controls', 'Kontroll'));
         if (isset($inheritPosts['layerId']) && !isset($inheritPosts['groupId'])) {
-            printChildSelect($map, 'layers', $thClass, 'Lager', $inheritPosts);
-            printChildSelect($map, 'groups', $thClass, 'Grupp', $inheritPosts);
-            printChildSelect($map, 'controls', $thClass, 'Kontroll', $inheritPosts);
+            $mapChildSelects = array(array('layers', 'Lager'), array('groups', 'Grupp'), array('controls', 'Kontroll'));
         } elseif (isset($inheritPosts['controlId'])) {
-            printChildSelect($map, 'controls', $thClass, 'Kontroll', $inheritPosts);
-            printChildSelect($map, 'groups', $thClass, 'Grupp', $inheritPosts);
-            printChildSelect($map, 'layers', $thClass, 'Lager', $inheritPosts);
-        } else {
-            printChildSelect($map, 'groups', $thClass, 'Grupp', $inheritPosts);
-            printChildSelect($map, 'layers', $thClass, 'Lager', $inheritPosts);
-            printChildSelect($map, 'controls', $thClass, 'Kontroll', $inheritPosts);
+            $mapChildSelects = array(array('controls', 'Kontroll'), array('groups', 'Grupp'), array('layers', 'Lager'));
         }
-        echo '</tr></table>';
-        unset($selectables, $thClass);
+        printChildSelectRow('childSelectHr', $map, $mapChildSelects, $inheritPosts);
+        unset($selectables, $mapChildSelects);
     }
     unset($map, $idPosts['mapId']);
 }
@@ -627,17 +653,17 @@ elseif (isset($post['databaseId'])) {
         printDatabaseForm($database, $inheritPosts, typeHelps("database", $helps));
 
         // Expose all schema ids of selected database as $databaseSchemas (array)
-        $databaseSchemas = preg_grep("/^" . $post['databaseId'] . "[.]/", array_column($configTables['schemas'], 'schema_id'));
+        $databaseSchemaPrefix=$post['databaseId'].'.';
+        $databaseSchemas=array_filter(array_column($configTables['schemas'], 'schema_id'), function ($schemaId) use ($databaseSchemaPrefix) {
+            return str_starts_with($schemaId, $databaseSchemaPrefix);
+        });
 
         // Add $databaseSchemas to $database
         setTargetConfigParam($database, 'schemas', '{' . implode(',', $databaseSchemas) . '}');
 
         // Print child select dialog for schemas if any exists for selected database
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($database, 'schemas', $thClass, 'Schema', $inheritPosts);
-        echo '</tr></table>';
-        unset($databaseSchemas, $thClass);
+        printChildSelectRow('childSelectHr', $database, array(array('schemas', 'Schema')), $inheritPosts);
+        unset($databaseSchemas);
     }
     unset($database, $idPosts['databaseId']);
 }
@@ -666,17 +692,17 @@ if (isset($post['schemaId'])) {
         printSchemaForm($schema, $selectables, $inheritPosts, typeHelps("schema", $helps));
 
         // Expose all table ids of selected schema as $schemaTables (array)
-        $schemaTables = preg_grep("/^" . $post['schemaId'] . "[.]/", array_column($configTables['tables'], 'table_id'));
+        $schemaTablePrefix=$post['schemaId'].'.';
+        $schemaTables=array_filter(array_column($configTables['tables'], 'table_id'), function ($tableId) use ($schemaTablePrefix) {
+            return str_starts_with($tableId, $schemaTablePrefix);
+        });
 
         // Add $schemaTables to $schema
         setTargetConfigParam($schema, 'tables', '{' . implode(',', $schemaTables) . '}');
 
         // Print child select dialog for tables if any exists for selected schema
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($schema, 'tables', $thClass, 'Tabell', $inheritPosts);
-        echo '</tr></table>';
-        unset($schemaTables, $thClass);
+        printChildSelectRow('childSelectHr', $schema, array(array('tables', 'Tabell')), $inheritPosts);
+        unset($schemaTables);
     }
     unset($schema, $idPosts['schemaId']);
 }
@@ -699,14 +725,9 @@ if (isset($post['classeId'])) {
         }
         printClasseForm($classe, $operationTables, $inheritPosts, typeHelps('classe', $helps));
         unset($operationTables, $operationTable);
-        echo '<hr class="childSelectHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($classe, 'infogroups', $thClass, 'Informationsgrupp', $inheritPosts);
-        printChildSelect($classe, 'layers', $thClass, 'Lager', $inheritPosts);
-        printChildSelect($classe, 'tables', $thClass, 'Tabell', $inheritPosts);
-        echo '</tr></table>';
+        printChildSelectRow('childSelectHr', $classe, array(array('infogroups', 'Informationsgrupp'), array('layers', 'Lager'), array('tables', 'Tabell')), $inheritPosts);
     }
-    unset($classe, $idPosts['classeId'], $thClass);
+    unset($classe, $idPosts['classeId']);
 }
 
 // If an infogroup is selected
@@ -729,12 +750,7 @@ foreach ($infogroupIdsArray as $infogroupId) {
         }
         printInfogroupForm($infogroup, $operationTables, $inheritPosts, typeHelps('infogroup', $helps));
         unset($operationTables, $operationTable);
-        echo '<hr class="overflowHr"><table><tr>';
-        $thClass = 'thFirst';
-        printChildSelect($infogroup, 'infogroups', $thClass, 'Informationsgrupp', $inheritPosts, $infogroupLevel);
-        printChildSelect($infogroup, 'layers', $thClass, 'Lager', $inheritPosts, $infogroupLevel);
-        printChildSelect($infogroup, 'tables', $thClass, 'Tabell', $inheritPosts, $infogroupLevel);
-        echo '</tr></table>';
+        printChildSelectRow('overflowHr', $infogroup, array(array('infogroups', 'Informationsgrupp'), array('layers', 'Lager'), array('tables', 'Tabell')), $inheritPosts, $infogroupLevel);
     }
     unset($infogroup);
     $infogroupLevel++;
@@ -777,21 +793,17 @@ foreach ($groupIdsArray as $groupId) {
         printGroupForm($group, array('maps' => $configTables['maps'], 'groups' => $configTables['groups']), $inheritPosts, typeHelps("group", $helps));
 
         // Print child select dialogs for layers and/or groups if any exists for the current loop group
-        echo '<hr class="overflowHr"><table><tr>';
-        $thClass = 'thFirst';
+        $groupChildSelects = array(array('groups', 'Grupp', $parent), array('layers', 'Lager'));
         if ($groupLevel == $totGroupLevels && isset($inheritPosts['layerId'])) {
-            printChildSelect($group, 'layers', $thClass, 'Lager', $inheritPosts, $groupLevel);
-            printChildSelect($group, 'groups', $thClass, 'Grupp', $inheritPosts, $groupLevel, $parent);
-        } else {
-            printChildSelect($group, 'groups', $thClass, 'Grupp', $inheritPosts, $groupLevel, $parent);
-            printChildSelect($group, 'layers', $thClass, 'Lager', $inheritPosts, $groupLevel);
+            $groupChildSelects = array(array('layers', 'Lager'), array('groups', 'Grupp', $parent));
         }
-        echo '</tr></table>';
+        printChildSelectRow('overflowHr', $group, $groupChildSelects, $inheritPosts, $groupLevel);
+        unset($groupChildSelects);
         $groupLevel++;
     }
     unset($group);
 }
-unset($tmpGroupIds, $parent, $groupLevel, $groupId, $thClass, $idPosts['groupId'], $totGroupLevels);
+unset($tmpGroupIds, $parent, $groupLevel, $groupId, $idPosts['groupId'], $totGroupLevels);
 
 // If any <item> is selected
 if (!empty($idPosts)) {
@@ -919,9 +931,9 @@ if (!empty($idPosts)) {
 
     // Else, if a searchtable is selected
     elseif ($childType == 'searchtable') {
-        // Table selectable items (databases) are exposed as $selectables (array)
+        // Search table selectable items (tables) are exposed as $selectables (array)
         $selectables = array(
-            'databases' => array_column($configTables['databases'], 'database_id')
+            'tables' => array_column($configTables['tables'], 'table_id')
         );
 
         // Print the form for the selected table
