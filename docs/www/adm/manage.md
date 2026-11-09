@@ -464,9 +464,12 @@ utan att behöva läsa alla 78 filer i `functions/manage/` i detalj:
   sektionerna så att variabler inte läcker mellan grenarna. Varje sektion har
   en förklarande kommentar.
 - `unset($_POST, $_GET)` står överst i `manage.php`.
-- `array_filter($_POST, ...)` behåller värdet `"0"` men filtrerar bort tomma
-  strängar, så legitima nollvärden (till exempel opacitet eller skala) går
-  inte förlorade.
+- `array_filter($_POST, ...)` behåller alla fält vars namn börjar med
+  `update`, även tomma värden. Postade tomma konfigurationsfält rensas till
+  `NULL` via `updatedFullTarget()` och `appendUpdatedColumnsToSql()`; fält
+  som inte postas behåller tidigare värden. Databasens `NOT NULL`-krav gäller
+  fortfarande för obligatoriska fält. Övriga tomma POST-värden filtreras bort,
+  men `"0"` behålls även för urval och UI-state.
 - Raderingsskyddet (`findAllParents` + `assocArrayValues`) återanvänder
   samma mönster som "Används av" i `info.php`.
 - Den QGIS-baserade autoifyllnaden vid update läser `.qgs`-filer, liksom
